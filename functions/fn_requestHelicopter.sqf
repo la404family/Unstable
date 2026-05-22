@@ -190,6 +190,7 @@ if (isNull _heli) exitWith {
 // Assigner les pilotes et artilleurs de l'équipage dans le bon camp (allié aux joueurs - indépendant RACS)
 private _side = if (!isNull _caller) then { side (group _caller) } else { independent };
 private _group = createGroup [_side, true];
+private _gunnersGroup = createGroup [_side, true];
 private _crew = [];
 
 private _pilotClass = "CUP_I_RACS_Pilot";
@@ -213,14 +214,20 @@ _crew pushBack _copilot;
 private _turrets = allTurrets _heli;
 private _gunnerTurrets = _turrets select { _x isNotEqualTo [0] };
 {
-    private _gunner = _group createUnit [_soldierClass, [0,0,0], [], 0, "NONE"];
+    private _gunner = _gunnersGroup createUnit [_soldierClass, [0,0,0], [], 0, "NONE"];
     _gunner moveInTurret [_heli, _x];
     _crew pushBack _gunner;
 } forEach _gunnerTurrets;
 
+// Pilotes ignorants les combats pour naviguer sereinement
 _group setBehaviour "CARELESS";
-_group setCombatMode "RED";
+_group setCombatMode "BLUE";
 _group setSpeedMode "FULL";
+
+// Artilleurs agressifs pour engager les menaces
+_gunnersGroup setBehaviour "COMBAT";
+_gunnersGroup setCombatMode "RED";
+_gunnersGroup setSpeedMode "FULL";
 
 {
     _x disableAI "FSM";
@@ -231,13 +238,38 @@ _group setSpeedMode "FULL";
 missionNamespace setVariable ["LL_missionHelicopter", _heli, true];
 
 // --- 4. EXÉCUTION DU THREAD DE VOL ET COMPORTEMENT ---
-[_heli, _targetPosFinal, _group, _crew, _homeBase, _supportType, _caller, _flyHeight, _hoverHeight, _side, _pilotClass, _soldierClass, _loiterHeight, _loiterRadius, _loiterDuration] spawn {
-    params ["_heli", "_dropPos", "_group", "_crew", "_homeBase", "_supportType", "_caller", "_flyHeight", "_hoverHeight", "_side", "_pilotClass", "_soldierClass", "_loiterHeight", "_loiterRadius", "_loiterDuration"];
+[_heli, _targetPosFinal, _group, _gunnersGroup, _crew, _homeBase, _supportType, _caller, _flyHeight, _hoverHeight, _side, _pilotClass, _soldierClass, _loiterHeight, _loiterRadius, _loiterDuration] spawn {
+    params ["_heli", "_dropPos", "_group", "_gunnersGroup", "_crew", "_homeBase", "_supportType", "_caller", "_flyHeight", "_hoverHeight", "_side", "_pilotClass", "_soldierClass", "_loiterHeight", "_loiterRadius", "_loiterDuration"];
     
     private _isSlingload = (_supportType == "LIVRAISON" || _supportType == "VEHICULE");
     private _cargo = objNull;
     private _originalMass = 0;
     private _victoryTriggered = false;
+
+    // Initialiser la destination courante pour la boucle de rappel
+    _heli setVariable ["TAG_Heli_CurrentDestination", _dropPos, true];
+
+    // Sous-thread de rappel toutes les 5 secondes pour forcer le comportement et l'ordre de vol des pilotes
+    [_heli, _group] spawn {
+        params ["_heli", "_group"];
+        while {alive _heli && {missionNamespace getVariable ["TAG_AirSupport_Active", false]}} do {
+            sleep 5;
+            if (alive _heli) then {
+                if (behaviour (leader _group) != "CARELESS") then {
+                    _group setBehaviour "CARELESS";
+                };
+                if (combatMode _group != "BLUE") then {
+                    _group setCombatMode "BLUE";
+                };
+                
+                private _dest = _heli getVariable ["TAG_Heli_CurrentDestination", [0,0,0]];
+                if (_dest isNotEqualTo [0,0,0]) then {
+                    _heli doMove _dest;
+                    _group setSpeedMode "FULL";
+                };
+            };
+        };
+    };
     
     // Si livraison de véhicule, la hauteur stationnaire finale est de 10m au lieu de 15m
     if (_supportType == "VEHICULE") then { _hoverHeight = 10; };
@@ -297,7 +329,7 @@ missionNamespace setVariable ["LL_missionHelicopter", _heli, true];
         _cargo setMass _stabilizerMass;
         _heli setSlingLoad _cargo;
 
-        // Remplissage dynamique à partir de l'équipement des joueurs (seulement pour les munitions)
+        // Remplissage dynamique à partir de l'équipement des unités alliées vivantes présentes (joueurs et IA)
         if (_supportType == "LIVRAISON") then {
             clearWeaponCargoGlobal _cargo;
             clearMagazineCargoGlobal _cargo;
@@ -308,42 +340,77 @@ missionNamespace setVariable ["LL_missionHelicopter", _heli, true];
             private _allMagazines = [];
             private _allItems = [];
             private _allBackpacks = [];
-            
-            private _legionUnits = [];
-            for "_i" from 0 to 6 do {
-                private _unit = missionNamespace getVariable [format ["player_%1", _i], objNull];
-                if (!isNull _unit) then { _legionUnits pushBack _unit; };
-            };
+
+            // Récupérer toutes les unités alliées vivantes (joueurs et IA) présentes dans la mission
+            private _alliedUnits = allUnits select { alive _x && {side (group _x) == _side} };
 
             {
-                if (!isNull _x && {side _x == independent || side _x == west}) then {
-                    private _pw = _x getVariable ["TAG_Initial_Primary", primaryWeapon _x];
-                    private _sw = _x getVariable ["TAG_Initial_Secondary", secondaryWeapon _x];
-                    private _hw = _x getVariable ["TAG_Initial_Handgun", handgunWeapon _x];
-                    
-                    if (_pw != "") then { _allWeapons pushBackUnique _pw; };
-                    if (_sw != "") then { _allWeapons pushBackUnique _sw; };
-                    if (_hw != "") then { _allWeapons pushBackUnique _hw; };
-                    
-                    private _mags = _x getVariable ["TAG_Initial_Mags", magazines _x];
-                    { _allMagazines pushBackUnique _x; } forEach _mags;
-                    
-                    private _itm = _x getVariable ["TAG_Initial_Items", items _x + assignedItems _x];
-                    { _allItems pushBackUnique _x; } forEach _itm;
-                    
-                    private _bp = _x getVariable ["TAG_Initial_Backpack", backpack _x];
-                    if (_bp != "") then { _allBackpacks pushBackUnique _bp; };
+                private _unit = _x;
+
+                // 1. Analyser les armes équipées pour s'assurer d'avoir des munitions compatibles
+                {
+                    private _w = _x;
+                    if (_w != "") then {
+                        _allWeapons pushBackUnique _w;
+                        
+                        // Récupérer les chargeurs compatibles de la config
+                        private _compMags = getArray (configFile >> "CfgWeapons" >> _w >> "magazines");
+                        if (count _compMags > 0) then {
+                            _allMagazines pushBackUnique (_compMags select 0);
+                            if (count _compMags > 1) then {
+                                _allMagazines pushBackUnique (_compMags select 1);
+                            };
+                        };
+                    };
+                } forEach [primaryWeapon _unit, secondaryWeapon _unit, handgunWeapon _unit];
+
+                // 2. Analyser les chargeurs, fumigènes et grenades dans leur inventaire actuel
+                {
+                    _allMagazines pushBackUnique _x;
+                } forEach (magazines _unit);
+
+                // 3. Analyser les objets utiles (GPS, télémètres, outils, etc.)
+                {
+                    if (_x in ["ItemGPS", "ItemDetector", "ToolKit", "MineDetector", "B_UavTerminal"]) then {
+                        _allItems pushBackUnique _x;
+                    };
+                } forEach (items _unit + assignedItems _unit);
+
+                // 4. Analyser les sacs à dos
+                private _bp = backpack _unit;
+                if (_bp != "") then {
+                    _allBackpacks pushBackUnique _bp;
                 };
-            } forEach _legionUnits;
 
-            { _cargo addWeaponCargoGlobal [_x, 2]; } forEach _allWeapons;
-            { _cargo addMagazineCargoGlobal [_x, 20]; } forEach _allMagazines;
-            { _cargo addItemCargoGlobal [_x, 5]; } forEach _allItems;
-            { _cargo addBackpackCargoGlobal [_x, 2]; } forEach _allBackpacks;
+            } forEach _alliedUnits;
 
+            // 5. Remplissage effectif de la caisse
+            {
+                _cargo addWeaponCargoGlobal [_x, 2];
+            } forEach _allWeapons;
+
+            {
+                // Adapter la quantité si c'est une grenade ou un fumigène
+                private _qty = 15;
+                private _lower = toLower _x;
+                if ((_lower find "grenade") != -1 || (_lower find "shell") != -1 || (_lower find "smoke") != -1) then {
+                    _qty = 10;
+                };
+                _cargo addMagazineCargoGlobal [_x, _qty];
+            } forEach _allMagazines;
+
+            {
+                _cargo addBackpackCargoGlobal [_x, 2];
+            } forEach _allBackpacks;
+
+            {
+                _cargo addItemCargoGlobal [_x, 2];
+            } forEach _allItems;
+
+            // Toujours fournir du soin de base et quelques fumigènes standards
+            _cargo addItemCargoGlobal ["FirstAidKit", 20];
             _cargo addMagazineCargoGlobal ["SmokeShell", 10];
             _cargo addMagazineCargoGlobal ["SmokeShellGreen", 10];
-            _cargo addItemCargoGlobal ["FirstAidKit", 20];
         };
     };
 
@@ -369,6 +436,9 @@ missionNamespace setVariable ["LL_missionHelicopter", _heli, true];
     
     deleteWaypoint [_group, 0];
 
+    // Désactiver la destination de transit automatique lors des opérations spécifiques (loiter, atterrissage, stationnaire)
+    _heli setVariable ["TAG_Heli_CurrentDestination", [0,0,0], true];
+
     // --- PHASE 2 : EXÉCUTION DES TÂCHES SPÉCIFIQUES ---
     
     // --- CAS A : LARGAGE MUNITIONS OU VÉHICULE ---
@@ -385,9 +455,23 @@ missionNamespace setVariable ["LL_missionHelicopter", _heli, true];
         
         private _positionTimeout = 0;
         waitUntil {
-            sleep 0.5;
-            _positionTimeout = _positionTimeout + 0.5;
-            ((_heli distance2D _dropPos) < 5) || _positionTimeout > 30 || !alive _heli
+            sleep 0.25;
+            _positionTimeout = _positionTimeout + 0.25;
+            
+            private _dist2D = _heli distance2D _dropPos;
+            
+            // Correction physique de la trajectoire pour forcer un stationnaire ultra précis sous les 25 mètres
+            if (_dist2D < 25) then {
+                private _heliPos = getPosVisual _heli;
+                private _pushX = ((_dropPos select 0) - (_heliPos select 0)) * 0.4;
+                private _pushY = ((_dropPos select 1) - (_heliPos select 1)) * 0.4;
+                _pushX = (_pushX min 5) max -5;
+                _pushY = (_pushY min 5) max -5;
+                private _vel = velocity _heli;
+                _heli setVelocity [_pushX, _pushY, _vel select 2];
+            };
+
+            (_dist2D < 2) || _positionTimeout > 50 || !alive _heli
         };
         
         if (!alive _heli) exitWith { 
@@ -405,19 +489,27 @@ missionNamespace setVariable ["LL_missionHelicopter", _heli, true];
         private _minCargoHeight = if (_supportType == "LIVRAISON") then { 5 } else { 4 };
         
         waitUntil {
-            sleep 0.5;
-            _dropTimeout = _dropTimeout + 0.5;
+            sleep 0.25;
+            _dropTimeout = _dropTimeout + 0.25;
             private _newHeight = _hoverHeight - _dropTimeout;
             if (_newHeight < _minCargoHeight) then { _newHeight = _minCargoHeight; };
             
             _heli flyInHeight _newHeight;
             _heli flyInHeightASL [_newHeight, _newHeight, _newHeight];
+
+            // Rétablir et maintenir l'alignement vertical parfait pendant la descente
+            private _heliPos = getPosVisual _heli;
+            private _pushX = ((_dropPos select 0) - (_heliPos select 0)) * 0.4;
+            private _pushY = ((_dropPos select 1) - (_heliPos select 1)) * 0.4;
+            _pushX = (_pushX min 4) max -4;
+            _pushY = (_pushY min 4) max -4;
+            _heli setVelocity [_pushX, _pushY, velocity _heli select 2];
             
             _cargoGrounded = (getPosATL _cargo select 2) < 3;
             if ((getPosATL _heli select 2) < 4) then {
                 _cargoGrounded = true;
             };
-            _cargoGrounded || _dropTimeout > 30 || !alive _heli || !alive _cargo
+            _cargoGrounded || _dropTimeout > 40 || !alive _heli || !alive _cargo
         };
         
         if (!alive _heli || !alive _cargo) exitWith { 
@@ -443,19 +535,47 @@ missionNamespace setVariable ["LL_missionHelicopter", _heli, true];
         if (_supportType == "LIVRAISON") then {
             (localize "STR_TAG_Msg_Ammo_Dropped") remoteExec ["systemChat", _caller];
             
-            // Signalisation fumigène et nettoyage
+            // Signalisation fumigène et nettoyage différé optimisé
             [_cargo] spawn {
                 params ["_crate"];
-                private _smoke = createVehicle ["SmokeShellGreen", getPos _crate, [], 0, "CAN_COLLIDE"];
+                if (isNull _crate) exitWith {};
                 
-                sleep 590; // Supprimer au bout de 10 min
-                if (alive _crate) then {
-                    for "_i" from 0 to 360 step 45 do {
-                        private _smokePos = _crate getPos [2, _i];
-                        createVehicle ["SmokeShell", _smokePos, [], 0, "CAN_COLLIDE"];
-                    };
+                private _smokeGreen = createVehicle ["SmokeShellGreen", getPos _crate, [], 0, "CAN_COLLIDE"];
+                
+                // Attente de 9 minutes et 50 secondes (590s) avec vérification d'existence active
+                private _steps = 59; // 59 * 10s = 590s
+                private _isDestroyed = false;
+                for "_i" from 1 to _steps do {
                     sleep 10;
-                    if (alive _crate) then { deleteVehicle _crate; };
+                    if (!alive _crate) exitWith { _isDestroyed = true; };
+                };
+                
+                if (_isDestroyed) exitWith {
+                    // Si la caisse est détruite avant les 10 min, nettoyer le fumigène vert s'il existe toujours
+                    if (!isNull _smokeGreen) then { deleteVehicle _smokeGreen; };
+                };
+                
+                if (alive _crate) then {
+                    // Créer une fumée blanche épaisse autour de la caisse pour masquer sa disparition
+                    private _smokes = [];
+                    for "_dir" from 0 to 360 step 45 do {
+                        private _smokePos = _crate getPos [2, _dir];
+                        private _smk = createVehicle ["SmokeShell", _smokePos, [], 0, "CAN_COLLIDE"];
+                        _smokes pushBack _smk;
+                    };
+                    
+                    sleep 10; // Laisser le temps à la fumée de s'épaissir
+                    
+                    if (alive _crate) then { 
+                        deleteVehicle _crate; 
+                    };
+                    
+                    // Nettoyer le fumigène vert initial
+                    if (!isNull _smokeGreen) then { deleteVehicle _smokeGreen; };
+                    
+                    // Nettoyage des fumigènes blancs après 2 minutes
+                    sleep 120;
+                    { if (!isNull _x) then { deleteVehicle _x; }; } forEach _smokes;
                 };
             };
         } else {
@@ -474,7 +594,7 @@ missionNamespace setVariable ["LL_missionHelicopter", _heli, true];
         _wpCAS setWaypointLoiterType "CIRCLE";
         _wpCAS setWaypointLoiterRadius _loiterRadius;
         _wpCAS setWaypointBehaviour "CARELESS";
-        _wpCAS setWaypointCombatMode "RED";
+        _wpCAS setWaypointCombatMode "BLUE";
         _wpCAS setWaypointSpeed "LIMITED";
         
         _heli doMove _dropPos;
@@ -497,7 +617,7 @@ missionNamespace setVariable ["LL_missionHelicopter", _heli, true];
                     _lastReveal = time;
                     private _targets = allUnits select { alive _x && {side _x == east} && {_x distance2D _dropPos < 500} };
                     {
-                        _group reveal [_x, 4];
+                        _gunnersGroup reveal [_x, 4];
                     } forEach _targets;
                 };
             };
@@ -823,6 +943,7 @@ missionNamespace setVariable ["LL_missionHelicopter", _heli, true];
                     deleteMarker _markerName;
 
                     // Décollage de l'hélicoptère
+                    _heli setVariable ["TAG_Heli_CurrentDestination", _homeBase, true];
                     _heli flyInHeight _flyHeight;
                     private _wpHome = _group addWaypoint [_homeBase, 0];
                     _wpHome setWaypointType "MOVE";
@@ -864,6 +985,7 @@ missionNamespace setVariable ["LL_missionHelicopter", _heli, true];
             deleteWaypoint [_group, 0];
         };
 
+        _heli setVariable ["TAG_Heli_CurrentDestination", _homeBase, true];
         _heli flyInHeight _flyHeight;
         
         private _wpHome = _group addWaypoint [_homeBase, 0];
@@ -891,12 +1013,14 @@ missionNamespace setVariable ["LL_missionHelicopter", _heli, true];
                 { deleteVehicle _x } forEach _crew;
                 deleteVehicle _heli;
                 deleteGroup _group;
+                deleteGroup _gunnersGroup;
                 if (_supportType == "CAS") then {
                     missionNamespace setVariable ["TAG_CAS_Cooldown_Until", time + 300, true];
                 };
             };
         } else {
             deleteGroup _group;
+            deleteGroup _gunnersGroup;
             if (_supportType == "CAS") then {
                 missionNamespace setVariable ["TAG_CAS_Cooldown_Until", time + 300, true];
             };
