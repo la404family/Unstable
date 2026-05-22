@@ -98,14 +98,14 @@ if (_mode == "scenario") exitWith {
                     };
                 } forEach (allVariables missionNamespace);
 
-                // Filtrer celles à plus de 1000m de tous les joueurs
+                // Filtrer celles à plus de 800m de tous les joueurs
                 private _players = allPlayers select { alive _x };
                 private _farLogics = [];
                 {
                     private _logic = _x;
                     private _tooClose = false;
                     {
-                        if (_x distance2D _logic <= 1000) exitWith { _tooClose = true; };
+                        if (_x distance2D _logic <= 800) exitWith { _tooClose = true; };
                     } forEach _players;
                     if (!_tooClose) then {
                         _farLogics pushBack _logic;
@@ -116,8 +116,8 @@ if (_mode == "scenario") exitWith {
                 if (count _farLogics > 0) then {
                     _destPos = getPosASL (selectRandom _farLogics);
                 } else {
-                    // Fallback : à 1500m de la position de rencontre actuelle
-                    _destPos = (getPos _chief) getPos [1500, random 360];
+                    // Fallback : à 1000m de la position de rencontre actuelle
+                    _destPos = (getPos _chief) getPos [1000, random 360];
                 };
 
                 // Ordonner le mouvement
@@ -146,7 +146,7 @@ if (_mode == "scenario") exitWith {
                                 private _allFar = true;
                                 {
                                     private _unit = _x;
-                                    if ((_players findIf { _x distance2D _unit <= 1500 }) != -1) then {
+                                    if ((_players findIf { _x distance2D _unit <= 800 }) != -1) then {
                                         _allFar = false;
                                     };
                                 } forEach _aliveUnits;
@@ -620,15 +620,15 @@ if (_mode == "scenario") exitWith {
         private _alivePlayers = allPlayers select { alive _x && side _x == independent };
         if (count _alivePlayers == 0) exitWith { true };
         
-        // Tous les joueurs doivent être à plus de 1500m de la position de rencontre
-        private _farFromMeeting = (_alivePlayers findIf { _x distance2D _meetingPos <= 1500 }) == -1;
+        // Tous les joueurs doivent être à plus de 800m de la position de rencontre
+        private _farFromMeeting = (_alivePlayers findIf { _x distance2D _meetingPos <= 800 }) == -1;
         
-        // Et à plus de 1500m de toutes les unités vivantes de la tâche (sauf celles en fuite)
+        // Et à plus de 800m de toutes les unités vivantes de la tâche (sauf celles en fuite)
         private _aliveUnits = ([_chief] + _guards) select { alive _x && !(_x getVariable ["LL_Task01_Escaping", false]) };
         private _farFromUnits = true;
         {
             private _unit = _x;
-            if ((_alivePlayers findIf { _x distance2D _unit <= 1500 }) != -1) then {
+            if ((_alivePlayers findIf { _x distance2D _unit <= 800 }) != -1) then {
                 _farFromUnits = false;
             };
         } forEach _aliveUnits;
