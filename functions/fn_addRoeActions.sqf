@@ -25,7 +25,7 @@ if (!hasInterface) exitWith {};
 
         // Action : INFILTRATION (GHOST)
         _unit addAction [
-            localize "STR_LL_Action_RoE_Stealth",
+            format ["<t color='#FFFFFF'>%1</t>", localize "STR_LL_Action_RoE_Stealth"],
             {
                 params ["_target", "_caller"];
                 private _grp = group _caller;
@@ -46,7 +46,7 @@ if (!hasInterface) exitWith {};
 
         // Action : VIGILANCE (AWARE)
         _unit addAction [
-            localize "STR_LL_Action_RoE_Vigilance",
+            format ["<t color='#FFFFFF'>%1</t>", localize "STR_LL_Action_RoE_Vigilance"],
             {
                 params ["_target", "_caller"];
                 private _grp = group _caller;
@@ -66,7 +66,7 @@ if (!hasInterface) exitWith {};
 
         // Action : ASSAUT (COMBAT)
         _unit addAction [
-            localize "STR_LL_Action_RoE_Assault",
+            format ["<t color='#FFFFFF'>%1</t>", localize "STR_LL_Action_RoE_Assault"],
             {
                 params ["_target", "_caller"];
                 private _grp = group _caller;
@@ -86,7 +86,7 @@ if (!hasInterface) exitWith {};
 
         // Action : ULTRA AGRESSIF (CHARGE)
         _unit addAction [
-            localize "STR_LL_Action_RoE_Charge",
+            format ["<t color='#FFFFFF'>%1</t>", localize "STR_LL_Action_RoE_Charge"],
             {
                 params ["_target", "_caller"];
                 private _grp = group _caller;

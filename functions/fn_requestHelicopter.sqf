@@ -33,8 +33,6 @@ params [
 if (_supportType == "CAS" && {time < (missionNamespace getVariable ["TAG_CAS_Cooldown_Until", 0])}) exitWith {
     private _cooldown = missionNamespace getVariable ["TAG_CAS_Cooldown_Until", 0];
     private _remaining = ceil (_cooldown - time);
-    private _snd = selectRandom ["negatif01", "negatif02", "negatif03", "negatif04"];
-    [_snd] remoteExec ["playSound", _caller];
     
     private _msg = format [localize "STR_TAG_Msg_CAS_Cooldown", _remaining];
     _msg remoteExec ["systemChat", _caller];
@@ -43,17 +41,12 @@ if (_supportType == "CAS" && {time < (missionNamespace getVariable ["TAG_CAS_Coo
 
 // 1. Vérification spécifique pour la livraison unique du véhicule
 if (_supportType == "VEHICULE" && {missionNamespace getVariable ["TAG_VehicleSupport_Delivered", false]}) exitWith {
-    private _snd = selectRandom ["negatif01", "negatif02", "negatif03", "negatif04"];
-    [_snd] remoteExec ["playSound", _caller];
     (localize "STR_TAG_Msg_Vehicle_Denied_Once") remoteExec ["systemChat", _caller];
     diag_log "[LL] requestHelicopter: Soutien véhicule refusé. Le véhicule de remplacement a déjà été livré.";
 };
 
 // 2. Vérifier si un soutien aérien est déjà en cours (Verrou unique et partagé)
 if (missionNamespace getVariable ["TAG_AirSupport_Active", false]) exitWith {
-    private _snd = selectRandom ["negatif01", "negatif02", "negatif03", "negatif04"];
-    [_snd] remoteExec ["playSound", _caller];
-    
     private _msg = "STR_TAG_Msg_Ammo_Denied";
     if (_supportType == "VEHICULE") then { _msg = "STR_TAG_Msg_Vehicle_Denied"; };
     if (_supportType == "CAS") then { _msg = "STR_TAG_Msg_CAS_Denied"; };
@@ -83,16 +76,7 @@ private _loiterHeight = 60; // Pour le CAS
 private _loiterRadius = 250; // Pour le CAS
 private _loiterDuration = 120; // Pour le CAS
 
-// Audios d'acceptation de la demande
-[_supportType] spawn {
-    params ["_type"];
-    private _sndList = ["livraison01", "livraison02", "livraison03", "livraison04", "livraison05", "livraison06", "livraison07", "livraison08", "livraison09"];
-    if (_type == "CAS") then {
-        _sndList = ["soutien01", "soutien02", "soutien03", "soutien04"];
-    };
-    private _snd = selectRandom _sndList;
-    _snd remoteExec ["playSound", 0];
-};
+
 
 private _approveMsg = "STR_TAG_Msg_Ammo_Approved";
 if (_supportType == "VEHICULE") then { _approveMsg = "STR_TAG_Msg_Vehicle_Approved"; };
@@ -102,139 +86,59 @@ if (_supportType == "CAS") then { _approveMsg = "STR_TAG_Msg_CAS_Approved"; };
 // --- 1. DÉTERMINATION DE LA POSITION DE DESTINATION (HÉLIPORTS OU ROUTE INTELLIGENTE) ---
 private _targetPosFinal = +_targetPos;
 
-// --- CAS A : CALCUL INTELLIGENT DE ROUTE POUR LE VÉHICULE ---
-if (_supportType == "VEHICULE") then {
-    private _vehClass = if (!isNil "vehicule_team" && {!isNull vehicule_team}) then { typeOf vehicule_team } else { "CUP_B_nM1025_SOV_M2_USMC_DES" };
-    private _activePlayers = allPlayers select { alive _x };
-    if (count _activePlayers == 0) then { _activePlayers = [_caller]; };
-
-    private _centerPos = [0, 0, 0];
-    { _centerPos = _centerPos vectorAdd getPos _x; } forEach _activePlayers;
-    _centerPos = _centerPos vectorMultiply (1 / (count _activePlayers));
-    if (count _centerPos < 3) then { _centerPos set [2, 0]; };
-
-    private _dropPos       = +_centerPos;
-    private _foundGoodRoad = false;
-
-    // Fonction locale : teste une liste de routes et retourne la première position propre
-    private _fnc_testRoads = {
-        params ["_roadList", "_strict"];
-        private _checkRadius = if (_strict) then { 12 } else { 8 };
-        private _badTypes = ["TREE", "SMALL TREE", "BUSH", "ROCK", "ROCKS", "HIDE",
-                             "BUILDING", "HOUSE", "WALL", "FENCE"];
-        {
-            if (_foundGoodRoad) exitWith {};
-            private _road    = _x;
-            private _roadPos = getPos _road;
-            if (!isOnRoad _roadPos) then { continue };
-
-            for "_offset" from -15 to 15 step 5 do {
-                if (_foundGoodRoad) exitWith {};
-
-                private _roadDir = getDir _road;
-                private _testPos = [
-                    (_roadPos select 0) + _offset * sin(_roadDir),
-                    (_roadPos select 1) + _offset * cos(_roadDir),
-                    0
-                ];
-
-                if (surfaceIsWater _testPos) then { continue };
-                if (!isOnRoad _testPos)      then { continue };
-
-                private _nearBad = nearestTerrainObjects [_testPos, _badTypes, _checkRadius, false, true];
-                if (count _nearBad > 0) then { continue };
-
-                private _emptyPos = _testPos findEmptyPosition [0, _checkRadius, _vehClass];
-                if (count _emptyPos > 0 && { _emptyPos distance2D _testPos <= _checkRadius }) then {
-                    _dropPos = _emptyPos;
-                    _dropPos set [2, 0];
-                    _foundGoodRoad = true;
-                };
-            };
-        } forEach _roadList;
+// Collecter tous les héliports invisibles de la mission
+private _heliports = [];
+for "_i" from 0 to 999 do {
+    private _numStr = "";
+    if (_i < 10) then { _numStr = "00" + str _i; } else {
+        if (_i < 100) then { _numStr = "0" + str _i; } else { _numStr = str _i; };
     };
-
-    // Passe 1 : routes larges et proches (rayon 800 m — critères stricts)
-    private _allRoads = _centerPos nearRoads 800;
-    _allRoads = [_allRoads, [], {
-        private _info = getRoadInfo _x;
-        (_info select 1) + (10000 / ((_x distance2D _centerPos) max 1))
-    }, "DESCEND"] call BIS_fnc_sortBy;
-    [_allRoads, true] call _fnc_testRoads;
-
-    // Passe 2 : rayon élargi à 2000 m — critères légèrement souples
-    if (!_foundGoodRoad) then {
-        _allRoads = _centerPos nearRoads 2000;
-        _allRoads = [_allRoads, [], { _x distance2D _centerPos }, "ASCEND"] call BIS_fnc_sortBy;
-        [_allRoads, false] call _fnc_testRoads;
-    };
-
-    // Repli ultime : position plate dégagée sans route
-    if (!_foundGoodRoad) then {
-        private _safePos = [_centerPos, 0, 300, 10, 0, 0.35, 0, [], _centerPos] call BIS_fnc_findSafePos;
-        if (_safePos isEqualType [] && { count _safePos >= 2 } && { _safePos distance2D _centerPos < 1200 }) then {
-            _dropPos = _safePos;
-        };
-        _dropPos set [2, 0];
-    };
-
-    _targetPosFinal = _dropPos;
-    diag_log format ["[LL] requestHelicopter: Position de largage véhicule calculée : %1 (sur route: %2)", _targetPosFinal, _foundGoodRoad];
-};
-
-// --- CAS B : HÉLIPORTS INVISIBLES POUR DÉBARQUEMENT ET EMBARQUEMENT ---
-if (_supportType == "DEBARQUEMENT" || _supportType == "EMBARQUEMENT") then {
-    private _heliports = [];
-    private _i = 0;
-    while {true} do {
-        private _numStr = "";
-        if (_i < 10) then {
-            _numStr = "00" + str _i;
-        } else {
-            if (_i < 100) then {
-                _numStr = "0" + str _i;
-            } else {
-                _numStr = str _i;
-            };
-        };
-        private _varName = "Heliport_" + _numStr;
-        private _heliportObj = missionNamespace getVariable [_varName, objNull];
-        if (isNull _heliportObj) exitWith {};
-        _heliports pushBack _heliportObj;
-        _i = _i + 1;
-    };
-
-    // Trouver l'héliport le plus proche de la cible demandée
-    private _nearestHeliport = objNull;
-    private _minDist = 999999;
     {
-        private _dist = _x distance2D _targetPos;
-        if (_dist < _minDist) then {
-            _minDist = _dist;
-            _nearestHeliport = _x;
+        private _varName = _x + _numStr;
+        private _heliportObj = missionNamespace getVariable [_varName, objNull];
+        if (!isNull _heliportObj) then {
+            _heliports pushBackUnique _heliportObj;
         };
-    } forEach _heliports;
+    } forEach ["Heliport_", "heliport_"];
+};
+for "_i" from 0 to 99 do {
+    private _numStr = if (_i < 10) then { "0" + str _i } else { str _i };
+    {
+        private _varName = _x + _numStr;
+        private _heliportObj = missionNamespace getVariable [_varName, objNull];
+        if (!isNull _heliportObj) then {
+            _heliports pushBackUnique _heliportObj;
+        };
+    } forEach ["Heliport_", "heliport_"];
+};
 
-    // Si on trouve un héliport à moins de 250m, on utilise sa position exacte
-    if (!isNull _nearestHeliport && { _nearestHeliport distance2D _targetPos < 250 }) then {
+// Trouver l'héliport le plus proche du joueur appelant
+private _nearestHeliport = objNull;
+private _minDist = 999999;
+private _referencePos = getPosATL _caller;
+{
+    private _dist = _x distance2D _referencePos;
+    if (_dist < _minDist) then {
+        _minDist = _dist;
+        _nearestHeliport = _x;
+    };
+} forEach _heliports;
+
+if (_supportType in ["LIVRAISON", "VEHICULE", "DEBARQUEMENT", "EMBARQUEMENT"]) then {
+    if (!isNull _nearestHeliport) then {
         _targetPosFinal = getPosATL _nearestHeliport;
-        diag_log format ["[LL] requestHelicopter: Héliport invisible détecté à proximité. Utilisation de %1 (pos: %2)", vehicleVarName _nearestHeliport, _targetPosFinal];
+        diag_log format ["[LL] requestHelicopter: Support %1. Héliport le plus proche sélectionné : %2 à %3m (pos: %4)", _supportType, vehicleVarName _nearestHeliport, round _minDist, _targetPosFinal];
+    } else {
+        // Fallback si aucun héliport n'est défini
+        _targetPosFinal = getPosATL _caller;
+        diag_log format ["[LL][WARNING] requestHelicopter: Aucun héliport trouvé ! Fallback sur la position du joueur : %1", _targetPosFinal];
     };
 };
 
-// --- CAS C : POSITION PLATE POUR LE CAS ---
 if (_supportType == "CAS") then {
-    private _dropPos = +_targetPos;
-    private _flatCheck = _dropPos isFlatEmpty [5, -1, 0.4, 5, 0, false, objNull];
-    if (_flatCheck isEqualTo []) then {
-         private _safePos = [_dropPos, 0, 100, 5, 0, 0.4, 0, [], _dropPos] call BIS_fnc_findSafePos;
-         if (_safePos isEqualType [] && {count _safePos >= 2}) then {
-            _dropPos = _safePos;
-            if (count _dropPos < 3) then { _dropPos set [2, 0]; };
-         };
-    };
-    _targetPosFinal = _dropPos;
-    diag_log format ["[LL] requestHelicopter: Position orbitale CAS calculée : %1", _targetPosFinal];
+    // Le CAS orbite autour de la position actuelle du joueur appelant
+    _targetPosFinal = getPosATL _caller;
+    diag_log format ["[LL] requestHelicopter: Support CAS. Orbite autour du joueur (pos: %1)", _targetPosFinal];
 };
 
 // --- 2. DÉTERMINATION DU COIN DE SPAWN LE PLUS ÉLOIGNÉ ---
@@ -342,10 +246,6 @@ missionNamespace setVariable ["LL_missionHelicopter", _heli, true];
         private _cargoClass = "B_supplyCrate_F";
         if (_supportType == "VEHICULE") then {
             _cargoClass = if (!isNil "vehicule_team" && {!isNull vehicule_team}) then { typeOf vehicule_team } else { "CUP_B_nM1025_SOV_M2_USMC_DES" };
-            // Supprimer l'ancienne instance ou son épave
-            if (!isNil "vehicule_team" && {!isNull vehicule_team}) then {
-                deleteVehicle vehicule_team;
-            };
         };
         _cargo = createVehicle [_cargoClass, [0,0,0], [], 0, "NONE"];
         _cargo setPos (_heli modelToWorld [0, 0, -15]);
@@ -598,8 +498,213 @@ missionNamespace setVariable ["LL_missionHelicopter", _heli, true];
                 "CUP_I_RACS_Soldier"
             ];
             private _reinforcements = [];
+
+            // Pools d'équipements identiques à fn_initPlayerLoadout.sqf
+            private _vests = [
+                "CUP_V_JPC_medical_coy",
+                "CUP_V_JPC_tl_coy",
+                "CUP_V_JPC_weapons_coy",
+                "CUP_V_JPC_communicationsbelt_coy",
+                "CUP_V_JPC_Fastbelt_coy",
+                "CUP_V_JPC_lightbelt_coy",
+                "CUP_V_JPC_medicalbelt_coy",
+                "CUP_V_JPC_tlbelt_coy",
+                "CUP_V_JPC_weaponsbelt_coy"
+            ];
+            private _helmets = [
+                "CUP_H_OpsCore_Tan_SF",
+                "CUP_H_OpsCore_Tan",
+                "CUP_H_OpsCore_Tan_NohS",
+                "CUP_H_OpsCore_Grey_SF",
+                "CUP_H_OpsCore_Grey",
+                "CUP_H_OpsCore_Grey_NohS"
+            ];
+            private _backpacks = [
+                "CUP_B_AssaultPack_Coyote",
+                "B_assaultPack_cbr",
+                "B_Kitbag_cbr"
+            ];
+            private _uniforms = [
+                "CUP_U_B_USMC_MCCUU_des_gloves",
+                "CUP_U_B_USMC_MCCUU_des_roll_2",
+                "CUP_U_B_USMC_MCCUU_des_roll_2_gloves",
+                "CUP_U_B_USMC_MCCUU_des_roll_pads",
+                "CUP_U_B_USMC_MCCUU_des_roll_2_pads_gloves",
+                "CUP_U_B_USMC_MCCUU_des_pads",
+                "CUP_U_B_USMC_MCCUU_des_pads_gloves",
+                "CUP_U_B_USMC_MCCUU_des_roll",
+                "CUP_U_B_USMC_MCCUU_des_roll_gloves",
+                "CUP_U_B_USMC_MCCUU_des_roll_pads",
+                "CUP_U_B_USMC_MCCUU_des_roll_pads_gloves",
+                "CUP_U_B_USMC_MCCUU_des"
+            ];
+            private _cagoules = [
+                "CUP_G_Tan_Scarf_Shades_GPSCombo_Beard",
+                "CUP_G_Tan_Scarf_Shades_GPS_Beard",
+                "CUP_G_Tan_Scarf_GPS",
+                "CUP_G_TK_RoundGlasses_blk",
+                "CUP_G_Oakleys_Drk",
+                "CUP_G_Scarf_Face_Tan",
+                "G_Aviator",
+                "CUP_G_ESS_KHK_Scarf_Tan_GPS_Beard",
+                "CUP_G_ESS_KHK_Facewrap_Tan",
+                "G_Bandana_khk"
+            ];
+
+            private _fn_addMagsForWeapon = {
+                params ["_unit", "_weapon", "_magCount"];
+                if (_weapon == "") exitWith {};
+                private _compatibleMags = getArray (configFile >> "CfgWeapons" >> _weapon >> "magazines");
+                if (count _compatibleMags > 0) then {
+                    private _targetMag = _compatibleMags select 0;
+                    for "_i" from 1 to _magCount do {
+                        _unit addItem _targetMag;
+                    };
+                };
+            };
+
             {
-                private _unit = _infGroup createUnit [_x, _dropPos, [], 0, "NONE"];
+                private _unitType = _x;
+                private _unit = _infGroup createUnit [_unitType, _dropPos, [], 0, "NONE"];
+
+                // --- 1. Attribution du loadout similaire aux joueurs ---
+                private _selectedUniform = selectRandom _uniforms;
+                private _selectedBackpack = selectRandom _backpacks;
+                private _selectedHelmet = selectRandom _helmets;
+                private _selectedCagoule = selectRandom _cagoules;
+                
+                private _selectedVest = "";
+                if (_unitType == "CUP_I_RACS_Soldier_Medic") then {
+                    private _medVests = _vests select { (_x find "medical") != -1 };
+                    _selectedVest = if (count _medVests > 0) then { selectRandom _medVests } else { selectRandom _vests };
+                } else {
+                    if (_unitType == "CUP_I_RACS_Soldier_SL") then {
+                        private _tlVests = _vests select { (_x find "_tl") != -1 };
+                        _selectedVest = if (count _tlVests > 0) then { selectRandom _tlVests } else { selectRandom _vests };
+                    } else {
+                        _selectedVest = selectRandom _vests;
+                    };
+                };
+
+                removeUniform _unit;
+                removeVest _unit;
+                removeBackpack _unit;
+                removeHeadgear _unit;
+                removeGoggles _unit;
+
+                _unit forceAddUniform _selectedUniform;
+                [_unit, "CSAT_ScimitarRegiment"] call BIS_fnc_setUnitInsignia;
+                _unit addVest _selectedVest;
+                _unit addBackpack _selectedBackpack;
+                _unit addHeadgear _selectedHelmet;
+                _unit addGoggles _selectedCagoule;
+
+                _unit linkItem "NVGogglesB_blk_F";
+                
+                private _currentBinoc = binocular _unit;
+                if (_currentBinoc != "") then {
+                    _unit removeWeapon _currentBinoc;
+                };
+                _unit addWeapon "CUP_LRTV";
+
+                // Munitions de manière dynamique en fonction des armes équipées (qui restent d'origine)
+                [_unit, primaryWeapon _unit, 5] call _fn_addMagsForWeapon;
+                [_unit, handgunWeapon _unit, 3] call _fn_addMagsForWeapon;
+                [_unit, secondaryWeapon _unit, 2] call _fn_addMagsForWeapon;
+
+                // Équipements de soin, grenades et fumigènes
+                for "_i" from 1 to 3 do { _unit addItem "FirstAidKit"; };
+                for "_i" from 1 to 3 do { _unit addItem "CUP_HandGrenade_M67"; };
+                for "_i" from 1 to 3 do { _unit addItem "SmokeShell"; };
+
+                if (_unitType == "CUP_I_RACS_Soldier_Medic") then {
+                    _unit addItemToBackpack "Medikit";
+                };
+
+                // --- 2. Attribution de l'identité et de la voix (cohérentes avec fn_initPlayerIdentity.sqf) ---
+                private _allNamesTyped = missionNamespace getVariable ["LL_g_allNamesTyped", []];
+                if (_allNamesTyped isEqualTo []) then {
+                    private _names_turkish = [
+                        ["Mustafa Demir", "Mustafa", "Demir"], ["Ahmet Yılmaz", "Ahmet", "Yılmaz"], ["Mehmet Kaya", "Mehmet", "Kaya"],
+                        ["Emre Şahin", "Emre", "Şahin"], ["Can Öztürk", "Can", "Öztürk"], ["Hakan Yıldırım", "Hakan", "Yıldırım"],
+                        ["Oğuzhan Çelik", "Oğuzhan", "Çelik"], ["Kaan Arslan", "Kaan", "Arslan"], ["Burak Koç", "Burak", "Koç"],
+                        ["Volkan Aydın", "Volkan", "Aydın"], ["Onur Özdemir", "Onur", "Özdemir"]
+                    ];
+                    private _names_arab = [
+                        ["Mehdi Benali", "Mehdi", "Benali"], ["Sofiane Haddad", "Sofiane", "Haddad"], ["Karim Mansouri", "Karim", "Mansouri"],
+                        ["Mohamed Trabelsi", "Mohamed", "Trabelsi"], ["Walid Belkacem", "Walid", "Belkacem"], ["Hicham Bouzid", "Hicham", "Bouzid"],
+                        ["Adel Gharbi", "Adel", "Gharbi"], ["Nassim Saïdi", "Nassim", "Saïdi"], ["Rachid Ziani", "Rachid", "Ziani"],
+                        ["Adam Khayat", "Adam", "Khayat"], ["Rayane Meriah", "Rayane", "Meriah"]
+                    ];
+                    private _names_african = [
+                        ["Moussa Diallo", "Moussa", "Diallo"], ["Mamadou Traoré", "Mamadou", "Traoré"], ["Ibrahim Keita", "Ibrahim", "Keita"],
+                        ["Sekou Diop", "Sekou", "Diop"], ["Ousmane Sy", "Ousmane", "Sy"], ["Bakary Sow", "Bakary", "Sow"],
+                        ["Ismaël Koné", "Ismaël", "Koné"], ["Kofi Mensah", "Kofi", "Mensah"], ["Amadi Achebe", "Amadi", "Achebe"],
+                        ["Jengo Okeke", "Jengo", "Okeke"], ["Kwame Nkrumah", "Kwame", "Nkrumah"]
+                    ];
+                    private _names_indonesian = [
+                        ["Budi Santoso", "Budi", "Santoso"], ["Joko Widodo", "Joko", "Widodo"], ["Agus Harjono", "Agus", "Harjono"],
+                        ["Slamet Rahardjo", "Slamet", "Rahardjo"], ["Wawan Setiawan", "Wawan", "Setiawan"], ["Hendra Wijaya", "Hendra", "Wijaya"],
+                        ["Eko Prasetyo", "Eko", "Prasetyo"], ["Aditya Nugroho", "Aditya", "Nugroho"], ["Rian Hidayat", "Rian", "Hidayat"],
+                        ["Aris Budiman", "Aris", "Budiman"], ["Dedi Kusnadi", "Dedi", "Kusnadi"]
+                    ];
+                    { _allNamesTyped pushBack [_x, "Turkish"]; } forEach _names_turkish;
+                    { _allNamesTyped pushBack [_x, "Arab"]; } forEach _names_arab;
+                    { _allNamesTyped pushBack [_x, "African"]; } forEach _names_african;
+                    { _allNamesTyped pushBack [_x, "Indonesian"]; } forEach _names_indonesian;
+                };
+                private _usedNames = missionNamespace getVariable ["LL_g_usedPlayerNames", []];
+                private _availableNames = _allNamesTyped select { !((_x select 0 select 0) in _usedNames) };
+                if (_availableNames isEqualTo []) then { _usedNames = []; _availableNames = _allNamesTyped; };
+                private _nameEntry = selectRandom _availableNames;
+                private _nameData = _nameEntry select 0;
+                private _faceType = _nameEntry select 1;
+                _usedNames pushBackUnique (_nameData select 0);
+                missionNamespace setVariable ["LL_g_usedPlayerNames", _usedNames, true];
+
+                // Visage cohérent avec l'origine du nom
+                private _faces = switch (_faceType) do {
+                    case "Turkish";
+                    case "Arab":      { ["PersianHead_A3_01","PersianHead_A3_02","PersianHead_A3_03",
+                                       "GreekHead_A3_01","GreekHead_A3_02","GreekHead_A3_03",
+                                       "GreekHead_A3_04","GreekHead_A3_05","GreekHead_A3_06"] };
+                    case "African":   { ["AfricanHead_01","AfricanHead_02","AfricanHead_03"] };
+                    case "Indonesian": { ["AsianHead_A3_01","AsianHead_A3_02","AsianHead_A3_03",
+                                        "TanoanHead_A3_01","TanoanHead_A3_02","TanoanHead_A3_03",
+                                        "TanoanHead_A3_04","TanoanHead_A3_05"] };
+                    default         { ["WhiteHead_01","WhiteHead_02","WhiteHead_03","WhiteHead_04",
+                                       "WhiteHead_05","WhiteHead_06","WhiteHead_07","WhiteHead_08",
+                                       "WhiteHead_09","WhiteHead_10","WhiteHead_11","WhiteHead_12",
+                                       "WhiteHead_13","WhiteHead_14","WhiteHead_15","WhiteHead_16",
+                                       "WhiteHead_17","WhiteHead_18","WhiteHead_19","WhiteHead_20",
+                                       "WhiteHead_21"] };
+                };
+                private _face = selectRandom _faces;
+
+                // Voix de joueur aléatoire (Américain, Britannique, Altis) avec pitch
+                private _speakers = [
+                    "Male01ENG", "Male02ENG", "Male03ENG", "Male04ENG", "Male05ENG",
+                    "Male01ENGB", "Male02ENGB", "Male03ENGB", "Male04ENGB", "Male05ENGB",
+                    "Male01GRE", "Male02GRE", "Male03GRE", "Male04GRE", "Male05GRE"
+                ];
+                private _speaker = selectRandom _speakers;
+                private _pitch = 0.85 + random 0.15;
+
+                // Application JIP-safe via remoteExec
+                private _beard = "";
+                [_unit, _nameData, _face, _speaker, _pitch, _beard] remoteExec ["LL_fnc_applyIdentity", 0, _unit];
+
+                // Stockage global + drapeau sur l'unité
+                _unit setVariable ["LL_s_identity", [_nameData, _faceType, _face, _speaker, _pitch, _beard], true];
+                _unit setVariable ["LL_IdentitySet", true, true];
+
+                // Assigner également un grade cohérent
+                if (_unitType == "CUP_I_RACS_Soldier_SL") then { _unit setUnitRank "SERGEANT"; } else {
+                    if (_unitType == "CUP_I_RACS_Soldier_Medic") then { _unit setUnitRank "CORPORAL"; } else {
+                        _unit setUnitRank "PRIVATE";
+                    };
+                };
+
                 _unit moveInCargo _heli;
                 _reinforcements pushBack _unit;
             } forEach _unitTypes;

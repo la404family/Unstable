@@ -27,23 +27,7 @@ if (!hasInterface) exitWith {};
             format ["<t color='#FFFFFF'>%1</t>", localize "STR_LL_Heli_Action_Supply"],
             {
                 params ["_target", "_caller", "_actionId"];
-                openMap true;
-                (localize "STR_LL_Heli_Msg_MapClick") systemChat;
-                
-                missionNamespace setVariable ["TAG_Heli_Request_Pending", ["LIVRAISON", _target, _actionId]];
-                
-                onMapSingleClick {
-                    params ["_control", "_pos", "_shift", "_alt"];
-                    private _pending = missionNamespace getVariable ["TAG_Heli_Request_Pending", []];
-                    if (count _pending > 0) then {
-                        _pending params ["_type", "_targetObj", "_actId"];
-                        [_type, _pos, player, _targetObj, _actId] remoteExec ["LL_fnc_requestHelicopter", 2];
-                    };
-                    missionNamespace setVariable ["TAG_Heli_Request_Pending", nil];
-                    onMapSingleClick "";
-                    openMap false;
-                    true
-                };
+                ["LIVRAISON", getPos player, player, _target, _actionId] remoteExec ["LL_fnc_requestHelicopter", 2];
             },
             nil, 5.5, false, true, "", "alive _target"
         ];
@@ -55,28 +39,9 @@ if (!hasInterface) exitWith {};
                 params ["_target", "_caller", "_actionId"];
                 // Vérifier d'abord localement si le véhicule a déjà été livré
                 if (missionNamespace getVariable ["TAG_VehicleSupport_Delivered", false]) exitWith {
-                    private _snd = selectRandom ["negatif01", "negatif02", "negatif03", "negatif04"];
-                    playSound _snd;
-                    (localize "STR_TAG_Msg_Vehicle_Denied_Once") systemChat;
+                    systemChat (localize "STR_TAG_Msg_Vehicle_Denied_Once");
                 };
-                
-                openMap true;
-                (localize "STR_LL_Heli_Msg_MapClick") systemChat;
-                
-                missionNamespace setVariable ["TAG_Heli_Request_Pending", ["VEHICULE", _target, _actionId]];
-                
-                onMapSingleClick {
-                    params ["_control", "_pos", "_shift", "_alt"];
-                    private _pending = missionNamespace getVariable ["TAG_Heli_Request_Pending", []];
-                    if (count _pending > 0) then {
-                        _pending params ["_type", "_targetObj", "_actId"];
-                        [_type, _pos, player, _targetObj, _actId] remoteExec ["LL_fnc_requestHelicopter", 2];
-                    };
-                    missionNamespace setVariable ["TAG_Heli_Request_Pending", nil];
-                    onMapSingleClick "";
-                    openMap false;
-                    true
-                };
+                ["VEHICULE", getPos player, player, _target, _actionId] remoteExec ["LL_fnc_requestHelicopter", 2];
             },
             nil, 5.4, false, true, "", "alive _target"
         ];
@@ -90,28 +55,9 @@ if (!hasInterface) exitWith {};
                 private _cooldown = missionNamespace getVariable ["TAG_CAS_Cooldown_Until", 0];
                 if (time < _cooldown) exitWith {
                     private _remaining = ceil (_cooldown - time);
-                    private _snd = selectRandom ["negatif01", "negatif02", "negatif03", "negatif04"];
-                    playSound _snd;
-                    (format [localize "STR_TAG_Msg_CAS_Cooldown", _remaining]) systemChat;
+                    systemChat (format [localize "STR_TAG_Msg_CAS_Cooldown", _remaining]);
                 };
-                
-                openMap true;
-                (localize "STR_LL_Heli_Msg_MapClick") systemChat;
-                
-                missionNamespace setVariable ["TAG_Heli_Request_Pending", ["CAS", _target, _actionId]];
-                
-                onMapSingleClick {
-                    params ["_control", "_pos", "_shift", "_alt"];
-                    private _pending = missionNamespace getVariable ["TAG_Heli_Request_Pending", []];
-                    if (count _pending > 0) then {
-                        _pending params ["_type", "_targetObj", "_actId"];
-                        [_type, _pos, player, _targetObj, _actId] remoteExec ["LL_fnc_requestHelicopter", 2];
-                    };
-                    missionNamespace setVariable ["TAG_Heli_Request_Pending", nil];
-                    onMapSingleClick "";
-                    openMap false;
-                    true
-                };
+                ["CAS", getPos player, player, _target, _actionId] remoteExec ["LL_fnc_requestHelicopter", 2];
             },
             nil, 5.3, false, true, "", "alive _target"
         ];
@@ -121,23 +67,7 @@ if (!hasInterface) exitWith {};
             format ["<t color='#FFFFFF'>%1</t>", localize "STR_LL_Heli_Action_Reinforcements"],
             {
                 params ["_target", "_caller", "_actionId"];
-                openMap true;
-                (localize "STR_LL_Heli_Msg_MapClick") systemChat;
-                
-                missionNamespace setVariable ["TAG_Heli_Request_Pending", ["DEBARQUEMENT", _target, _actionId]];
-                
-                onMapSingleClick {
-                    params ["_control", "_pos", "_shift", "_alt"];
-                    private _pending = missionNamespace getVariable ["TAG_Heli_Request_Pending", []];
-                    if (count _pending > 0) then {
-                        _pending params ["_type", "_targetObj", "_actId"];
-                        [_type, _pos, player, _targetObj, _actId] remoteExec ["LL_fnc_requestHelicopter", 2];
-                    };
-                    missionNamespace setVariable ["TAG_Heli_Request_Pending", nil];
-                    onMapSingleClick "";
-                    openMap false;
-                    true
-                };
+                ["DEBARQUEMENT", getPos player, player, _target, _actionId] remoteExec ["LL_fnc_requestHelicopter", 2];
             },
             nil, 5.2, false, true, "", "alive _target"
         ];
@@ -147,23 +77,7 @@ if (!hasInterface) exitWith {};
             format ["<t color='#FFFFFF'>%1</t>", localize "STR_LL_Heli_Action_Extraction"],
             {
                 params ["_target", "_caller", "_actionId"];
-                openMap true;
-                (localize "STR_LL_Heli_Msg_MapClick") systemChat;
-                
-                missionNamespace setVariable ["TAG_Heli_Request_Pending", ["EMBARQUEMENT", _target, _actionId]];
-                
-                onMapSingleClick {
-                    params ["_control", "_pos", "_shift", "_alt"];
-                    private _pending = missionNamespace getVariable ["TAG_Heli_Request_Pending", []];
-                    if (count _pending > 0) then {
-                        _pending params ["_type", "_targetObj", "_actId"];
-                        [_type, _pos, player, _targetObj, _actId] remoteExec ["LL_fnc_requestHelicopter", 2];
-                    };
-                    missionNamespace setVariable ["TAG_Heli_Request_Pending", nil];
-                    onMapSingleClick "";
-                    openMap false;
-                    true
-                };
+                ["EMBARQUEMENT", getPos player, player, _target, _actionId] remoteExec ["LL_fnc_requestHelicopter", 2];
             },
             nil, 5.1, false, true, "", "alive _target"
         ];

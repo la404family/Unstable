@@ -23,7 +23,7 @@ if (!hasInterface) exitWith {};
         _unit setVariable ["LL_Action_Heal_Added", true];
 
         _unit addAction [
-            localize "STR_LL_Action_Heal",  
+            format ["<t color='#FFFFFF'>%1</t>", localize "STR_LL_Action_Heal"],  
             {
                 params ["_target", "_caller", "_actionId", "_arguments"];
                 

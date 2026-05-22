@@ -56,7 +56,7 @@ LL_Search_BuildingsNearby = false;
         _unit setVariable ["LL_Action_Search_Added", true];
 
         _unit addAction [
-            localize "STR_LL_Action_Search",
+            format ["<t color='#FFFFFF'>%1</t>", localize "STR_LL_Action_Search"],
             {
                 params ["_target", "_caller", "_actionId", "_arguments"];
 

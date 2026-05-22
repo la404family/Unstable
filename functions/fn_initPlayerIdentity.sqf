@@ -126,7 +126,8 @@ private _allNamesTyped = [];
 { _allNamesTyped pushBack [_x, "African"];    } forEach _names_african;
 { _allNamesTyped pushBack [_x, "Indonesian"]; } forEach _names_indonesian;
 
-// Cache des noms déjà attribués (session serveur uniquement)
+// Cache des noms déjà attribués et du pool complet (session serveur uniquement)
+LL_g_allNamesTyped = _allNamesTyped;
 LL_g_usedPlayerNames = [];
 
 // ── Sous-fonction locale : sélection d'une identité unique ───────────────────

@@ -48,7 +48,9 @@ if (DEBUG_MODE) then {
 
 // ── Surveillance de complétion ──────────────────────────────────────────────
 [] spawn {
-    // Attendre que tous les joueurs vivants soient à bord de vehicule_team
+    private _initialVehicle = missionNamespace getVariable ["vehicule_team", objNull];
+
+    // Attendre que tous les joueurs vivants soient à bord du véhicule d'origine ou du véhicule de remplacement
     waitUntil {
         sleep 2;
 
@@ -58,8 +60,11 @@ if (DEBUG_MODE) then {
         // Si personne de vivant, éviter un faux positif — attendre
         if (count _alivePlayers == 0) exitWith { false };
 
-        // Vrai si chaque joueur vivant est bien passager ou conducteur du véhicule
-        private _notBoarded = _alivePlayers select { vehicle _x != vehicule_team };
+        // Vrai si chaque joueur vivant est bien passager ou conducteur d'un des véhicules autorisés
+        private _notBoarded = _alivePlayers select { 
+            private _veh = vehicle _x;
+            _veh != _initialVehicle && _veh != (missionNamespace getVariable ["vehicule_team", objNull])
+        };
 
         (count _notBoarded == 0)
     };

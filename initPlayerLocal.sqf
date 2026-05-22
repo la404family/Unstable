@@ -17,7 +17,7 @@
 [] spawn LL_fnc_addSearchAction;
 
 // Les actions de demande de support hélicoptère (Chinook RACS) seront ajoutées par l'utilisateur par la suite
-// [] spawn LL_fnc_addHelicopterActions;
+[] spawn LL_fnc_addHelicopterActions;
 
 // --- Système de basculement vers une IA du groupe en cas de mort ---
 player addEventHandler ["Killed", {
