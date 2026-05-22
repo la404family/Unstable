@@ -16,8 +16,11 @@
 // Ajout de l'action pour ordonner la fouille des bâtiments aux IA
 [] spawn LL_fnc_addSearchAction;
 
-// Les actions de demande de support hélicoptère (Chinook RACS) seront ajoutées par l'utilisateur par la suite
+// Les actions de demande de support hélicoptère (Chinook RACS)
 [] spawn LL_fnc_addHelicopterActions;
+
+// L'action de demande de surveillance drone (MQ-9)
+[] spawn LL_fnc_addDroneAction;
 
 // --- Système de basculement vers une IA du groupe en cas de mort ---
 player addEventHandler ["Killed", {

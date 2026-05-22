@@ -366,6 +366,30 @@ Le Roi de Sahrani a lancé cette opération de pacification autonome pour prouve
         <English>[SUPPORT] CAS support unavailable. Please wait %1 seconds before calling again.</English>
         <French>[SUPPORT] Soutien CAS indisponible. Veuillez patienter %1 secondes avant le prochain appel.</French>
       </Key>
+      <Key ID="STR_LL_Drone_Action">
+        <English>[Drone] Request MQ-9 Surveillance</English>
+        <French>[Drone] Demander Surveillance MQ-9</French>
+      </Key>
+      <Key ID="STR_TAG_Msg_Drone_Denied">
+        <English>[SUPPORT] Drone support denied. A surveillance drone is already active.</English>
+        <French>[SUPPORT] Soutien drone refusé. Un drone de surveillance est déjà actif.</French>
+      </Key>
+      <Key ID="STR_TAG_Msg_Drone_Approved">
+        <English>[SUPPORT] Request approved. MQ-9 drone en route to the area.</English>
+        <French>[SUPPORT] Demande approuvée. Drone MQ-9 en route vers la zone.</French>
+      </Key>
+      <Key ID="STR_TAG_Msg_Drone_Error">
+        <English>[SUPPORT] Drone support error. Failed to deploy the drone.</English>
+        <French>[SUPPORT] Erreur soutien drone. Impossible de déployer le drone.</French>
+      </Key>
+      <Key ID="STR_TAG_Msg_Drone_Overhead">
+        <English>[SUPPORT] MQ-9 on station. Surveillance active. Enemy and allied positions updated on map.</English>
+        <French>[SUPPORT] MQ-9 sur zone. Surveillance active. Positions ennemies et alliées mises à jour sur la carte.</French>
+      </Key>
+      <Key ID="STR_TAG_Msg_Drone_End">
+        <English>[SUPPORT] Drone mission complete. MQ-9 returning to base.</English>
+        <French>[SUPPORT] Mission drone terminée. MQ-9 de retour à la base.</French>
+      </Key>
     </Container>
   </Package>
 </Project>

@@ -22,3 +22,15 @@
 - La variable du drone est : CUP_B_USMC_DYN_MQ9
 - vehicule_team est le véhicule des joueurs en début de mission. (nom de variable du véhicule : CUP_B_nM1025_SOV_M2_USMC_DES)
 - l'hélicoptère allié est un MH-47E (CUP_B_MH47E_USA)
+
+---
+
+## Chat et interraction avec le joueur BILINGUE STR stringtable.xml : 
+
+- Toutes les interractions texte en jeu se font avec le systemChat. REGLES A SUIVRE : 
+    - `SUPPORT` — Messages liés au soutien hélicoptère ou drone (demande, refus, approbation, livraison, erreur, RTB, cooldown).
+    - `QG` ou `HQ`  pour messages narratifs du QG et ordre de mission (taches)
+    - `Chef de milice` ou `Militia Leader` pour les chef de milice
+    - `Gardes de la milice` ou `Militia Guards`  pour les gardes sous les ordres des chef de milice
+
+

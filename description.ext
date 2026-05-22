@@ -57,6 +57,8 @@ class CfgFunctions {
             class showSubtitle          {};
             class requestHelicopter     {};
             class addHelicopterActions  {};
+            class requestDrone          {};
+            class addDroneAction        {};
         };
         class Tasks {
             file = "tasks";
