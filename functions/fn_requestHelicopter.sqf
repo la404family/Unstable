@@ -237,9 +237,49 @@ missionNamespace setVariable ["LL_missionHelicopter", _heli, true];
     private _isSlingload = (_supportType == "LIVRAISON" || _supportType == "VEHICULE");
     private _cargo = objNull;
     private _originalMass = 0;
+    private _victoryTriggered = false;
     
     // Si livraison de véhicule, la hauteur stationnaire finale est de 10m au lieu de 15m
     if (_supportType == "VEHICULE") then { _hoverHeight = 10; };
+
+    // Création du marqueur de carte unifié pour indiquer la zone de support
+    private _markerName = format ["heli_support_mrk_%1_%2", _supportType, floor(random 100000)];
+    private _markerType = "mil_dot";
+    private _markerColor = "ColorBlack";
+    private _markerText = "";
+
+    switch (_supportType) do {
+        case "LIVRAISON": {
+            _markerType = "mil_box";
+            _markerColor = "ColorBlue";
+            _markerText = localize "STR_TAG_Marker_Heli_Ammo";
+        };
+        case "VEHICULE": {
+            _markerType = "mil_box";
+            _markerColor = "ColorBlue";
+            _markerText = localize "STR_TAG_Marker_Heli_Vehicle";
+        };
+        case "DEBARQUEMENT": {
+            _markerType = "mil_end";
+            _markerColor = "ColorGreen";
+            _markerText = localize "STR_TAG_Marker_Heli_Debark";
+        };
+        case "EMBARQUEMENT": {
+            _markerType = "mil_pickup";
+            _markerColor = "ColorYellow";
+            _markerText = localize "STR_TAG_Marker_Heli_Extract";
+        };
+        case "CAS": {
+            _markerType = "mil_warning";
+            _markerColor = "ColorRed";
+            _markerText = localize "STR_TAG_Marker_Heli_CAS";
+        };
+    };
+
+    private _mrk = createMarker [_markerName, _dropPos];
+    _mrk setMarkerType _markerType;
+    _mrk setMarkerColor _markerColor;
+    _mrk setMarkerText _markerText;
 
     // --- PREPARATION DU SLINGLOAD ---
     if (_isSlingload) then {
@@ -307,24 +347,6 @@ missionNamespace setVariable ["LL_missionHelicopter", _heli, true];
         };
     };
 
-    // Marqueur temporaire sur la zone de livraison (Munitions ou Véhicule)
-    private _marker = objNull;
-    if (_isSlingload) then {
-        private _markerName = format ["delivery_mrk_%1_%2", _supportType, floor(random 10000)];
-        _marker = createMarker [_markerName, _dropPos];
-        _marker setMarkerType "mil_pickup";
-        _marker setMarkerColor "ColorBlue";
-        
-        private _txt = if (_supportType == "LIVRAISON") then { "Drop Logistique" } else { localize "STR_TAG_Msg_Vehicle_Marker" };
-        _marker setMarkerText _txt;
-        
-        [_marker] spawn {
-            params ["_m"];
-            sleep 120;
-            deleteMarker _m;
-        };
-    };
-
     // --- PHASE 1 : VOL VERS LA CIBLE ---
     private _wp1 = _group addWaypoint [_dropPos, 0];
     _wp1 setWaypointType "MOVE";
@@ -340,6 +362,7 @@ missionNamespace setVariable ["LL_missionHelicopter", _heli, true];
     };
     
     if (!alive _heli) exitWith { 
+        deleteMarker _markerName;
         missionNamespace setVariable ["TAG_AirSupport_Active", false, true]; 
         missionNamespace setVariable ["LL_missionHelicopter", objNull, true];
     };
@@ -368,6 +391,7 @@ missionNamespace setVariable ["LL_missionHelicopter", _heli, true];
         };
         
         if (!alive _heli) exitWith { 
+            deleteMarker _markerName;
             missionNamespace setVariable ["TAG_AirSupport_Active", false, true]; 
             missionNamespace setVariable ["LL_missionHelicopter", objNull, true];
         };
@@ -397,6 +421,7 @@ missionNamespace setVariable ["LL_missionHelicopter", _heli, true];
         };
         
         if (!alive _heli || !alive _cargo) exitWith { 
+            deleteMarker _markerName;
             missionNamespace setVariable ["TAG_AirSupport_Active", false, true]; 
             missionNamespace setVariable ["LL_missionHelicopter", objNull, true];
         };
@@ -454,17 +479,34 @@ missionNamespace setVariable ["LL_missionHelicopter", _heli, true];
         
         _heli doMove _dropPos;
 
-        private _endTime = time + _loiterDuration;
-        while {time < _endTime && alive _heli} do {
-            // Révéler uniquement les OPFOR (east) à l'hélicoptère
-            private _targets = allUnits select { alive _x && {side _x == east} && {_x distance2D _dropPos < 500} };
-            {
-                _group reveal [_x, 4];
-            } forEach _targets;
-            sleep 5;
+        // Attendre que l'hélicoptère atteigne la zone de loiter avant de commencer le timer
+        waitUntil {
+            sleep 1;
+            !alive _heli || {(_heli distance2D _dropPos) < (_loiterRadius + 150)}
         };
 
-        deleteWaypoint [_group, 0];
+        if (alive _heli) then {
+            private _endTime = time + 180; // Reste 3 minutes (180 secondes)
+            private _lastReveal = 0;
+
+            while {time < _endTime && alive _heli} do {
+                sleep 1;
+                if (!alive _heli) exitWith {};
+
+                if (time - _lastReveal > 5) then {
+                    _lastReveal = time;
+                    private _targets = allUnits select { alive _x && {side _x == east} && {_x distance2D _dropPos < 500} };
+                    {
+                        _group reveal [_x, 4];
+                    } forEach _targets;
+                };
+            };
+        };
+
+        // Supprimer proprement tous les waypoints de ce groupe pour éviter les conflits d'IA
+        while { count (waypoints _group) > 0 } do {
+            deleteWaypoint [_group, 0];
+        };
     };
 
     // --- CAS B & C : DEBARQUEMENT ET EMBARQUEMENT ---
@@ -483,6 +525,7 @@ missionNamespace setVariable ["LL_missionHelicopter", _heli, true];
         };
         
         if (!alive _heli) exitWith { 
+            deleteMarker _markerName;
             missionNamespace setVariable ["TAG_AirSupport_Active", false, true]; 
             missionNamespace setVariable ["LL_missionHelicopter", objNull, true];
         };
@@ -771,48 +814,92 @@ missionNamespace setVariable ["LL_missionHelicopter", _heli, true];
             };
             
             (localize "STR_LL_Heli_Msg_Departing") remoteExec ["systemChat", 0];
+
+            if (alive _heli) then {
+                private _allHumanPlayers = allPlayers select { alive _x };
+                private _playersInHeli = crew _heli select { _x in _allHumanPlayers };
+                if (count _playersInHeli > 0) then {
+                    _victoryTriggered = true;
+                    deleteMarker _markerName;
+
+                    // Décollage de l'hélicoptère
+                    _heli flyInHeight _flyHeight;
+                    private _wpHome = _group addWaypoint [_homeBase, 0];
+                    _wpHome setWaypointType "MOVE";
+                    _wpHome setWaypointBehaviour "CARELESS";
+                    _wpHome setWaypointSpeed "FULL";
+                    _heli doMove _homeBase;
+
+                    // Rendre les joueurs et les alliés invisibles
+                    private _unitsToHide = (crew _heli) - _crew;
+                    {
+                        _x hideObjectGlobal true;
+                    } forEach _unitsToHide;
+
+                    // Verrouiller l'hélicoptère
+                    _heli lock 2;
+
+                    // Attendre 25 secondes
+                    sleep 25;
+
+                    // Lancer la fin de mission
+                    if (alive _heli) then {
+                        ["MissionSuccess", true, true] remoteExec ["BIS_fnc_endMission", 0];
+                    };
+                };
+            };
         };
     };
 
-    // --- PHASE 3 : RETOUR ET DESPAWN ---
-    if (_supportType == "CAS") then {
-        (localize "STR_TAG_Msg_CAS_RTB") remoteExec ["systemChat", _caller];
-    };
-    sleep 2;
-    _heli flyInHeight _flyHeight;
-    
-    private _wpHome = _group addWaypoint [_homeBase, 0];
-    _wpHome setWaypointType "MOVE";
-    _wpHome setWaypointBehaviour "CARELESS";
-    _wpHome setWaypointSpeed "FULL";
-    _heli doMove _homeBase;
-    
-    // Libération immédiate du verrou pour que le joueur puisse demander une autre action
-    missionNamespace setVariable ["TAG_AirSupport_Active", false, true];
-    
-    private _returnTime = time;
-    waitUntil {
-        sleep 5;
-        (_heli distance2D _homeBase < 200) || !alive _heli || (time - _returnTime > 180)
-    };
-    
-    if (alive _heli) then {
-        // Extraction finale : si des joueurs sont à bord au retour, c'est un succès de mission
-        private _hasPlayers = {isPlayer _x} count crew _heli > 0;
-        if (_hasPlayers) then {
-            ["MissionSuccess", true, true] remoteExec ["BIS_fnc_endMission", 0];
+    if (!_victoryTriggered) then {
+        deleteMarker _markerName;
+        // --- PHASE 3 : RETOUR ET DESPAWN ---
+        if (_supportType == "CAS") then {
+            (localize "STR_TAG_Msg_CAS_RTB") remoteExec ["systemChat", _caller];
+        };
+        sleep 2;
+        
+        // Supprimer proprement tous les waypoints existants pour éviter les conflits d'IA
+        while { count (waypoints _group) > 0 } do {
+            deleteWaypoint [_group, 0];
+        };
+
+        _heli flyInHeight _flyHeight;
+        
+        private _wpHome = _group addWaypoint [_homeBase, 0];
+        _wpHome setWaypointType "MOVE";
+        _wpHome setWaypointBehaviour "CARELESS";
+        _wpHome setWaypointSpeed "FULL";
+        _group setCurrentWaypoint _wpHome;
+        _heli doMove _homeBase;
+        
+        // Libération immédiate du verrou pour que le joueur puisse demander une autre action
+        missionNamespace setVariable ["TAG_AirSupport_Active", false, true];
+        
+        private _returnTime = time;
+        waitUntil {
+            sleep 5;
+            (_heli distance2D _homeBase < 200) || !alive _heli || (time - _returnTime > 180)
+        };
+        
+        if (alive _heli) then {
+            // Extraction finale : si des joueurs sont à bord au retour, c'est un succès de mission (fallback au cas où)
+            private _hasPlayers = {isPlayer _x} count crew _heli > 0;
+            if (_hasPlayers) then {
+                ["MissionSuccess", true, true] remoteExec ["BIS_fnc_endMission", 0];
+            } else {
+                { deleteVehicle _x } forEach _crew;
+                deleteVehicle _heli;
+                deleteGroup _group;
+                if (_supportType == "CAS") then {
+                    missionNamespace setVariable ["TAG_CAS_Cooldown_Until", time + 300, true];
+                };
+            };
         } else {
-            { deleteVehicle _x } forEach _crew;
-            deleteVehicle _heli;
             deleteGroup _group;
             if (_supportType == "CAS") then {
                 missionNamespace setVariable ["TAG_CAS_Cooldown_Until", time + 300, true];
             };
-        };
-    } else {
-        deleteGroup _group;
-        if (_supportType == "CAS") then {
-            missionNamespace setVariable ["TAG_CAS_Cooldown_Until", time + 300, true];
         };
     };
     

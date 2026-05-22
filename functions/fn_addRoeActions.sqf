@@ -30,7 +30,7 @@ if (!hasInterface) exitWith {};
                 params ["_target", "_caller"];
                 private _grp = group _caller;
                 if (isNull _grp) exitWith {
-                    systemChat "[LL ERROR] Impossible d'appliquer l'infiltration : Groupe introuvable.";
+                    systemChat localize "STR_LL_Msg_RoE_Stealth_Error";
                 };
                 
                 _grp setCombatMode "BLUE";    // Ne tire jamais
@@ -51,7 +51,7 @@ if (!hasInterface) exitWith {};
                 params ["_target", "_caller"];
                 private _grp = group _caller;
                 if (isNull _grp) exitWith {
-                    systemChat "[LL ERROR] Impossible d'appliquer la vigilance : Groupe introuvable.";
+                    systemChat localize "STR_LL_Msg_RoE_Vigilance_Error";
                 };
                 
                 _grp setCombatMode "YELLOW";  // Tire à volonté
@@ -71,7 +71,7 @@ if (!hasInterface) exitWith {};
                 params ["_target", "_caller"];
                 private _grp = group _caller;
                 if (isNull _grp) exitWith {
-                    systemChat "[LL ERROR] Impossible d'appliquer l'assaut : Groupe introuvable.";
+                    systemChat localize "STR_LL_Msg_RoE_Assault_Error";
                 };
                 
                 _grp setCombatMode "RED";     // Engagement libre et tir à volonté
@@ -91,7 +91,7 @@ if (!hasInterface) exitWith {};
                 params ["_target", "_caller"];
                 private _grp = group _caller;
                 if (isNull _grp) exitWith {
-                    systemChat "[LL ERROR] Impossible d'appliquer la charge : Groupe introuvable.";
+                    systemChat localize "STR_LL_Msg_RoE_Charge_Error";
                 };
                 
                 _grp setCombatMode "RED";     // Engagement libre

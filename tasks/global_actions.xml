@@ -170,6 +170,62 @@
         <English>[SUPPORT] CAS support unavailable. Please wait %1 seconds before calling again.</English>
         <French>[SUPPORT] Soutien CAS indisponible. Veuillez patienter %1 secondes avant le prochain appel.</French>
       </Key>
+
+      <!-- Marqueurs du Support Hélicoptère -->
+      <Key ID="STR_TAG_Marker_Heli_Ammo">
+        <English>Ammo Delivery Zone</English>
+        <French>Zone de Livraison Munitions</French>
+      </Key>
+      <Key ID="STR_TAG_Marker_Heli_Vehicle">
+        <English>Vehicle Delivery Zone</English>
+        <French>Zone de Livraison Véhicule</French>
+      </Key>
+      <Key ID="STR_TAG_Marker_Heli_Debark">
+        <English>RACS Landing Zone</English>
+        <French>Zone de Débarquement RACS</French>
+      </Key>
+      <Key ID="STR_TAG_Marker_Heli_Extract">
+        <English>Extraction Zone</English>
+        <French>Zone d'Extraction</French>
+      </Key>
+      <Key ID="STR_TAG_Marker_Heli_CAS">
+        <English>CAS Support Zone</English>
+        <French>Zone d'Appui CAS</French>
+      </Key>
+
+      <!-- Erreurs Soins -->
+      <Key ID="STR_LL_Msg_Heal_NoKit">
+        <English>[LL ERROR] Injured AI do not have a first aid kit (FirstAidKit/Medikit).</English>
+        <French>[LL ERREUR] Les IA blessées n'ont pas de kit de soin (FirstAidKit/Medikit).</French>
+      </Key>
+      <Key ID="STR_LL_Msg_Heal_NoInjured">
+        <English>[LL ERROR] No injured AI requires healing.</English>
+        <French>[LL ERREUR] Aucune IA blessée n'a besoin de soins.</French>
+      </Key>
+
+      <!-- Erreurs RoE -->
+      <Key ID="STR_LL_Msg_RoE_Stealth_Error">
+        <English>[LL ERROR] Failed to apply stealth: Group not found.</English>
+        <French>[LL ERREUR] Impossible d'appliquer l'infiltration : Groupe introuvable.</French>
+      </Key>
+      <Key ID="STR_LL_Msg_RoE_Vigilance_Error">
+        <English>[LL ERROR] Failed to apply vigilance: Group not found.</English>
+        <French>[LL ERREUR] Impossible d'appliquer la vigilance : Groupe introuvable.</French>
+      </Key>
+      <Key ID="STR_LL_Msg_RoE_Assault_Error">
+        <English>[LL ERROR] Failed to apply assault: Group not found.</English>
+        <French>[LL ERREUR] Impossible d'appliquer l'assaut : Groupe introuvable.</French>
+      </Key>
+      <Key ID="STR_LL_Msg_RoE_Charge_Error">
+        <English>[LL ERROR] Failed to apply charge: Group not found.</English>
+        <French>[LL ERREUR] Impossible d'appliquer la charge : Groupe introuvable.</French>
+      </Key>
+
+      <!-- Erreurs Leadership -->
+      <Key ID="STR_LL_Msg_AssignLeader_Error">
+        <English>[LL ERROR] assignLeader: No player detected to assign as leader!</English>
+        <French>[LL ERREUR] assignLeader : Aucun joueur détecté pour attribuer le leader !</French>
+      </Key>
     </Container>
   </Package>
 </Project>

@@ -71,9 +71,9 @@ if (!hasInterface) exitWith {};
                 } else {
                     // Erreurs / Anomalies : affichage de systemChat uniquement pour ces cas
                     if (_noKitCount > 0) then {
-                        systemChat "[LL ERROR] Les IA blessées n'ont pas de kit de soin (FirstAidKit/Medikit).";
+                        systemChat localize "STR_LL_Msg_Heal_NoKit";
                     } else {
-                        systemChat "[LL ERROR] Aucune IA blessée n'a besoin de soins.";
+                        systemChat localize "STR_LL_Msg_Heal_NoInjured";
                     };
                 };
             },

@@ -198,6 +198,30 @@ Le Roi de Sahrani a lancé cette opération de pacification autonome pour prouve
       </Key>
     </Container>
     <Container name="Actions">
+      <Key ID="STR_LL_Drone_Action">
+        <English>[Drone] Request MQ-9 Surveillance</English>
+        <French>[Drone] Demander Surveillance MQ-9</French>
+      </Key>
+      <Key ID="STR_TAG_Msg_Drone_Denied">
+        <English>[SUPPORT] Drone support denied. A surveillance drone is already active.</English>
+        <French>[SUPPORT] Soutien drone refusé. Un drone de surveillance est déjà actif.</French>
+      </Key>
+      <Key ID="STR_TAG_Msg_Drone_Approved">
+        <English>[SUPPORT] Request approved. MQ-9 drone en route to the area.</English>
+        <French>[SUPPORT] Demande approuvée. Drone MQ-9 en route vers la zone.</French>
+      </Key>
+      <Key ID="STR_TAG_Msg_Drone_Error">
+        <English>[SUPPORT] Drone support error. Failed to deploy the drone.</English>
+        <French>[SUPPORT] Erreur soutien drone. Impossible de déployer le drone.</French>
+      </Key>
+      <Key ID="STR_TAG_Msg_Drone_Overhead">
+        <English>[SUPPORT] MQ-9 on station. Surveillance active. Enemy and allied positions updated on map.</English>
+        <French>[SUPPORT] MQ-9 sur zone. Surveillance active. Positions ennemies et alliées mises à jour sur la carte.</French>
+      </Key>
+      <Key ID="STR_TAG_Msg_Drone_End">
+        <English>[SUPPORT] Drone mission complete. MQ-9 returning to base.</English>
+        <French>[SUPPORT] Mission drone terminée. MQ-9 de retour à la base.</French>
+      </Key>
       <Key ID="STR_LL_Action_Heal">
         <English>Order AI to self-heal</English>
         <French>Ordonner aux IA de se soigner</French>
@@ -366,29 +390,53 @@ Le Roi de Sahrani a lancé cette opération de pacification autonome pour prouve
         <English>[SUPPORT] CAS support unavailable. Please wait %1 seconds before calling again.</English>
         <French>[SUPPORT] Soutien CAS indisponible. Veuillez patienter %1 secondes avant le prochain appel.</French>
       </Key>
-      <Key ID="STR_LL_Drone_Action">
-        <English>[Drone] Request MQ-9 Surveillance</English>
-        <French>[Drone] Demander Surveillance MQ-9</French>
+      <Key ID="STR_TAG_Marker_Heli_Ammo">
+        <English>Ammo Delivery Zone</English>
+        <French>Zone de Livraison Munitions</French>
       </Key>
-      <Key ID="STR_TAG_Msg_Drone_Denied">
-        <English>[SUPPORT] Drone support denied. A surveillance drone is already active.</English>
-        <French>[SUPPORT] Soutien drone refusé. Un drone de surveillance est déjà actif.</French>
+      <Key ID="STR_TAG_Marker_Heli_Vehicle">
+        <English>Vehicle Delivery Zone</English>
+        <French>Zone de Livraison Véhicule</French>
       </Key>
-      <Key ID="STR_TAG_Msg_Drone_Approved">
-        <English>[SUPPORT] Request approved. MQ-9 drone en route to the area.</English>
-        <French>[SUPPORT] Demande approuvée. Drone MQ-9 en route vers la zone.</French>
+      <Key ID="STR_TAG_Marker_Heli_Debark">
+        <English>RACS Landing Zone</English>
+        <French>Zone de Débarquement RACS</French>
       </Key>
-      <Key ID="STR_TAG_Msg_Drone_Error">
-        <English>[SUPPORT] Drone support error. Failed to deploy the drone.</English>
-        <French>[SUPPORT] Erreur soutien drone. Impossible de déployer le drone.</French>
+      <Key ID="STR_TAG_Marker_Heli_Extract">
+        <English>Extraction Zone</English>
+        <French>Zone d'Extraction</French>
       </Key>
-      <Key ID="STR_TAG_Msg_Drone_Overhead">
-        <English>[SUPPORT] MQ-9 on station. Surveillance active. Enemy and allied positions updated on map.</English>
-        <French>[SUPPORT] MQ-9 sur zone. Surveillance active. Positions ennemies et alliées mises à jour sur la carte.</French>
+      <Key ID="STR_TAG_Marker_Heli_CAS">
+        <English>CAS Support Zone</English>
+        <French>Zone d'Appui CAS</French>
       </Key>
-      <Key ID="STR_TAG_Msg_Drone_End">
-        <English>[SUPPORT] Drone mission complete. MQ-9 returning to base.</English>
-        <French>[SUPPORT] Mission drone terminée. MQ-9 de retour à la base.</French>
+      <Key ID="STR_LL_Msg_Heal_NoKit">
+        <English>[LL ERROR] Injured AI do not have a first aid kit (FirstAidKit/Medikit).</English>
+        <French>[LL ERREUR] Les IA blessées n'ont pas de kit de soin (FirstAidKit/Medikit).</French>
+      </Key>
+      <Key ID="STR_LL_Msg_Heal_NoInjured">
+        <English>[LL ERROR] No injured AI requires healing.</English>
+        <French>[LL ERREUR] Aucune IA blessée n'a besoin de soins.</French>
+      </Key>
+      <Key ID="STR_LL_Msg_RoE_Stealth_Error">
+        <English>[LL ERROR] Failed to apply stealth: Group not found.</English>
+        <French>[LL ERREUR] Impossible d'appliquer l'infiltration : Groupe introuvable.</French>
+      </Key>
+      <Key ID="STR_LL_Msg_RoE_Vigilance_Error">
+        <English>[LL ERROR] Failed to apply vigilance: Group not found.</English>
+        <French>[LL ERREUR] Impossible d'appliquer la vigilance : Groupe introuvable.</French>
+      </Key>
+      <Key ID="STR_LL_Msg_RoE_Assault_Error">
+        <English>[LL ERROR] Failed to apply assault: Group not found.</English>
+        <French>[LL ERREUR] Impossible d'appliquer l'assaut : Groupe introuvable.</French>
+      </Key>
+      <Key ID="STR_LL_Msg_RoE_Charge_Error">
+        <English>[LL ERROR] Failed to apply charge: Group not found.</English>
+        <French>[LL ERREUR] Impossible d'appliquer la charge : Groupe introuvable.</French>
+      </Key>
+      <Key ID="STR_LL_Msg_AssignLeader_Error">
+        <English>[LL ERROR] assignLeader: No player detected to assign as leader!</English>
+        <French>[LL ERREUR] assignLeader : Aucun joueur détecté pour attribuer le leader !</French>
       </Key>
     </Container>
   </Package>

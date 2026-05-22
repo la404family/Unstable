@@ -26,7 +26,7 @@ private _players = allPlayers - entities "HeadlessClient_F";
 if (count _players == 0) exitWith {
     // Si aucun joueur n'est connecté au démarrage (cas anormal en MP)
     diag_log "[LL][assignLeader] Erreur: Aucun joueur détecté au démarrage pour attribuer le rôle de leader.";
-    ["[LL ERROR] assignLeader: Aucun joueur détecté pour attribuer le leader!"] remoteExec ["systemChat", 0];
+    [localize "STR_LL_Msg_AssignLeader_Error"] remoteExec ["systemChat", 0];
 };
 
 private _defaultLeader = missionNamespace getVariable ["player_00", objNull];
