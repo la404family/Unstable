@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project name="UnstablePorto">
+  <Package name="Missions">
+    <Container name="Dialogues">
+      <Key ID="STR_LL_Task_01_Narrative_Meeting">
+        <English>CQ. We have localized the militia leader. Proceed to the designated building and make contact. Exercise caution. Out.</English>
+        <French>Ici QG. Nous avons localisé le chef de milice. Rendez-vous au bâtiment désigné et établissez le contact. Faites preuve de prudence. Terminé.</French>
+      </Key>
+      <Key ID="STR_LL_Task_01_S1_Chief">
+        <English>Here are their coordinates and patrol routes.</English>
+        <French>Voici les coordonnées et leurs plans de patrouille.</French>
+      </Key>
+      <Key ID="STR_LL_Task_01_Narrative_S1_Success">
+        <English>CQ, respond. Insurgent positions confirmed. Out.</English>
+        <French>QG à patrouille. Positions insurgées confirmées. Terminé.</French>
+      </Key>
+      <Key ID="STR_LL_Task_01_S2_Chief">
+        <English>You think we will ally with the RACS ? Kill these dogs!</English>
+        <French>Vous croyez que nous allons nous allier avec le RACS ? Crevez bande de chiens  !</French>
+      </Key>
+      <Key ID="STR_LL_Task_01_Narrative_S2_Start">
+        <English>TREASON !</English>
+        <French>TRAHISON !</French>
+      </Key>
+      <Key ID="STR_LL_Task_01_Narrative_S2_Success">
+        <English>HQ to patrol. Excellent work under fire. Out.</English>
+        <French>QG à patrouille. Excellent travail sous le feu. Terminé.</French>
+      </Key>
+      <Key ID="STR_LL_Task_01_S3_Chief">
+        <English>I am with you but there are traitors here !</English>
+        <French>Je suis avec vous mais il y a des traîtres ici !</French>
+      </Key>
+      <Key ID="STR_LL_Task_01_S3_Guards">
+        <English>Traitor! You are selling our cause to foreigners! You die with them!</English>
+        <French>Traître ! Tu vends notre cause aux étrangers ! Tu vas mourir avec eux !</French>
+      </Key>
+      <Key ID="STR_LL_Task_01_Narrative_S3_Start">
+        <English>HQ to patrol. Protect the militia leader and eliminate the mutinous guards! He must survive!</English>
+        <French>QG à patrouille. Protégez le chef de milice et éliminez les gardes mutins ! Il doit survivre !</French>
+      </Key>
+      <Key ID="STR_LL_Task_01_Narrative_S3_Success">
+        <English>HQ to patrol. Mutineers eliminated and the leader is safe. Intel is secured. Out.</English>
+        <French>QG à patrouille. Mutins éliminés et le chef est sain et sauf. Les renseignements sont sécurisés. Terminé.</French>
+      </Key>
+      <Key ID="STR_LL_Task_01_Narrative_S3_Failed">
+        <English>HQ to patrol. The militia leader has been killed. The intel is lost. Out.</English>
+        <French>QG à patrouille. Le chef de milice a été tué. Les renseignements sont perdus. Terminé.</French>
+      </Key>
+    </Container>
+  </Package>
+</Project>

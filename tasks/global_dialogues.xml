@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project name="UnstablePorto">
+  <Package name="Missions">
+    <Container name="Dialogues">
+      <Key ID="STR_LL_Speaker_Narrator">
+        <English>HQ</English>
+        <French>QG</French>
+      </Key>
+      <Key ID="STR_LL_Speaker_Chief">
+        <English>Militia Leader</English>
+        <French>Chef de milice</French>
+      </Key>
+      <Key ID="STR_LL_Speaker_Guards">
+        <English>Militia Guards</English>
+        <French>Gardes de la milice</French>
+      </Key>
+    </Container>
+  </Package>
+</Project>

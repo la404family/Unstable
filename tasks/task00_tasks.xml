@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project name="UnstablePorto">
+  <Package name="Missions">
+    <Container name="Tasks">
+      <Key ID="STR_LL_Task_00_Title">
+        <English>Embarkation</English>
+        <French>Embarquement</French>
+      </Key>
+      <Key ID="STR_LL_Task_00_Desc">
+        <English>Board the patrol vehicle with your squad to begin the operation.</English>
+        <French>Montez à bord du véhicule de patrouille avec votre escouade pour commencer l'opération.</French>
+      </Key>
+      <Key ID="STR_LL_Task_00_Marker">
+        <English>Assembly Point</English>
+        <French>Point de rassemblement</French>
+      </Key>
+    </Container>
+  </Package>
+</Project>

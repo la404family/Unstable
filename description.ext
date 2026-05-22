@@ -1,0 +1,90 @@
+// ============================================================================
+// description.ext — Configuration générale et bibliothèque de fonctions (LL)
+// ============================================================================
+
+// --- Informations sur la mission ---
+author          = "RACS (Corps Expéditionnaire Multinational)";
+onLoadName      = "Operation Royal Alliance";
+onLoadMission   = "Opération de pacification à Porto par le Corps Expéditionnaire Multinational du RACS.";
+loadScreen      = "porto_load_screen.jpg"; // Image de chargement de la mission
+
+// --- Paramètres de la partie ---
+class Header {
+    gameType    = Coop; // Type de mission (Coop, DM, TDM, etc.)
+    minPlayers  = 1;
+    maxPlayers  = 7;    // 7 emplacements jouables (player_00 à player_06)
+};
+
+// --- Paramètres réseau & performance ---
+disabledAI          = 1; // 1 = Désactive les IA dans les slots de joueurs vides au démarrage
+joinInProgress      = 1; // Permet aux joueurs de rejoindre en cours de partie
+
+// --- Système de Respawn ---
+respawn             = 3;  // 3 = Respawn sur position personnalisée (ex: marqueur "respawn_west")
+respawnDelay        = 10; // Délai en secondes avant réapparition
+respawnButton       = 1;  // 1 = Permet de forcer le respawn via le menu pause
+respawnOnStart      = 0;  // 0 = Ne lance pas les scripts de respawn au démarrage initial
+
+// --- Bibliothèque de fonctions de la mission ---
+class CfgFunctions {
+    class LL {
+        tag = "LL";
+        class MissionFunctions {
+            file = "functions";
+            
+            // Initialisation & Système Joueur
+            class initPlayer            {};
+            class initPlayerIdentity    {};
+            class initPlayerLoadout     {};
+            class applyIdentity         {};
+            
+            // Système de Présence Civile
+            class initCivilians         {};
+            class spawnCivilianPresence {};
+            class applyCivilianTemplate {};
+            
+            // Ambiance & Mécaniques de jeu
+            class doorSecurity          {};
+            class playEzan              {};
+            class manageSkills          {};
+            class showSubtitle          {};
+        };
+        class Tasks {
+            file = "tasks";
+            class task00                {};
+            class task01                {};
+            class task01_addAction      {};
+            class taskManager           {};
+        };
+    };
+};
+
+// --- Effets sonores et appel à la prière ---
+class CfgSounds {
+    sounds[] = {};
+    class ezan {
+        name    = "ezan";
+        sound[] = {"music\ezan.ogg", 2.0, 1.0, 2500}; // Fichier, volume, pitch, distance max (mètres)
+        titles[] = {};
+    };
+};
+
+// --- Écrans de fin de mission ---
+class CfgDebriefing {
+    class MissionSuccess {
+        title       = "$STR_LL_End_Success_Title";
+        subtitle    = "$STR_LL_End_Success_Subtitle";
+        description = "$STR_LL_End_Success_Desc";
+        pictureBackground = "";
+        picture     = "b_inf";
+        pictureColor[] = {0.0, 0.3, 0.6, 1};
+    };
+    class MissionFailed {
+        title       = "$STR_LL_End_Failed_Title";
+        subtitle    = "$STR_LL_End_Failed_Subtitle";
+        description = "$STR_LL_End_Failed_Desc";
+        pictureBackground = "";
+        picture     = "o_inf";
+        pictureColor[] = {0.6, 0.1, 0.2, 1};
+    };
+};

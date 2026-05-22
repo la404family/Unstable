@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project name="UnstablePorto">
+  <Package name="Missions">
+    <Container name="Debriefing">
+      <Key ID="STR_LL_End_Success_Title">
+        <English>Mission Accomplished</English>
+        <French>Mission Réussie</French>
+      </Key>
+      <Key ID="STR_LL_End_Success_Subtitle">
+        <English>Intelligence Secured - The operation was a success</English>
+        <French>Renseignements Sécurisés - L'opération est un succès</French>
+      </Key>
+      <Key ID="STR_LL_End_Success_Desc">
+        <English>The RACS has successfully secured the intelligence about insurgent operations in Porto.</English>
+        <French>Le RACS a réussi à sécuriser les renseignements sur les opérations insurgées à Porto.</French>
+      </Key>
+      <Key ID="STR_LL_End_Failed_Title">
+        <English>Mission Failed</English>
+        <French>Mission Échouée</French>
+      </Key>
+      <Key ID="STR_LL_End_Failed_Subtitle">
+        <English>Intelligence Lost - Our informant has fallen in battle</English>
+        <French>Renseignements Perdus - Notre informateur est tombé au combat</French>
+      </Key>
+      <Key ID="STR_LL_End_Failed_Desc">
+        <English>The militia leader was killed before delivering the intelligence. The operation is a failure.</English>
+        <French>Le chef de milice a été tué avant d'avoir pu livrer les renseignements. L'opération est un échec.</French>
+      </Key>
+    </Container>
+  </Package>
+</Project>

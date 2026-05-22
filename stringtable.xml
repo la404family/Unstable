@@ -1,0 +1,209 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Project name="UnstablePorto">
+  <Package name="Missions">
+    <Container name="Briefing">
+      <Key ID="STR_LL_Diary">
+        <English>Diary</English>
+        <French>Journal</French>
+      </Key>
+      <Key ID="STR_LL_Briefing_Title">
+        <English>Operations Order (OPORD)</English>
+        <French>Ordre d'Opération (OPORD)</French>
+      </Key>
+      <Key ID="STR_LL_Briefing_Text">
+        <English>&lt;font size='16' color='#FFFF00'&gt;OPÉRATION ROYAL ALLIANCE&lt;/font&gt;&lt;br/&gt;&lt;br/&gt;
+&lt;font size='14' color='#00FF00'&gt;1. SITUATION&lt;/font&gt;&lt;br/&gt;
+Porto is in a state of high tension. Local insurgent forces (OPFOR) have established hidden outposts in various buildings across the city. A local militia leader, who possesses vital intelligence on enemy documents and hostages, is currently hiding in one of the safe houses. The RACS Multinational Expeditionary Corps is deployed to secure the area and retrieve this intel.&lt;br/&gt;&lt;br/&gt;
+&lt;font size='14' color='#00FF00'&gt;2. MISSION&lt;/font&gt;&lt;br/&gt;
+Find the local militia leader, contact him, and secure the intelligence. Eliminate any insurgent threat encountered during the operation.&lt;br/&gt;&lt;br/&gt;
+&lt;font size='14' color='#00FF00'&gt;3. EXECUTION&lt;/font&gt;&lt;br/&gt;
+- Prepare and mount the patrol vehicle (vehicule_team) when the squad is ready.&lt;br/&gt;
+- Move to the designated meeting point inside the city.&lt;br/&gt;
+- Talk to the militia leader and resolve the situation.&lt;br/&gt;&lt;br/&gt;
+&lt;font size='14' color='#00FF00'&gt;4. SUPPORT&lt;/font&gt;&lt;br/&gt;
+Tactical transport is provided by the squad vehicle. Good luck, Soldiers.</English>
+        <French>&lt;font size='16' color='#FFFF00'&gt;OPÉRATION ROYAL ALLIANCE&lt;/font&gt;&lt;br/&gt;&lt;br/&gt;
+&lt;font size='14' color='#00FF00'&gt;1. SITUATION&lt;/font&gt;&lt;br/&gt;
+La situation à Porto est extrêmement tendue. Des forces insurgées locales (OPFOR) ont établi des postes cachés dans différents bâtiments de la ville. Un chef de milice locale, détenant des informations cruciales sur des documents et otages ennemis, se cache dans un bâtiment sécurisé. Le Corps Expéditionnaire Multinational du RACS est déployé pour sécuriser la zone et récupérer ces renseignements.&lt;br/&gt;&lt;br/&gt;
+&lt;font size='14' color='#00FF00'&gt;2. MISSION&lt;/font&gt;&lt;br/&gt;
+Localiser le chef de la milice locale, entrer en contact avec lui, et sécuriser les renseignements. Éliminer toute menace insurgée rencontrée lors de l'opération.&lt;br/&gt;&lt;br/&gt;
+&lt;font size='14' color='#00FF00'&gt;3. EXÉCUTION&lt;/font&gt;&lt;br/&gt;
+- Préparer et monter à bord du véhicule de patrouille (vehicule_team) dès que l'escouade est prête.&lt;br/&gt;
+- Se rendre au point de rencontre désigné en ville.&lt;br/&gt;
+- Parler au chef de milice et résoudre la situation.&lt;br/&gt;&lt;br/&gt;
+&lt;font size='14' color='#00FF00'&gt;4. SOUTIEN&lt;/font&gt;&lt;br/&gt;
+Le transport tactique est assuré par le véhicule d'escouade. Bonne chance, soldats.</French>
+      </Key>
+      <Key ID="STR_LL_Diary_Context_Title">
+        <English>Context and Situation</English>
+        <French>Contexte et Situation</French>
+      </Key>
+      <Key ID="STR_LL_Diary_Context_Text">
+        <English>&lt;font size='16' color='#FFFF00'&gt;GLOBAL CONTEXT&lt;/font&gt;&lt;br/&gt;
+Following the difficult reunification of Sahrani, the Kingdom remains fragile. The radical leftist North was defeated, but its clandestine networks and weapons survive.&lt;br/&gt;
+The country has become a major Atlantic hub for illegal migration routes and arms/drug trafficking.&lt;br/&gt;&lt;br/&gt;
+The &lt;font color='#00FF00'&gt;RACS&lt;/font&gt; has established a Multinational Expeditionary Corps integrating volunteers from allied nations (Turkey, Arab nations, Africa, Indonesia).&lt;br/&gt;&lt;br/&gt;
+&lt;font size='16' color='#FFFF00'&gt;TACTICAL SITUATION IN PORTO&lt;/font&gt;&lt;br/&gt;
+Porto is a secondary port island suffering from deep ethnic, confessional, and ideological tensions, fueled by poverty, local corruption, and migration waves.</English>
+        <French>&lt;font size='16' color='#FFFF00'&gt;CONTEXTE GLOBAL&lt;/font&gt;&lt;br/&gt;
+Après la réunification difficile de Sahrani, le Royaume reste un État fragile. Le Nord gauchiste radical a été vaincu, mais ses réseaux clandestins et ses armes subsistent.&lt;br/&gt;
+Le pays est devenu un hub en Atlantique pour les routes migratoires clandestines et les trafics d'armes et de drogue.&lt;br/&gt;&lt;br/&gt;
+Le &lt;font color='#00FF00'&gt;RACS&lt;/font&gt; a instauré un Corps Expéditionnaire Multinational intégrant des volontaires de pays alliés (Turquie, pays arabes, Afrique, Indonésie).&lt;br/&gt;&lt;br/&gt;
+&lt;font size='16' color='#FFFF00'&gt;SITUATION TACTIQUE À PORTO&lt;/font&gt;&lt;br/&gt;
+Porto est une île-port secondaire en proie à de vives tensions ethniques, confessionnelles et idéologiques, catalysées par la pauvreté, la corruption locale et les flux migratoires.</French>
+      </Key>
+      <Key ID="STR_LL_Diary_Factions_Title">
+        <English>Factions</English>
+        <French>Factions</French>
+      </Key>
+      <Key ID="STR_LL_Diary_Factions_Text">
+        <English>&lt;font size='16' color='#FF0000'&gt;LIBERATION FRONT (FL)&lt;/font&gt;&lt;br/&gt;
+Radical leftist, anti-monarchist ideology. Recruits among those disappointed by the crown. Aims to expel the RACS from Porto.&lt;br/&gt;&lt;br/&gt;
+&lt;font size='16' color='#FF0000'&gt;MOVEMENT FOR JUSTICE (MJ)&lt;/font&gt;&lt;br/&gt;
+Jihadist group linked to a transnational network. Aims to transform Porto into a logistics and smuggling sanctuary.&lt;br/&gt;&lt;br/&gt;
+&lt;font size='16' color='#FF0000'&gt;MILITIAS AND SMUGGLING CARTELS&lt;/font&gt;&lt;br/&gt;
+Opportunistic criminals wanting to maintain local anarchy to protect their maritime trafficking.</English>
+        <French>&lt;font size='16' color='#FF0000'&gt;FRONT DE LIBÉRATION (FL)&lt;/font&gt;&lt;br/&gt;
+Idéologie gauchiste radicale et anti-monarchiste. Recrute parmi les déçus de la couronne. Vise à chasser le RACS de Porto.&lt;br/&gt;&lt;br/&gt;
+&lt;font size='16' color='#FF0000'&gt;MOUVEMENT POUR LA JUSTICE (MJ)&lt;/font&gt;&lt;br/&gt;
+Groupe djihadiste lié à un réseau transnational. Vise à faire de Porto un sanctuaire logistique et de contrebande.&lt;br/&gt;&lt;br/&gt;
+&lt;font size='16' color='#FF0000'&gt;MILICES ET CARTELS DE CONTREBANDE&lt;/font&gt;&lt;br/&gt;
+Criminels opportunistes voulant maintenir l'anarchie locale pour pérenniser leurs trafics maritimes.</French>
+      </Key>
+      <Key ID="STR_LL_Diary_Lore_Title">
+        <English>Narrative Background</English>
+        <French>Historique Narratif</French>
+      </Key>
+      <Key ID="STR_LL_Diary_Lore_Text">
+        <English>&lt;font size='16' color='#FFFF00'&gt;CAMPAIGN LORE (2025-2026)&lt;/font&gt;&lt;br/&gt;
+Following deadly bombings on the mainland (Corazol market, Bagango outpost), Porto was identified as the main logistics hub for the MJ and FL.&lt;br/&gt;&lt;br/&gt;
+The King of Sahrani launched this autonomous pacification operation to prove that the multinational RACS is capable of stabilizing its territory without direct NATO or US intervention. &lt;font color='#FFFF00'&gt;This is a critical test for the Kingdom's credibility.&lt;/font&gt;</English>
+        <French>&lt;font size='16' color='#FFFF00'&gt;LORE DE CAMPAGNE (2025-2026)&lt;/font&gt;&lt;br/&gt;
+Suite à des attentats sanglants sur le continent (marché de Corazol, poste de Bagango), Porto a été identifiée comme la plaque tournante logistique du MJ et du FL.&lt;br/&gt;&lt;br/&gt;
+Le Roi de Sahrani a lancé cette opération de pacification autonome pour prouver que le RACS multinational est capable de stabiliser son territory sans intervention directe de l'OTAN ou des États-Unis. &lt;font color='#FFFF00'&gt;C'est un test décisif pour la crédibilité du Royaume.&lt;/font&gt;</French>
+      </Key>
+    </Container>
+    <Container name="Tasks">
+      <Key ID="STR_LL_Task_00_Title">
+        <English>Embarkation</English>
+        <French>Embarquement</French>
+      </Key>
+      <Key ID="STR_LL_Task_00_Desc">
+        <English>Board the patrol vehicle with your squad to begin the operation.</English>
+        <French>Montez à bord du véhicule de patrouille avec votre escouade pour commencer l'opération.</French>
+      </Key>
+      <Key ID="STR_LL_Task_00_Marker">
+        <English>Assembly Point</English>
+        <French>Point de rassemblement</French>
+      </Key>
+      <Key ID="STR_LL_Task_01_Title">
+        <English>Contact Militia Leader</English>
+        <French>Contacter le chef de milice</French>
+      </Key>
+      <Key ID="STR_LL_Task_01_Desc">
+        <English>Meet with the local militia leader in the designated building to obtain intel.</English>
+        <French>Rendez-vous au lieu de rencontre indiqué dans le bâtiment pour obtenir les renseignements auprès du chef de milice.</French>
+      </Key>
+      <Key ID="STR_LL_Task_01_Marker">
+        <English>Meeting Point</English>
+        <French>Lieu de rencontre</French>
+      </Key>
+      <Key ID="STR_LL_Task_01_Action">
+        <English>Talk to the militia leader</English>
+        <French>Parler au chef de milice</French>
+      </Key>
+      <Key ID="STR_LL_Task_01_Error">
+        <English>ERROR: No valid game logic M_Dans_Bat_XXX found!</English>
+        <French>ERREUR : Aucun game logic M_Dans_Bat_XXX valide trouvé !</French>
+      </Key>
+    </Container>
+    <Container name="Dialogues">
+      <Key ID="STR_LL_Speaker_Narrator">
+        <English>HQ</English>
+        <French>QG</French>
+      </Key>
+      <Key ID="STR_LL_Speaker_Chief">
+        <English>Militia Leader</English>
+        <French>Chef de milice</French>
+      </Key>
+      <Key ID="STR_LL_Speaker_Guards">
+        <English>Militia Guards</English>
+        <French>Gardes de la milice</French>
+      </Key>
+      <Key ID="STR_LL_Task_00_Narrative_Start">
+        <English>CQ, respond. Prepare your gear and get into the vehicle to begin the patrol. Out.</English>
+        <French>Ici QG, répondez. Préparez votre équipement et montez dans le véhicule pour commencer la patrouille. Terminé.</French>
+      </Key>
+      <Key ID="STR_LL_Task_01_Narrative_Meeting">
+        <English>CQ. We have localized the militia leader. Proceed to the designated building and make contact. Exercise caution. Out.</English>
+        <French>Ici QG. Nous avons localisé le chef de milice. Rendez-vous au bâtiment désigné et établissez le contact. Faites preuve de prudence. Terminé.</French>
+      </Key>
+      <Key ID="STR_LL_Task_01_S1_Chief">
+        <English>Here are their coordinates and patrol routes.</English>
+        <French>Voici les coordonnées et leurs plans de patrouille.</French>
+      </Key>
+      <Key ID="STR_LL_Task_01_Narrative_S1_Success">
+        <English>CQ, respond. Insurgent positions confirmed. Out.</English>
+        <French>QG à patrouille. Positions insurgées confirmées. Terminé.</French>
+      </Key>
+      <Key ID="STR_LL_Task_01_S2_Chief">
+        <English>You think we will ally with the RACS ? Kill these dogs!</English>
+        <French>Vous croyez que nous allons nous allier avec le RACS ? Crevez bande de chiens  !</French>
+      </Key>
+      <Key ID="STR_LL_Task_01_Narrative_S2_Start">
+        <English>TREASON !</English>
+        <French>TRAHISON !</French>
+      </Key>
+      <Key ID="STR_LL_Task_01_Narrative_S2_Success">
+        <English>HQ to patrol. Excellent work under fire. Out.</English>
+        <French>QG à patrouille. Excellent travail sous le feu. Terminé.</French>
+      </Key>
+      <Key ID="STR_LL_Task_01_S3_Chief">
+        <English>I am with you but there are traitors here !</English>
+        <French>Je suis avec vous mais il y a des traîtres ici !</French>
+      </Key>
+      <Key ID="STR_LL_Task_01_S3_Guards">
+        <English>Traitor! You are selling our cause to foreigners! You die with them!</English>
+        <French>Traître ! Tu vends notre cause aux étrangers ! Tu vas mourir avec eux !</French>
+      </Key>
+      <Key ID="STR_LL_Task_01_Narrative_S3_Start">
+        <English>HQ to patrol. Protect the militia leader and eliminate the mutinous guards! He must survive!</English>
+        <French>QG à patrouille. Protégez le chef de milice et éliminez les gardes mutins ! Il doit survivre !</French>
+      </Key>
+      <Key ID="STR_LL_Task_01_Narrative_S3_Success">
+        <English>HQ to patrol. Mutineers eliminated and the leader is safe. Intel is secured. Out.</English>
+        <French>QG à patrouille. Mutins éliminés et le chef est sain et sauf. Les renseignements sont sécurisés. Terminé.</French>
+      </Key>
+      <Key ID="STR_LL_Task_01_Narrative_S3_Failed">
+        <English>HQ to patrol. The militia leader has been killed. The intel is lost. Out.</English>
+        <French>QG à patrouille. Le chef de milice a été tué. Les renseignements sont perdus. Terminé.</French>
+      </Key>
+    </Container>
+    <Container name="Debriefing">
+      <Key ID="STR_LL_End_Success_Title">
+        <English>Mission Accomplished</English>
+        <French>Mission Réussie</French>
+      </Key>
+      <Key ID="STR_LL_End_Success_Subtitle">
+        <English>The operation was a success</English>
+        <French>L'opération est un succès</French>
+      </Key>
+      <Key ID="STR_LL_End_Success_Desc">
+        <English>The RACS has successfully secured the intelligence about insurgent operations in Porto.</English>
+        <French>Le RACS a réussi à sécuriser les renseignements sur les opérations insurgées à Porto.</French>
+      </Key>
+      <Key ID="STR_LL_End_Failed_Title">
+        <English>Mission Failed</English>
+        <French>Mission Échouée</French>
+      </Key>
+      <Key ID="STR_LL_End_Failed_Subtitle">
+        <English>Intelligence Lost - Our informant has fallen in battle</English>
+        <French>Renseignements Perdus - Notre informateur est tombé au combat</French>
+      </Key>
+      <Key ID="STR_LL_End_Failed_Desc">
+        <English>The militia leader was killed before delivering the intelligence. The operation is a failure.</English>
+        <French>Le chef de milice a été tué avant d'avoir pu livrer les renseignements. L'opération est un échec.</French>
+      </Key>
+    </Container>
+  </Package>
+</Project>

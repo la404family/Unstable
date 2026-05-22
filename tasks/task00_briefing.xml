@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project name="UnstablePorto">
+  <Package name="Missions">
+    <Container name="Briefing">
+      <Key ID="STR_LL_Diary">
+        <English>Diary</English>
+        <French>Journal</French>
+      </Key>
+      <Key ID="STR_LL_Briefing_Title">
+        <English>Operations Order (OPORD)</English>
+        <French>Ordre d'Opération (OPORD)</French>
+      </Key>
+      <Key ID="STR_LL_Briefing_Text">
+        <English><![CDATA[<font size='16' color='#FFFF00'>OPÉRATION ROYAL ALLIANCE</font><br/><br/>
+<font size='14' color='#00FF00'>1. SITUATION</font><br/>
+Porto is in a state of high tension. Local insurgent forces (OPFOR) have established hidden outposts in various buildings across the city. A local militia leader, who possesses vital intelligence on enemy documents and hostages, is currently hiding in one of the safe houses. The RACS Multinational Expeditionary Corps is deployed to secure the area and retrieve this intel.<br/><br/>
+<font size='14' color='#00FF00'>2. MISSION</font><br/>
+Find the local militia leader, contact him, and secure the intelligence. Eliminate any insurgent threat encountered during the operation.<br/><br/>
+<font size='14' color='#00FF00'>3. EXECUTION</font><br/>
+- Prepare and mount the patrol vehicle (vehicule_team) when the squad is ready.<br/>
+- Move to the designated meeting point inside the city.<br/>
+- Talk to the militia leader and resolve the situation.<br/><br/>
+<font size='14' color='#00FF00'>4. SUPPORT</font><br/>
+Tactical transport is provided by the squad vehicle. Good luck, Soldiers.]]></English>
+        <French><![CDATA[<font size='16' color='#FFFF00'>OPÉRATION ROYAL ALLIANCE</font><br/><br/>
+<font size='14' color='#00FF00'>1. SITUATION</font><br/>
+La situation à Porto est extrêmement tendue. Des forces insurgées locales (OPFOR) ont établi des postes cachés dans différents bâtiments de la ville. Un chef de milice locale, détenant des informations cruciales sur des documents et otages ennemis, se cache dans un bâtiment sécurisé. Le Corps Expéditionnaire Multinational du RACS est déployé pour sécuriser la zone et récupérer ces renseignements.<br/><br/>
+<font size='14' color='#00FF00'>2. MISSION</font><br/>
+Localiser le chef de la milice locale, entrer en contact avec lui, et sécuriser les renseignements. Éliminer toute menace insurgée rencontrée lors de l'opération.<br/><br/>
+<font size='14' color='#00FF00'>3. EXÉCUTION</font><br/>
+- Préparer et monter à bord du véhicule de patrouille (vehicule_team) dès que l'escouade est prête.<br/>
+- Se rendre au point de rencontre désigné en ville.<br/>
+- Parler au chef de milice et résoudre la situation.<br/><br/>
+<font size='14' color='#00FF00'>4. SOUTIEN</font><br/>
+Le transport tactique est assuré par le véhicule d'escouade. Bonne chance, soldats.]]></French>
+      </Key>
+      <Key ID="STR_LL_Diary_Context_Title">
+        <English>Context and Situation</English>
+        <French>Contexte et Situation</French>
+      </Key>
+      <Key ID="STR_LL_Diary_Context_Text">
+        <English><![CDATA[<font size='16' color='#FFFF00'>GLOBAL CONTEXT</font><br/>
+Following the difficult reunification of Sahrani, the Kingdom remains fragile. The radical leftist North was defeated, but its clandestine networks and weapons survive.<br/>
+The country has become a major Atlantic hub for illegal migration routes and arms/drug trafficking.<br/><br/>
+The <font color='#00FF00'>RACS</font> has established a Multinational Expeditionary Corps integrating volunteers from allied nations (Turkey, Arab nations, Africa, Indonesia).<br/><br/>
+<font size='16' color='#FFFF00'>TACTICAL SITUATION IN PORTO</font><br/>
+Porto is a secondary port island suffering from deep ethnic, confessional, and ideological tensions, fueled by poverty, local corruption, and migration waves.]]></English>
+        <French><![CDATA[<font size='16' color='#FFFF00'>CONTEXTE GLOBAL</font><br/>
+Après la réunification difficile de Sahrani, le Royaume reste un État fragile. Le Nord gauchiste radical a été vaincu, mais ses réseaux clandestins et ses armes subsistent.<br/>
+Le pays est devenu un hub en Atlantique pour les routes migratoires clandestines et les trafics d'armes et de drogue.<br/><br/>
+Le <font color='#00FF00'>RACS</font> a instauré un Corps Expéditionnaire Multinational intégrant des volontaires de pays alliés (Turquie, pays arabes, Afrique, Indonésie).<br/><br/>
+<font size='16' color='#FFFF00'>SITUATION TACTIQUE À PORTO</font><br/>
+Porto est une île-port secondaire en proie à de vives tensions ethniques, confessionnelles et idéologiques, catalysées par la pauvreté, la corruption locale et les flux migratoires.]]></French>
+      </Key>
+      <Key ID="STR_LL_Diary_Factions_Title">
+        <English>Factions</English>
+        <French>Factions</French>
+      </Key>
+      <Key ID="STR_LL_Diary_Factions_Text">
+        <English><![CDATA[<font size='16' color='#FF0000'>LIBERATION FRONT (FL)</font><br/>
+Radical leftist, anti-monarchist ideology. Recruits among those disappointed by the crown. Aims to expel the RACS from Porto.<br/><br/>
+<font size='16' color='#FF0000'>MOVEMENT FOR JUSTICE (MJ)</font><br/>
+Jihadist group linked to a transnational network. Aims to transform Porto into a logistics and smuggling sanctuary.<br/><br/>
+<font size='16' color='#FF0000'>MILITIAS AND SMUGGLING CARTELS</font><br/>
+Opportunistic criminals wanting to maintain local anarchy to protect their maritime trafficking.]]></English>
+        <French><![CDATA[<font size='16' color='#FF0000'>FRONT DE LIBÉRATION (FL)</font><br/>
+Idéologie gauchiste radicale et anti-monarchiste. Recrute parmi les déçus de la couronne. Vise à chasser le RACS de Porto.<br/><br/>
+<font size='16' color='#FF0000'>MOUVEMENT POUR LA JUSTICE (MJ)</font><br/>
+Groupe djihadiste lié à un réseau transnational. Vise à faire de Porto un sanctuaire logistique et de contrebande.<br/><br/>
+<font size='16' color='#FF0000'>MILICES ET CARTELS DE CONTREBANDE</font><br/>
+Criminels opportunistes voulant maintenir l'anarchie locale pour pérenniser leurs trafics maritimes.]]></French>
+      </Key>
+      <Key ID="STR_LL_Diary_Lore_Title">
+        <English>Narrative Background</English>
+        <French>Historique Narratif</French>
+      </Key>
+      <Key ID="STR_LL_Diary_Lore_Text">
+        <English><![CDATA[<font size='16' color='#FFFF00'>CAMPAIGN LORE (2025-2026)</font><br/>
+Following deadly bombings on the mainland (Corazol market, Bagango outpost), Porto was identified as the main logistics hub for the MJ and FL.<br/><br/>
+The King of Sahrani launched this autonomous pacification operation to prove that the multinational RACS is capable of stabilizing its territory without direct NATO or US intervention. <font color='#FFFF00'>This is a critical test for the Kingdom's credibility.</font>]]></English>
+        <French><![CDATA[<font size='16' color='#FFFF00'>LORE DE CAMPAGNE (2025-2026)</font><br/>
+Suite à des attentats sanglants sur le continent (marché de Corazol, poste de Bagango), Porto a été identifiée comme la plaque tournante logistique du MJ et du FL.<br/><br/>
+Le Roi de Sahrani a lancé cette opération de pacification autonome pour prouver que le RACS multinational est capable de stabiliser son territory sans intervention directe de l'OTAN ou des États-Unis. <font color='#FFFF00'>C'est un test décisif pour la crédibilité du Royaume.</font>]]></French>
+      </Key>
+    </Container>
+  </Package>
+</Project>

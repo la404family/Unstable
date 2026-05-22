@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project name="UnstablePorto">
+  <Package name="Missions">
+    <Container name="Tasks">
+      <Key ID="STR_LL_Task_01_Title">
+        <English>Contact Militia Leader</English>
+        <French>Contacter le chef de milice</French>
+      </Key>
+      <Key ID="STR_LL_Task_01_Desc">
+        <English>Meet with the local militia leader in the designated building to obtain intel.</English>
+        <French>Rendez-vous au lieu de rencontre indiqué dans le bâtiment pour obtenir les renseignements auprès du chef de milice.</French>
+      </Key>
+      <Key ID="STR_LL_Task_01_Marker">
+        <English>Meeting Point</English>
+        <French>Lieu de rencontre</French>
+      </Key>
+      <Key ID="STR_LL_Task_01_Action">
+        <English>Talk to the militia leader</English>
+        <French>Parler au chef de milice</French>
+      </Key>
+      <Key ID="STR_LL_Task_01_Error">
+        <English>ERROR: No valid game logic M_Dans_Bat_XXX found!</English>
+        <French>ERREUR : Aucun game logic M_Dans_Bat_XXX valide trouvé !</French>
+      </Key>
+    </Container>
+  </Package>
+</Project>

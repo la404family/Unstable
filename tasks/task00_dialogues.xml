@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project name="UnstablePorto">
+  <Package name="Missions">
+    <Container name="Dialogues">
+      <Key ID="STR_LL_Task_00_Narrative_Start">
+        <English>CQ, respond. Prepare your gear and get into the vehicle to begin the patrol. Out.</English>
+        <French>Ici QG, répondez. Préparez votre équipement et montez dans le véhicule pour commencer la patrouille. Terminé.</French>
+      </Key>
+    </Container>
+  </Package>
+</Project>
