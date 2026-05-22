@@ -177,40 +177,9 @@ private _fnc_processUnit = {
     };
     private _face  = selectRandom _faces;
 
-    // Voix anglaise (sans voix VR robotiques) et pitch selon l'origine
-    private _voiceData = switch (_faceType) do {
-        case "Turkish": {
-            [
-                selectRandom ["Male01ENGB", "Male02ENGB", "Male03ENGB", "Male04ENGB", "Male05ENGB"],
-                0.85 + random 0.12
-            ]
-        };
-        case "Arab": {
-            [
-                selectRandom ["Male01ENGB", "Male02ENGB", "Male03ENGB", "Male04ENGB", "Male05ENGB"],
-                0.98 + random 0.12
-            ]
-        };
-        case "African": {
-            [
-                selectRandom ["Male01ENG", "Male02ENG", "Male03ENG", "Male04ENG", "Male05ENG", "Male06ENG", "Male07ENG", "Male08ENG", "Male09ENG", "Male10ENG", "Male11ENG", "Male12ENG"],
-                0.85 + random 0.12
-            ]
-        };
-        case "Indonesian": {
-            [
-                selectRandom ["Male01ENG", "Male02ENG", "Male03ENG", "Male04ENG", "Male05ENG", "Male06ENG", "Male07ENG", "Male08ENG", "Male09ENG", "Male10ENG", "Male11ENG", "Male12ENG"],
-                0.98 + random 0.12
-            ]
-        };
-        default {
-            [
-                selectRandom ["Male01ENG", "Male02ENG", "Male03ENG", "Male04ENG"],
-                0.90 + random 0.20
-            ]
-        };
-    };
-    _voiceData params ["_speaker", "_pitch"];
+    // Voix CUP aléatoire et pitch (0.85 + random 0.15) peu importe l'origine
+    private _speaker = selectRandom ["CUP_D_Male01_EN", "CUP_D_Male02_EN", "CUP_D_Male03_EN", "CUP_D_Male04_EN", "CUP_D_Male05_EN"];
+    private _pitch = 0.85 + random 0.15;
 
     // Grade selon le slot (uniquement pour les unités jouables connues)
     {
