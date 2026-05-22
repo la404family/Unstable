@@ -15,3 +15,33 @@
 
 // Ajout de l'action pour ordonner la fouille des bâtiments aux IA
 [] spawn LL_fnc_addSearchAction;
+
+// Les actions de demande de support hélicoptère (Chinook RACS) seront ajoutées par l'utilisateur par la suite
+// [] spawn LL_fnc_addHelicopterActions;
+
+// --- Système de basculement vers une IA du groupe en cas de mort ---
+player addEventHandler ["Killed", {
+    params ["_unit", "_killer", "_instigator", "_useEffects"];
+    
+    // Si l'unité décédée était le leader, réassigner immédiatement
+    if (leader (group _unit) == _unit) then {
+        [group _unit, _unit] remoteExec ["LL_fnc_manageLeadership", 2];
+    };
+    
+    [_unit] spawn LL_fnc_switchToAI;
+}];
+
+player addEventHandler ["Respawn", {
+    params ["_newUnit", "_oldUnit"];
+    
+    // Réattacher l'Event Handler Killed sur le nouveau corps après respawn normal
+    _newUnit addEventHandler ["Killed", {
+        params ["_unit", "_killer", "_instigator", "_useEffects"];
+        
+        if (leader (group _unit) == _unit) then {
+            [group _unit, _unit] remoteExec ["LL_fnc_manageLeadership", 2];
+        };
+        
+        [_unit] spawn LL_fnc_switchToAI;
+    }];
+}];

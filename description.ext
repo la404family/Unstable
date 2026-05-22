@@ -41,6 +41,9 @@ class CfgFunctions {
             class addHealAction         {};
             class addRoeActions         {};
             class addSearchAction       {};
+            class switchToAI            {};
+            class transferLocality      {};
+            class manageLeadership      {};
             
             // Système de Présence Civile
             class initCivilians         {};
@@ -52,6 +55,8 @@ class CfgFunctions {
             class playEzan              {};
             class manageSkills          {};
             class showSubtitle          {};
+            class requestHelicopter     {};
+            class addHelicopterActions  {};
         };
         class Tasks {
             file = "tasks";

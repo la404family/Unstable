@@ -177,8 +177,13 @@ private _fnc_processUnit = {
     };
     private _face  = selectRandom _faces;
 
-    // Voix CUP aléatoire et pitch (0.85 + random 0.15) peu importe l'origine
-    private _speaker = selectRandom ["CUP_D_Male01_EN", "CUP_D_Male02_EN", "CUP_D_Male03_EN", "CUP_D_Male04_EN", "CUP_D_Male05_EN"];
+    // Voix de joueur aléatoire entre Américain (1-5), Britannique (1-5) et Anglais d'Altis (1-5) avec variation de pitch (0.85 à 1.00)
+    private _speakers = [
+        "Male01ENG", "Male02ENG", "Male03ENG", "Male04ENG", "Male05ENG",
+        "Male01ENGB", "Male02ENGB", "Male03ENGB", "Male04ENGB", "Male05ENGB",
+        "Male01GRE", "Male02GRE", "Male03GRE", "Male04GRE", "Male05GRE"
+    ];
+    private _speaker = selectRandom _speakers;
     private _pitch = 0.85 + random 0.15;
 
     // Grade selon le slot (uniquement pour les unités jouables connues)

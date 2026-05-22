@@ -5,6 +5,7 @@
 ### LOGIC DE JEU : 
 
 - M_Dans_Bat_000 à M_Dans_Bat_XXX sont game logic placé dans des batiments (les M_Dans_Bat_XXX déterminent des lieux précis de missions ( respecter absolument le x,y,z + 0.2)
+- Heliport_000 à Heliport_XXX sont des heliport invisibles. pour l'hélicoptère allié
 - player_00 à player_XX sont les unités jouables (Royal Army Corps of Sahrani - independant)
 - template_01 ... template_XX sont des personnages dans l'éditeur qui servent de gabarit de personnage pour des missions ou des civils...
 - ezan_00 à ezan_XX sont des Loudspeaker dans le jeu qui produise l'appel a la prière.

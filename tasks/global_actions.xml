@@ -38,6 +38,138 @@
         <English>[LL ERROR] Search: No active AI infantry in your group to search.</English>
         <French>[LL ERREUR] Fouille : Aucune infanterie I.A. active dans votre groupe pour fouiller.</French>
       </Key>
+      <Key ID="STR_LL_Msg_Switch_Error">
+        <English>[LL ERROR] Locality transfer timed out. Could not switch to AI.</English>
+        <French>[LL ERREUR] Délai d'attente dépassé pour le transfert de localité. Impossible de basculer sur l'IA.</French>
+      </Key>
+      <Key ID="STR_LL_Heli_Action_Supply">
+        <English>[Helicopter] Request Ammo Supply</English>
+        <French>[Hélicoptère] Demander Livraison Munitions</French>
+      </Key>
+      <Key ID="STR_LL_Heli_Action_Reinforcements">
+        <English>[Helicopter] Request Reinforcements</English>
+        <French>[Hélicoptère] Demander Renforts (Débarquement)</French>
+      </Key>
+      <Key ID="STR_LL_Heli_Action_Extraction">
+        <English>[Helicopter] Request Extraction</English>
+        <French>[Hélicoptère] Demander Extraction (Embarquement)</French>
+      </Key>
+      <Key ID="STR_LL_Heli_Action_Depart">
+        <English>[Heli] Order Takeoff</English>
+        <French>[Héli] Ordonner le décollage</French>
+      </Key>
+      <Key ID="STR_TAG_Heli_Action_Vehicle">
+        <English>[Helicopter] Request Vehicle Delivery</English>
+        <French>[Hélicoptère] Demander Livraison Véhicule</French>
+      </Key>
+      <Key ID="STR_TAG_Heli_Action_CAS">
+        <English>[Helicopter] Request Air Support (CAS)</English>
+        <French>[Hélicoptère] Demander Appui Aérien (CAS)</French>
+      </Key>
+      <Key ID="STR_LL_Heli_Msg_Active">
+        <English>[SUPPORT] A support helicopter is already active or requested. Please wait.</English>
+        <French>[SUPPORT] Un hélicoptère de support est déjà demandé ou actif. Veuillez patienter.</French>
+      </Key>
+      <Key ID="STR_LL_Heli_Msg_Route">
+        <English>[SUPPORT] MH-47E support helicopter en route to the area.</English>
+        <French>[SUPPORT] Hélicoptère de support MH-47E en route vers la zone.</French>
+      </Key>
+      <Key ID="STR_LL_Heli_Msg_Killed">
+        <English>[SUPPORT] The support helicopter has been shot down!</English>
+        <French>[SUPPORT] L'hélicoptère de support a été abattu !</French>
+      </Key>
+      <Key ID="STR_LL_Heli_Msg_Landed_Supply">
+        <English>[SUPPORT] Helicopter landed. Unloading supply crate.</English>
+        <French>[SUPPORT] Hélicoptère posé. Déchargement de la caisse de ravitaillement.</French>
+      </Key>
+      <Key ID="STR_LL_Heli_Msg_Success_Supply">
+        <English>[SUPPORT] Supply crate successfully delivered.</English>
+        <French>[SUPPORT] Caisse de ravitaillement livrée avec succès.</French>
+      </Key>
+      <Key ID="STR_LL_Heli_Msg_Landed_Reinforce">
+        <English>[SUPPORT] Helicopter landed. Deploying reinforcements.</English>
+        <French>[SUPPORT] Hélicoptère posé. Débarquement des renforts.</French>
+      </Key>
+      <Key ID="STR_LL_Heli_Msg_Squad_Joined">
+        <English>[SUPPORT] Allied reinforcements joined your squad.</English>
+        <French>[SUPPORT] Renforts alliés intégrés à votre escouade.</French>
+      </Key>
+      <Key ID="STR_LL_Heli_Msg_Patrol_Started">
+        <English>[SUPPORT] Allied reinforcements are patrolling the area.</English>
+        <French>[SUPPORT] Renforts alliés en patrouille de sécurisation.</French>
+      </Key>
+      <Key ID="STR_LL_Heli_Msg_Landed_Extract">
+        <English>[SUPPORT] Helicopter landed. Board the units then order takeoff.</English>
+        <French>[SUPPORT] Hélicoptère posé. Embarquez les unités puis utilisez l'action sur l'hélico pour le faire décoller.</French>
+      </Key>
+      <Key ID="STR_LL_Heli_Msg_Departing">
+        <English>[SUPPORT] Taking off. Returning to extraction point.</English>
+        <French>[SUPPORT] Décollage. Retour vers le point d'extraction.</French>
+      </Key>
+      <Key ID="STR_LL_Heli_Msg_MapClick">
+        <English>Select the zone on the map.</English>
+        <French>Sélectionnez la zone sur la carte.</French>
+      </Key>
+      <Key ID="STR_TAG_Msg_Ammo_Denied">
+        <English>[SUPPORT] Air support denied. Airspace is busy.</English>
+        <French>[SUPPORT] Soutien aérien refusé. Espace aérien occupé.</French>
+      </Key>
+      <Key ID="STR_TAG_Msg_Ammo_Approved">
+        <English>[SUPPORT] Request approved. Chinook en route.</English>
+        <French>[SUPPORT] Demande approuvée. Chinook en route.</French>
+      </Key>
+      <Key ID="STR_TAG_Msg_Ammo_Error">
+        <English>[SUPPORT] Air support error. Failed to spawn helicopter.</English>
+        <French>[SUPPORT] Erreur de soutien aérien. Impossible de créer l'hélicoptère.</French>
+      </Key>
+      <Key ID="STR_TAG_Msg_Ammo_Dropped">
+        <English>[SUPPORT] Cargo dropped successfully.</English>
+        <French>[SUPPORT] Colis largué avec succès.</French>
+      </Key>
+      <Key ID="STR_TAG_Msg_Vehicle_Denied">
+        <English>[SUPPORT] Air support denied. Airspace is busy.</English>
+        <French>[SUPPORT] Soutien aérien refusé. Espace aérien occupé.</French>
+      </Key>
+      <Key ID="STR_TAG_Msg_Vehicle_Denied_Once">
+        <English>[SUPPORT] Request denied. The replacement vehicle has already been delivered.</English>
+        <French>[SUPPORT] Soutien refusé. Le véhicule de remplacement a déjà été livré.</French>
+      </Key>
+      <Key ID="STR_TAG_Msg_Vehicle_Approved">
+        <English>[SUPPORT] Request approved. Chinook en route with the replacement vehicle.</English>
+        <French>[SUPPORT] Demande approuvée. Chinook en route avec le véhicule de remplacement.</French>
+      </Key>
+      <Key ID="STR_TAG_Msg_Vehicle_Error">
+        <English>[SUPPORT] Air support error. Failed to spawn helicopter.</English>
+        <French>[SUPPORT] Erreur de soutien aérien. Impossible de créer l'hélicoptère.</French>
+      </Key>
+      <Key ID="STR_TAG_Msg_Vehicle_Marker">
+        <English>Vehicle Delivery</English>
+        <French>Livraison Véhicule</French>
+      </Key>
+      <Key ID="STR_TAG_Msg_Vehicle_Dropped">
+        <English>[SUPPORT] Vehicle delivered successfully.</English>
+        <French>[SUPPORT] Véhicule livré avec succès.</French>
+      </Key>
+      <Key ID="STR_TAG_Msg_CAS_Denied">
+        <English>[SUPPORT] Air support denied. Airspace is busy.</English>
+        <French>[SUPPORT] Soutien aérien refusé. Espace aérien occupé.</French>
+      </Key>
+      <Key ID="STR_TAG_Msg_CAS_Approved">
+        <English>[SUPPORT] Request approved. Chinook en route for air support.</English>
+        <French>[SUPPORT] Demande approuvée. Chinook en route pour appui aérien.</French>
+      </Key>
+      <Key ID="STR_TAG_Msg_CAS_Error">
+        <English>[SUPPORT] Air support error. Failed to spawn helicopter.</English>
+        <French>[SUPPORT] Erreur de soutien aérien. Impossible de créer l'hélicoptère.</French>
+      </Key>
+      <Key ID="STR_TAG_Msg_CAS_RTB">
+        <English>[SUPPORT] CAS mission completed. Helicopter returning to base.</English>
+        <French>[SUPPORT] Mission CAS terminée. Hélicoptère de retour à la base.</French>
+      </Key>
+      <Key ID="STR_TAG_Msg_CAS_Cooldown">
+        <English>[SUPPORT] CAS support unavailable. Please wait %1 seconds before calling again.</English>
+        <French>[SUPPORT] Soutien CAS indisponible. Veuillez patienter %1 secondes avant le prochain appel.</French>
+      </Key>
     </Container>
   </Package>
 </Project>
