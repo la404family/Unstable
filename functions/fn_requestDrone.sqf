@@ -108,22 +108,15 @@ if (DEBUG_MODE) then { diag_log "[LL] requestDrone: Demande approuvée, déploie
         _x disableAI "SUPPRESSION"; // Pas de suppression inutile
     } forEach units _droneGroup;
 
-    // ── Boucle filtre cibles : le drone ne tire que sur les véhicules ─────────
-    [_drone, _droneGroup] spawn {
-        params ["_drone", "_grp"];
-        while { alive _drone } do {
-            sleep 2;
-            if (alive _drone) then {
-                {
-                    // Si la cible courante est un fantassin, l'oublier immédiatement
-                    private _tgt = _x currentTarget;
-                    if (!isNull _tgt && (_tgt isKindOf "Man")) then {
-                        _x forgetTarget _tgt;
-                    };
-                } forEach units _grp;
-            };
+    // ── Filtre cibles : le drone ne tire que sur les véhicules ───────────────
+    // EnemyDetected se déclenche dès qu'une unité ennemie est détectée.
+    // Si c'est un fantassin, toutes les unités du groupe l'oublient immédiatement.
+    _droneGroup addEventHandler ["EnemyDetected", {
+        params ["_grp", "_detected"];
+        if (_detected isKindOf "Man") then {
+            { _x forgetTarget _detected } forEach units _grp;
         };
-    };
+    }];
 
     // ── Boucle : les unités ennemies ignorent le drone ────────────────────────
     [_drone] spawn {
@@ -184,7 +177,7 @@ if (DEBUG_MODE) then { diag_log "[LL] requestDrone: Demande approuvée, déploie
     // Pools de marqueurs dot : east=rouge, independent=bleu (RACS allié)
     // createMarker est global : visible par tous les clients automatiquement
     {
-        params ["_tag", "_color"];
+        _x params ["_tag", "_color"];
         for "_i" from 0 to (_markerPool - 1) do {
             private _mn = format ["%1%2_%3", _markerPrefix, _tag, _i];
             createMarker [_mn, [0, 0, 0]];
@@ -262,30 +255,33 @@ if (DEBUG_MODE) then { diag_log "[LL] requestDrone: Demande approuvée, déploie
         };
     };
 
-    // ── Phase 4 : Attendre la fin de mission ──────────────────────────────────
-    sleep _missionTime;
+    // ── Phase 4 : Attendre la fin de mission ou la destruction du drone ─────
+    // waitUntil interruptible : libère le verrou immédiatement si le drone est détruit
+    waitUntil { sleep 5; !alive _drone || time >= _missionEnd };
 
     (localize "STR_TAG_Msg_Drone_End") remoteExec ["systemChat", 0];
 
-    if (DEBUG_MODE) then { diag_log "[LL] requestDrone: Mission terminée, retrait du drone."; };
+    if (DEBUG_MODE) then { diag_log "[LL] requestDrone: Mission terminée ou drone détruit, retrait en cours."; };
 
-    // Supprimer les waypoints de loiter
+    // Supprimer les waypoints actifs
     while { count (waypoints _droneGroup) > 0 } do {
         deleteWaypoint [_droneGroup, 0];
     };
 
-    // ── Phase 5 : Vol de retrait ──────────────────────────────────────────────
-    _drone flyInHeight _approachHeight;
-    private _exitDir = random 360;
-    private _exitPos = (getPos _drone) getPos [5000, _exitDir];
-    _exitPos set [2, _approachHeight];
-    private _wpExit = _droneGroup addWaypoint [_exitPos, 0];
-    _wpExit setWaypointType "MOVE";
-    _wpExit setWaypointSpeed "FULL";
+    // ── Phase 5 : Vol de retrait (ignoré si drone détruit) ───────────────────
+    if (alive _drone) then {
+        _drone flyInHeight _approachHeight;
+        private _exitDir = random 360;
+        private _exitPos = (getPos _drone) getPos [5000, _exitDir];
+        _exitPos set [2, _approachHeight];
+        private _wpExit = _droneGroup addWaypoint [_exitPos, 0];
+        _wpExit setWaypointType "MOVE";
+        _wpExit setWaypointSpeed "FULL";
 
-    waitUntil {
-        sleep 5;
-        !alive _drone || (_drone distance2D _exitPos < 1000)
+        waitUntil {
+            sleep 5;
+            !alive _drone || (_drone distance2D _exitPos < 1000)
+        };
     };
 
     // ── Nettoyage final ───────────────────────────────────────────────────────
