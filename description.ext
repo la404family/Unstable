@@ -37,6 +37,10 @@ class CfgFunctions {
             class initPlayerIdentity    {};
             class initPlayerLoadout     {};
             class applyIdentity         {};
+            class assignLeader          {};
+            class addHealAction         {};
+            class addRoeActions         {};
+            class addSearchAction       {};
             
             // Système de Présence Civile
             class initCivilians         {};

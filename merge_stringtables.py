@@ -26,17 +26,48 @@ def merge_xml_files():
     print(f"Found files: {', '.join(rel_paths)}")
     
     # Predefined order of containers for the output
-    container_order = ["Briefing", "Tasks", "Dialogues", "Debriefing"]
+    container_order = ["Briefing", "Tasks", "Dialogues", "Debriefing", "Actions"]
     containers_dict = {} # name -> list of keys (Element)
-    seen_keys = {} # key_id -> relative_filepath
+    seen_keys = {} # key_id -> (container_name, key_element, source_file)
     
+    # 1. Read existing stringtable.xml if it exists to preserve its keys
+    if os.path.exists(output_file):
+        print(f"Reading existing '{output_file}' to preserve keys...")
+        try:
+            tree = ET.parse(output_file)
+            root = tree.getroot()
+            
+            # Find all Container elements
+            containers = root.findall(".//Container")
+            for container in containers:
+                container_name = container.attrib.get("name")
+                if not container_name:
+                    continue
+                
+                if container_name not in containers_dict:
+                    containers_dict[container_name] = []
+                
+                # Extract all Key children
+                keys = container.findall("Key")
+                for key in keys:
+                    key_id = key.attrib.get("ID")
+                    if not key_id:
+                        continue
+                    
+                    seen_keys[key_id] = (container_name, key, "stringtable.xml")
+                    containers_dict[container_name].append(key)
+            print(f"Loaded {len(seen_keys)} keys from existing stringtable.xml.")
+        except Exception as e:
+            print(f"Warning: Could not parse existing '{output_file}': {e}")
+
+    # 2. Process task XML files and merge them
     for filepath in xml_files:
         rel_filepath = os.path.relpath(filepath, tasks_dir)
         try:
             tree = ET.parse(filepath)
             root = tree.getroot()
             
-            # Find all Container elements (can be direct children or under Project/Package)
+            # Find all Container elements
             containers = root.findall(".//Container")
             for container in containers:
                 container_name = container.attrib.get("name")
@@ -54,10 +85,20 @@ def merge_xml_files():
                         continue
                     
                     if key_id in seen_keys:
-                        print(f"WARNING: Duplicate Key ID '{key_id}' found in '{rel_filepath}' (already defined in '{seen_keys[key_id]}'). Skipping.")
+                        old_container_name, old_key_el, source = seen_keys[key_id]
+                        if source == "stringtable.xml":
+                            # Overwrite/Update the key from stringtable.xml with the one from tasks/*.xml
+                            if old_key_el in containers_dict[old_container_name]:
+                                containers_dict[old_container_name].remove(old_key_el)
+                            containers_dict[container_name].append(key)
+                            seen_keys[key_id] = (container_name, key, rel_filepath)
+                            print(f"Updated Key '{key_id}' from '{rel_filepath}' (overwrote version in stringtable.xml).")
+                        else:
+                            # It's a duplicate within the tasks/ folder files themselves
+                            print(f"WARNING: Duplicate Key ID '{key_id}' found in '{rel_filepath}' (already defined in '{source}'). Skipping.")
                         continue
                     
-                    seen_keys[key_id] = rel_filepath
+                    seen_keys[key_id] = (container_name, key, rel_filepath)
                     containers_dict[container_name].append(key)
                     
             print(f"Successfully processed: {rel_filepath}")

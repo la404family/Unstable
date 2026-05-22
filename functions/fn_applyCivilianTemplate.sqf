@@ -86,12 +86,23 @@ if (_agentSide == east || _agentSide == west || _agent getVariable ["LL_forceTem
         "_FAK",    "_FAKCount"
     ];
 
-    _agent addWeapon _priWep;
-    for "_i" from 1 to _priMagCount  do { _agent addMagazine _priMag  };
-    _agent addWeapon _secWep;
-    for "_i" from 1 to _secMagCount  do { _agent addMagazine _secMag  };
+    if (_priWep != "") then {
+        _agent addWeapon _priWep;
+        for "_i" from 1 to _priMagCount  do { _agent addMagazine _priMag  };
+        private _priFlashlight = selectRandom ["CUP_acc_Flashlight", "CUP_acc_Zenit_2DS"];
+        _agent addPrimaryWeaponItem _priFlashlight;
+    };
+    if (_secWep != "") then {
+        _agent addWeapon _secWep;
+        for "_i" from 1 to _secMagCount  do { _agent addMagazine _secMag  };
+        private _secFlashlight = selectRandom ["CUP_acc_CZ_M3X", "acc_Flashlight_pistol"];
+        _agent addHandgunItem _secFlashlight;
+    };
     for "_i" from 1 to _smokeCount   do { _agent addMagazine _smoke   };
     for "_i" from 1 to _FAKCount     do { _agent addItem     _FAK     };
+    
+    // Forcer l'activation de la lampe tactique
+    _agent enableGunLights "forceOn";
 } else {
     // Civil : s'assurer qu'il ne porte aucune arme
     removeAllWeapons _agent;

@@ -21,4 +21,3 @@
 - La variable du drone est : CUP_B_USMC_DYN_MQ9
 - vehicule_team est le véhicule des joueurs en début de mission. (nom de variable du véhicule : CUP_B_nM1025_SOV_M2_USMC_DES)
 - l'hélicoptère allié est un MH-47E (CUP_B_MH47E_USA)
-

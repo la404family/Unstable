@@ -239,6 +239,7 @@ private _fn_addMagsForWeapon = {
 
         // Équipement de la tenue et des accessoires
         _unit forceAddUniform _selectedUniform;
+        [_unit, "CSAT_ScimitarRegiment"] call BIS_fnc_setUnitInsignia;
         _unit addVest _selectedVest;
         _unit addBackpack _selectedBackpack;
         _unit addHeadgear _selectedHelmet;

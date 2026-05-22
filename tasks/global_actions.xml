@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project name="UnstablePorto">
+  <Package name="Missions">
+    <Container name="Actions">
+      <Key ID="STR_LL_Action_Heal">
+        <English>Order AI to self-heal</English>
+        <French>Ordonner aux IA de se soigner</French>
+      </Key>
+      <Key ID="STR_LL_Action_RoE_Stealth">
+        <English>RoE: Stealth (Infiltration)</English>
+        <French>Règles d'engagement : Infiltration (Silencieux/Marche)</French>
+      </Key>
+      <Key ID="STR_LL_Action_RoE_Vigilance">
+        <English>RoE: Vigilance</English>
+        <French>Règles d'engagement : Vigilance (Combat/Prudent)</French>
+      </Key>
+      <Key ID="STR_LL_Action_RoE_Assault">
+        <English>RoE: Assault</English>
+        <French>Règles d'engagement : Assaut (Tir libre/Combat)</French>
+      </Key>
+      <Key ID="STR_LL_Action_RoE_Charge">
+        <English>RoE: Charge (Sprint)</English>
+        <French>Règles d'engagement : Charge (Sprint/Assaut permanent)</French>
+      </Key>
+      <Key ID="STR_LL_Action_Search">
+        <English>Order Squad: Search Buildings</English>
+        <French>Ordonner au groupe : Fouiller les bâtiments</French>
+      </Key>
+      <Key ID="STR_LL_Msg_Search_NoBuilding">
+        <English>[LL ERROR] Search: No buildings with garrison positions nearby.</English>
+        <French>[LL ERREUR] Fouille : Aucun bâtiment avec des positions intérieures à proximité.</French>
+      </Key>
+      <Key ID="STR_LL_Msg_Search_NotAccessible">
+        <English>[LL ERROR] Search: Building positions are not accessible.</English>
+        <French>[LL ERREUR] Fouille : Les positions dans les bâtiments ne sont pas accessibles.</French>
+      </Key>
+      <Key ID="STR_LL_Msg_Search_NoInfantry">
+        <English>[LL ERROR] Search: No active AI infantry in your group to search.</English>
+        <French>[LL ERREUR] Fouille : Aucune infanterie I.A. active dans votre groupe pour fouiller.</French>
+      </Key>
+    </Container>
+  </Package>
+</Project>

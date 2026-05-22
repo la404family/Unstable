@@ -6,7 +6,7 @@ Ce document présente le cadre historique, géopolitique et narratif de la campa
 
 ## 1. Contexte Global (Post-Conflit Sahrani)
 
-Après la réunification difficile de Sahrani (fin des années 2000 / début 2010), le Royaume de Sahrani (United Sahrani) reste un État fragile. Le Nord gauchiste radical a été vaincu militairement, mais ses réseaux, ses sympathisants et ses armes ont survécu dans la clandestinité. 
+Après la réunification difficile de Sahrani (fin des années 2000 / début 2010), le Royaume de Sahrani (United Sahrani) reste un État fragile. Le Nord nationaliste ethnique a été vaincu militairement, mais ses réseaux, ses sympathisants et ses armes ont survécu dans la clandestinité. 
 
 Le pays est devenu un hub stratégique en Atlantique, sujet à :
 *   Des routes migratoires clandestines majeures.
@@ -39,7 +39,7 @@ Porto est une petite île-port secondaire située au large de la côte sud de Sa
 ## 3. Les Factions Antagonistes
 
 ### Front de Libération (FL)
-*   **Idéologie :** Gauchisme radical, anti-monarchiste et souverainiste.
+*   **Idéologie :** Nationalisme ethnique, anti-monarchiste et souverainiste.
 *   **Recrutement :** Recrute activement parmi les anciens sympathisants du Nord et les populations défavorisées du Sud déçues par la couronne.
 *   **Objectif :** Chasser les forces étrangères du RACS et renverser l'influence monarchique. Opère à Porto via des cellules clandestines et des milices de quartier.
 

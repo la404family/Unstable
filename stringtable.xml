@@ -11,28 +11,20 @@
         <French>Ordre d'Opération (OPORD)</French>
       </Key>
       <Key ID="STR_LL_Briefing_Text">
-        <English>&lt;font size='16' color='#FFFF00'&gt;OPÉRATION ROYAL ALLIANCE&lt;/font&gt;&lt;br/&gt;&lt;br/&gt;
+        <English>&lt;font size='16' color='#FFFF00'&gt;OPERATION ROYAL ALLIANCE&lt;/font&gt;&lt;br/&gt;&lt;br/&gt;
 &lt;font size='14' color='#00FF00'&gt;1. SITUATION&lt;/font&gt;&lt;br/&gt;
-Porto is in a state of high tension. Local insurgent forces (OPFOR) have established hidden outposts in various buildings across the city. A local militia leader, who possesses vital intelligence on enemy documents and hostages, is currently hiding in one of the safe houses. The RACS Multinational Expeditionary Corps is deployed to secure the area and retrieve this intel.&lt;br/&gt;&lt;br/&gt;
+The port island of Porto is facing severe ethnic, sectarian, and ideological tensions, fueled by poverty, local corruption, and clandestine migration routes. Armed insurgent groups, such as the ethnic nationalist Liberation Front (FL) and the jihadist Movement for Justice (MJ), are attempting to establish a rear logistics base and undermine the Sahrani Crown's authority. The RACS Multinational Expeditionary Corps is deployed to restore civil security and ensure the global pacification of the island.&lt;br/&gt;&lt;br/&gt;
 &lt;font size='14' color='#00FF00'&gt;2. MISSION&lt;/font&gt;&lt;br/&gt;
-Find the local militia leader, contact him, and secure the intelligence. Eliminate any insurgent threat encountered during the operation.&lt;br/&gt;&lt;br/&gt;
-&lt;font size='14' color='#00FF00'&gt;3. EXECUTION&lt;/font&gt;&lt;br/&gt;
-- Prepare and mount the patrol vehicle (vehicule_team) when the squad is ready.&lt;br/&gt;
-- Move to the designated meeting point inside the city.&lt;br/&gt;
-- Talk to the militia leader and resolve the situation.&lt;br/&gt;&lt;br/&gt;
-&lt;font size='14' color='#00FF00'&gt;4. SUPPORT&lt;/font&gt;&lt;br/&gt;
-Tactical transport is provided by the squad vehicle. Good luck, Soldiers.</English>
+Conduct security operations, patrol urban areas, and neutralize insurgent threats through multiple successive tasks to ensure territorial control and civil safety in Porto. Meeting with a local militia leader is only one of the initial tasks intended to gather key intelligence on enemy networks.&lt;br/&gt;&lt;br/&gt;
+&lt;font size='14' color='#00FF00'&gt;3. SUPPORT&lt;/font&gt;&lt;br/&gt;
+Initial transport is provided by the squad vehicle. During the operation, you will have access to on-demand air support, drone overwatch (MQ-9), and logistics supply drops for ammunition and replacement vehicles as needed. Good luck, Soldiers.</English>
         <French>&lt;font size='16' color='#FFFF00'&gt;OPÉRATION ROYAL ALLIANCE&lt;/font&gt;&lt;br/&gt;&lt;br/&gt;
 &lt;font size='14' color='#00FF00'&gt;1. SITUATION&lt;/font&gt;&lt;br/&gt;
-La situation à Porto est extrêmement tendue. Des forces insurgées locales (OPFOR) ont établi des postes cachés dans différents bâtiments de la ville. Un chef de milice locale, détenant des informations cruciales sur des documents et otages ennemis, se cache dans un bâtiment sécurisé. Le Corps Expéditionnaire Multinational du RACS est déployé pour sécuriser la zone et récupérer ces renseignements.&lt;br/&gt;&lt;br/&gt;
+L'île-port de Porto est en proie à de vives tensions ethniques, confessionnelles et idéologiques, catalysées par la pauvreté, la corruption locale et les flux migratoires clandestins. Des groupes armés insurgés, notamment le Front de Libération (FL) nationaliste ethnique et le Mouvement pour la Justice (MJ) djihadiste, tentent d'établir une base arrière et de saborder l'autorité de la Couronne de Sahrani. Le Corps Expéditionnaire Multinational du RACS est déployé pour restaurer la sécurité civile et assurer la pacification globale de l'île.&lt;br/&gt;&lt;br/&gt;
 &lt;font size='14' color='#00FF00'&gt;2. MISSION&lt;/font&gt;&lt;br/&gt;
-Localiser le chef de la milice locale, entrer en contact avec lui, et sécuriser les renseignements. Éliminer toute menace insurgée rencontrée lors de l'opération.&lt;br/&gt;&lt;br/&gt;
-&lt;font size='14' color='#00FF00'&gt;3. EXÉCUTION&lt;/font&gt;&lt;br/&gt;
-- Préparer et monter à bord du véhicule de patrouille (vehicule_team) dès que l'escouade est prête.&lt;br/&gt;
-- Se rendre au point de rencontre désigné en ville.&lt;br/&gt;
-- Parler au chef de milice et résoudre la situation.&lt;br/&gt;&lt;br/&gt;
-&lt;font size='14' color='#00FF00'&gt;4. SOUTIEN&lt;/font&gt;&lt;br/&gt;
-Le transport tactique est assuré par le véhicule d'escouade. Bonne chance, soldats.</French>
+Mener des opérations de sécurisation, patrouiller les zones urbaines et neutraliser les menaces insurgées à travers plusieurs tâches successives afin d'assurer le contrôle territorial et la sécurité civile de Porto. Le rendez-vous avec un chef de milice locale n'est qu'une des tâches initiales visant à obtenir des renseignements clés sur les réseaux ennemis.&lt;br/&gt;&lt;br/&gt;
+&lt;font size='14' color='#00FF00'&gt;3. SOUTIEN&lt;/font&gt;&lt;br/&gt;
+Le transport initial est assuré par le véhicule d'escouade. Durant l'opération, vous disposez d'un soutien aérien à la demande, d'un survol permanent par drone (MQ-9), ainsi que de possibilités de livraisons logistiques de munitions et de véhicules de remplacement en cas de besoin. Bonne chance, soldats.</French>
       </Key>
       <Key ID="STR_LL_Diary_Context_Title">
         <English>Context and Situation</English>
@@ -40,13 +32,13 @@ Le transport tactique est assuré par le véhicule d'escouade. Bonne chance, sol
       </Key>
       <Key ID="STR_LL_Diary_Context_Text">
         <English>&lt;font size='16' color='#FFFF00'&gt;GLOBAL CONTEXT&lt;/font&gt;&lt;br/&gt;
-Following the difficult reunification of Sahrani, the Kingdom remains fragile. The radical leftist North was defeated, but its clandestine networks and weapons survive.&lt;br/&gt;
+Following the difficult reunification of Sahrani, the Kingdom remains fragile. The radical ethnic nationalist North was defeated, but its clandestine networks and weapons survive.&lt;br/&gt;
 The country has become a major Atlantic hub for illegal migration routes and arms/drug trafficking.&lt;br/&gt;&lt;br/&gt;
 The &lt;font color='#00FF00'&gt;RACS&lt;/font&gt; has established a Multinational Expeditionary Corps integrating volunteers from allied nations (Turkey, Arab nations, Africa, Indonesia).&lt;br/&gt;&lt;br/&gt;
 &lt;font size='16' color='#FFFF00'&gt;TACTICAL SITUATION IN PORTO&lt;/font&gt;&lt;br/&gt;
 Porto is a secondary port island suffering from deep ethnic, confessional, and ideological tensions, fueled by poverty, local corruption, and migration waves.</English>
         <French>&lt;font size='16' color='#FFFF00'&gt;CONTEXTE GLOBAL&lt;/font&gt;&lt;br/&gt;
-Après la réunification difficile de Sahrani, le Royaume reste un État fragile. Le Nord gauchiste radical a été vaincu, mais ses réseaux clandestins et ses armes subsistent.&lt;br/&gt;
+Après la réunification difficile de Sahrani, le Royaume reste un État fragile. Le Nord nationaliste ethnique a été vaincu, mais ses réseaux clandestins et ses armes subsistent.&lt;br/&gt;
 Le pays est devenu un hub en Atlantique pour les routes migratoires clandestines et les trafics d'armes et de drogue.&lt;br/&gt;&lt;br/&gt;
 Le &lt;font color='#00FF00'&gt;RACS&lt;/font&gt; a instauré un Corps Expéditionnaire Multinational intégrant des volontaires de pays alliés (Turquie, pays arabes, Afrique, Indonésie).&lt;br/&gt;&lt;br/&gt;
 &lt;font size='16' color='#FFFF00'&gt;SITUATION TACTIQUE À PORTO&lt;/font&gt;&lt;br/&gt;
@@ -58,13 +50,13 @@ Porto est une île-port secondaire en proie à de vives tensions ethniques, conf
       </Key>
       <Key ID="STR_LL_Diary_Factions_Text">
         <English>&lt;font size='16' color='#FF0000'&gt;LIBERATION FRONT (FL)&lt;/font&gt;&lt;br/&gt;
-Radical leftist, anti-monarchist ideology. Recruits among those disappointed by the crown. Aims to expel the RACS from Porto.&lt;br/&gt;&lt;br/&gt;
+Ethnic nationalist, anti-monarchist ideology. Recruits among those disappointed by the crown. Aims to expel the RACS from Porto.&lt;br/&gt;&lt;br/&gt;
 &lt;font size='16' color='#FF0000'&gt;MOVEMENT FOR JUSTICE (MJ)&lt;/font&gt;&lt;br/&gt;
 Jihadist group linked to a transnational network. Aims to transform Porto into a logistics and smuggling sanctuary.&lt;br/&gt;&lt;br/&gt;
 &lt;font size='16' color='#FF0000'&gt;MILITIAS AND SMUGGLING CARTELS&lt;/font&gt;&lt;br/&gt;
 Opportunistic criminals wanting to maintain local anarchy to protect their maritime trafficking.</English>
         <French>&lt;font size='16' color='#FF0000'&gt;FRONT DE LIBÉRATION (FL)&lt;/font&gt;&lt;br/&gt;
-Idéologie gauchiste radicale et anti-monarchiste. Recrute parmi les déçus de la couronne. Vise à chasser le RACS de Porto.&lt;br/&gt;&lt;br/&gt;
+Idéologie nationaliste ethnique et anti-monarchiste. Recrute parmi les déçus de la couronne. Vise à chasser le RACS de Porto.&lt;br/&gt;&lt;br/&gt;
 &lt;font size='16' color='#FF0000'&gt;MOUVEMENT POUR LA JUSTICE (MJ)&lt;/font&gt;&lt;br/&gt;
 Groupe djihadiste lié à un réseau transnational. Vise à faire de Porto un sanctuaire logistique et de contrebande.&lt;br/&gt;&lt;br/&gt;
 &lt;font size='16' color='#FF0000'&gt;MILICES ET CARTELS DE CONTREBANDE&lt;/font&gt;&lt;br/&gt;
@@ -185,8 +177,8 @@ Le Roi de Sahrani a lancé cette opération de pacification autonome pour prouve
         <French>Mission Réussie</French>
       </Key>
       <Key ID="STR_LL_End_Success_Subtitle">
-        <English>The operation was a success</English>
-        <French>L'opération est un succès</French>
+        <English>Intelligence Secured - The operation was a success</English>
+        <French>Renseignements Sécurisés - L'opération est un succès</French>
       </Key>
       <Key ID="STR_LL_End_Success_Desc">
         <English>The RACS has successfully secured the intelligence about insurgent operations in Porto.</English>
@@ -203,6 +195,44 @@ Le Roi de Sahrani a lancé cette opération de pacification autonome pour prouve
       <Key ID="STR_LL_End_Failed_Desc">
         <English>The militia leader was killed before delivering the intelligence. The operation is a failure.</English>
         <French>Le chef de milice a été tué avant d'avoir pu livrer les renseignements. L'opération est un échec.</French>
+      </Key>
+    </Container>
+    <Container name="Actions">
+      <Key ID="STR_LL_Action_Heal">
+        <English>Order AI to self-heal</English>
+        <French>Ordonner aux IA de se soigner</French>
+      </Key>
+      <Key ID="STR_LL_Action_RoE_Stealth">
+        <English>RoE: Stealth (Infiltration)</English>
+        <French>Règles d'engagement : Infiltration (Silencieux/Marche)</French>
+      </Key>
+      <Key ID="STR_LL_Action_RoE_Vigilance">
+        <English>RoE: Vigilance</English>
+        <French>Règles d'engagement : Vigilance (Combat/Prudent)</French>
+      </Key>
+      <Key ID="STR_LL_Action_RoE_Assault">
+        <English>RoE: Assault</English>
+        <French>Règles d'engagement : Assaut (Tir libre/Combat)</French>
+      </Key>
+      <Key ID="STR_LL_Action_RoE_Charge">
+        <English>RoE: Charge (Sprint)</English>
+        <French>Règles d'engagement : Charge (Sprint/Assaut permanent)</French>
+      </Key>
+      <Key ID="STR_LL_Action_Search">
+        <English>Order Squad: Search Buildings</English>
+        <French>Ordonner au groupe : Fouiller les bâtiments</French>
+      </Key>
+      <Key ID="STR_LL_Msg_Search_NoBuilding">
+        <English>[LL ERROR] Search: No buildings with garrison positions nearby.</English>
+        <French>[LL ERREUR] Fouille : Aucun bâtiment avec des positions intérieures à proximité.</French>
+      </Key>
+      <Key ID="STR_LL_Msg_Search_NotAccessible">
+        <English>[LL ERROR] Search: Building positions are not accessible.</English>
+        <French>[LL ERREUR] Fouille : Les positions dans les bâtiments ne sont pas accessibles.</French>
+      </Key>
+      <Key ID="STR_LL_Msg_Search_NoInfantry">
+        <English>[LL ERROR] Search: No active AI infantry in your group to search.</English>
+        <French>[LL ERREUR] Fouille : Aucune infanterie I.A. active dans votre groupe pour fouiller.</French>
       </Key>
     </Container>
   </Package>

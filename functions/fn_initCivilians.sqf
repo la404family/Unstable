@@ -394,20 +394,48 @@ MISSION_CivilianBeards = ["CUP_Beard_Brown", "CUP_Beard_Black"];
 // Armes disponibles pour les bandits OPFOR / Indépendants
 // Format : [arme_pri, mag_pri, nb_pri, arme_sec, mag_sec, nb_sec, fumigène, nb_fumi, soin, nb_soin]
 MISSION_BanditLoadouts = [
-    ["arifle_TRG20_F",          "30Rnd_556x45_Stanag",       7, "hgun_Rook40_F",            "16Rnd_9x21_Mag",        5, "SmokeShell", 2, "FirstAidKit", 2],
-    ["hgun_PDW2000_F",          "30Rnd_9x21_Mag",            7, "hgun_P07_F",               "16Rnd_9x21_Mag",        5, "SmokeShell", 2, "FirstAidKit", 2],
-    ["SMG_02_F",                "30Rnd_9x21_Mag",            7, "hgun_Rook40_F",            "16Rnd_9x21_Mag",        5, "SmokeShell", 2, "FirstAidKit", 2],
-    ["arifle_Mk20C_F",          "30Rnd_556x45_Stanag",       6, "hgun_Pistol_heavy_02_F",   "6Rnd_45ACP_Cylinder",   6, "SmokeShell", 2, "FirstAidKit", 2],
-    ["SMG_01_F",                "30Rnd_45ACP_Mag_SMG_01",    7, "hgun_ACPC2_F",             "9Rnd_45ACP_Mag",        5, "SmokeShell", 2, "FirstAidKit", 2],
-    ["arifle_Mk20_F",           "30Rnd_556x45_Stanag",       7, "hgun_ACPC2_F",             "9Rnd_45ACP_Mag",        5, "SmokeShell", 2, "FirstAidKit", 2],
-    ["arifle_TRG21_F",          "30Rnd_556x45_Stanag",       7, "hgun_Pistol_heavy_01_F",   "11Rnd_45ACP_Mag",       5, "SmokeShell", 2, "FirstAidKit", 2],
-    ["arifle_Katiba_C_F",       "30Rnd_65x39_caseless_green",6, "hgun_Pistol_heavy_02_F",   "6Rnd_45ACP_Cylinder",   5, "SmokeShell", 2, "FirstAidKit", 2],
-    ["arifle_AKM_F",            "30Rnd_762x39_Mag_F",        9, "hgun_Rook40_F",            "16Rnd_9x21_Mag",        5, "SmokeShell", 2, "FirstAidKit", 2],
-    ["arifle_AKS_F",            "30Rnd_545x39_Mag_F",        9, "hgun_Pistol_heavy_02_F",   "6Rnd_45ACP_Cylinder",   5, "SmokeShell", 2, "FirstAidKit", 2],
-    ["srifle_DMR_06_camo_F",    "20Rnd_762x51_Mag",          8, "hgun_Rook40_F",            "16Rnd_9x21_Mag",        5, "SmokeShell", 2, "FirstAidKit", 2],
-    ["sgun_HunterShotgun_01_F", "2Rnd_12Gauge_Pellets",     13, "hgun_P07_F",               "16Rnd_9x21_Mag",        5, "SmokeShell", 2, "FirstAidKit", 2],
-    ["LMG_03_F",                "200Rnd_556x45_Box_F",       5, "hgun_Pistol_heavy_01_F",   "11Rnd_45ACP_Mag",       5, "SmokeShell", 2, "FirstAidKit", 2],
-    ["srifle_DMR_01_F",         "10Rnd_762x54_Mag",          9, "hgun_P07_F",               "16Rnd_9x21_Mag",        5, "SmokeShell", 2, "FirstAidKit", 2]
+    // --- 18 Loadouts avec armes principales + secondaires ---
+    // DMR Hunter (srifle_DMR_06_hunter_F)
+    ["srifle_DMR_06_hunter_F",      "10Rnd_Mk14_762x51_Mag",     8, "CUP_hgun_Browning_HP",     "CUP_13Rnd_9x19_Browning_HP", 5, "SmokeShell", 2, "FirstAidKit", 2],
+    ["srifle_DMR_06_hunter_F",      "10Rnd_Mk14_762x51_Mag",     8, "CUP_hgun_CZ75",            "CUP_16Rnd_9x19_cz75",        5, "SmokeShell", 2, "FirstAidKit", 2],
+    
+    // AK47 Early
+    ["CUP_arifle_AK47_Early",       "CUP_30Rnd_762x39_AK47_bakelite_M", 6, "CUP_hgun_Glock17",      "CUP_17Rnd_9x19_glock17",     5, "SmokeShell", 2, "FirstAidKit", 2],
+    ["CUP_arifle_AK47_Early",       "CUP_30Rnd_762x39_AK47_bakelite_M", 6, "hgun_Pistol_heavy_01_F","11Rnd_45ACP_Mag",            4, "SmokeShell", 2, "FirstAidKit", 2],
+    
+    // AKM
+    ["CUP_arifle_AKM",              "CUP_30Rnd_762x39_AK47_bakelite_M", 6, "CUP_hgun_Mac10",        "CUP_30Rnd_45ACP_MAC10_M",    5, "SmokeShell", 2, "FirstAidKit", 2],
+    ["CUP_arifle_AKM",              "CUP_30Rnd_762x39_AK47_bakelite_M", 6, "CUP_hgun_TEC9",         "CUP_32Rnd_9x19_TEC9",        4, "SmokeShell", 2, "FirstAidKit", 2],
+    ["CUP_arifle_AKM",              "CUP_30Rnd_762x39_AK47_bakelite_M", 6, "CUP_hgun_UZI",          "CUP_32Rnd_9x19_UZI_M",       4, "SmokeShell", 2, "FirstAidKit", 2],
+    
+    // FN FAL
+    ["CUP_arifle_FNFAL",            "CUP_20Rnd_762x51_FNFAL_M",  6, "CUP_hgun_Duty",            "CUP_18Rnd_9x19_Phantom",     4, "SmokeShell", 2, "FirstAidKit", 2],
+    ["CUP_arifle_FNFAL",            "CUP_20Rnd_762x51_FNFAL_M",  6, "hgun_Pistol_01_F",         "10Rnd_9x21_Mag",             6, "SmokeShell", 2, "FirstAidKit", 2],
+    
+    // M14
+    ["CUP_arifle_M14",              "CUP_20Rnd_762x51_DMR",      6, "CUP_hgun_Browning_HP",     "CUP_13Rnd_9x19_Browning_HP", 5, "SmokeShell", 2, "FirstAidKit", 2],
+    ["CUP_arifle_M14",              "CUP_20Rnd_762x51_DMR",      6, "CUP_hgun_CZ75",            "CUP_16Rnd_9x19_cz75",        5, "SmokeShell", 2, "FirstAidKit", 2],
+    
+    // FN FAL Wooden
+    ["CUP_arifle_FNFAL5061_wooden", "CUP_20Rnd_762x51_FNFAL_M",  6, "CUP_hgun_Glock17",         "CUP_17Rnd_9x19_glock17",     5, "SmokeShell", 2, "FirstAidKit", 2],
+    ["CUP_arifle_FNFAL5061_wooden", "CUP_20Rnd_762x51_FNFAL_M",  6, "CUP_hgun_Duty",            "CUP_18Rnd_9x19_Phantom",     4, "SmokeShell", 2, "FirstAidKit", 2],
+    
+    // Gewehr 1
+    ["CUP_arifle_Gewehr1",          "CUP_20Rnd_762x51_G3",       6, "hgun_Pistol_heavy_01_F",   "11Rnd_45ACP_Mag",            4, "SmokeShell", 2, "FirstAidKit", 2],
+    ["CUP_arifle_Gewehr1",          "CUP_20Rnd_762x51_G3",       6, "hgun_Pistol_01_F",         "10Rnd_9x21_Mag",             6, "SmokeShell", 2, "FirstAidKit", 2],
+    
+    // Shotgun M1014
+    ["CUP_sgun_M1014_Entry",        "CUP_8Rnd_12Gauge_Pellets",  12, "CUP_hgun_Mac10",           "CUP_30Rnd_45ACP_MAC10_M",    5, "SmokeShell", 2, "FirstAidKit", 2],
+    ["CUP_sgun_M1014_Entry",        "CUP_8Rnd_12Gauge_Pellets",  12, "CUP_hgun_TEC9",            "CUP_32Rnd_9x19_TEC9",        4, "SmokeShell", 2, "FirstAidKit", 2],
+    ["CUP_sgun_M1014_Entry",        "CUP_8Rnd_12Gauge_Pellets",  12, "CUP_hgun_UZI",             "CUP_32Rnd_9x19_UZI_M",       4, "SmokeShell", 2, "FirstAidKit", 2],
+    
+    // --- 6 Loadouts SANS arme principale (seulement arme secondaire) : exactement 25% (6 / 24) ---
+    ["",                            "",                          0, "hgun_Pistol_heavy_01_F",   "11Rnd_45ACP_Mag",            6, "SmokeShell", 2, "FirstAidKit", 2],
+    ["",                            "",                          0, "CUP_hgun_Browning_HP",     "CUP_13Rnd_9x19_Browning_HP", 7, "SmokeShell", 2, "FirstAidKit", 2],
+    ["",                            "",                          0, "CUP_hgun_CZ75",            "CUP_16Rnd_9x19_cz75",        7, "SmokeShell", 2, "FirstAidKit", 2],
+    ["",                            "",                          0, "CUP_hgun_Glock17",         "CUP_17Rnd_9x19_glock17",     7, "SmokeShell", 2, "FirstAidKit", 2],
+    ["",                            "",                          0, "CUP_hgun_Mac10",           "CUP_30Rnd_45ACP_MAC10_M",    7, "SmokeShell", 2, "FirstAidKit", 2],
+    ["",                            "",                          0, "CUP_hgun_TEC9",            "CUP_32Rnd_9x19_TEC9",        6, "SmokeShell", 2, "FirstAidKit", 2]
 ];
 
 // Sacs à dos disponibles pour les bandits

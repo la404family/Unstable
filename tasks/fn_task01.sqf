@@ -69,10 +69,100 @@ if (_mode == "scenario") exitWith {
 
                 ["STR_LL_Speaker_Narrator", "STR_LL_Task_01_Narrative_S1_Success"] remoteExec ["LL_fnc_showSubtitle", 0];
                 
-                // Les gardes restent amicaux et arrêtent leurs patrouilles
-                { _x disableAI "MOVE"; } forEach _guards;
-
+                // Succès immédiat
                 ["task_01_recon", "SUCCEEDED", true] call BIS_fnc_taskSetState;
+
+                // À la fin du scénario 1, le groupe se rejoint et s'éloigne
+                private _escapeGrp = createGroup [independent, true];
+                ([_chief] + _guards) joinSilent _escapeGrp;
+                
+                // Activer les mouvements et animations
+                _chief enableAI "MOVE";
+                _chief enableAI "ANIM";
+                {
+                    _x enableAI "MOVE";
+                    _x enableAI "ANIM";
+                    _x setBehaviour "SAFE";
+                    _x setSpeedMode "FULL";
+                    _x setVariable ["LL_Task01_Escaping", true, true]; // Empêcher la suppression prématurée globale
+                } forEach ([_chief] + _guards);
+
+                // Rechercher toutes les logiques M_Dans_Bat_
+                private _allLogics = [];
+                {
+                    if (_x select [0, 11] == "M_Dans_Bat_") then {
+                        private _val = missionNamespace getVariable [_x, objNull];
+                        if (!isNull _val) then {
+                            _allLogics pushBack _val;
+                        };
+                    };
+                } forEach (allVariables missionNamespace);
+
+                // Filtrer celles à plus de 1000m de tous les joueurs
+                private _players = allPlayers select { alive _x };
+                private _farLogics = [];
+                {
+                    private _logic = _x;
+                    private _tooClose = false;
+                    {
+                        if (_x distance2D _logic <= 1000) exitWith { _tooClose = true; };
+                    } forEach _players;
+                    if (!_tooClose) then {
+                        _farLogics pushBack _logic;
+                    };
+                } forEach _allLogics;
+
+                private _destPos = [0, 0, 0];
+                if (count _farLogics > 0) then {
+                    _destPos = getPosASL (selectRandom _farLogics);
+                } else {
+                    // Fallback : à 1500m de la position de rencontre actuelle
+                    _destPos = (getPos _chief) getPos [1500, random 360];
+                };
+
+                // Ordonner le mouvement
+                while {count waypoints _escapeGrp > 0} do {
+                    deleteWaypoint [_escapeGrp, 0];
+                };
+                private _wp = _escapeGrp addWaypoint [_destPos, 0];
+                _wp setWaypointType "MOVE";
+                _wp setWaypointSpeed "FULL";
+                _wp setWaypointBehaviour "SAFE";
+
+                // Boucle de surveillance à 60s
+                [_escapeGrp, [_chief] + _guards] spawn {
+                    params ["_grp", "_units"];
+                    private _exit = false;
+                    while {!_exit} do {
+                        sleep 60;
+                        private _players = allPlayers select { alive _x };
+                        if (count _players == 0) then {
+                            _exit = true;
+                        } else {
+                            private _aliveUnits = _units select { alive _x };
+                            if (count _aliveUnits == 0) then {
+                                _exit = true;
+                            } else {
+                                private _allFar = true;
+                                {
+                                    private _unit = _x;
+                                    if ((_players findIf { _x distance2D _unit <= 1500 }) != -1) then {
+                                        _allFar = false;
+                                    };
+                                } forEach _aliveUnits;
+
+                                if (_allFar) then {
+                                    _exit = true;
+                                };
+                            };
+                        };
+                    };
+
+                    {
+                        if (!isNull _x) then { deleteVehicle _x; };
+                    } forEach _units;
+                    deleteGroup _grp;
+                };
             };
 
             // ── Scénario 2 : Trahison ─────────────────────────────────────────
@@ -84,11 +174,12 @@ if (_mode == "scenario") exitWith {
 
                 ["STR_LL_Speaker_Narrator", "STR_LL_Task_01_Narrative_S2_Start"] remoteExec ["LL_fnc_showSubtitle", 0];
 
-                // Tout le monde devient hostile (OPFOR)
+                // Tout le monde devient hostile (OPFOR) et rejoint le même groupe
                 private _hostiles = [_chief] + _guards;
+                private _opforGrp = createGroup [east, true];
+                _hostiles joinSilent _opforGrp;
+                
                 {
-                    private _grp = createGroup [east, true];
-                    [_x] joinSilent _grp;
                     _x setBehaviour "COMBAT";
                     _x setCombatMode "RED";
                 } forEach _hostiles;
@@ -97,6 +188,32 @@ if (_mode == "scenario") exitWith {
                 private _targets = allPlayers select { side _x == independent && alive _x };
                 if (count _targets > 0) then {
                     { _x doFire (selectRandom _targets); } forEach _hostiles;
+                };
+
+                // Les traîtres cherchent et fouillent les joueurs les plus proches pour les tuer (Hunt Loop)
+                [_opforGrp] spawn {
+                    params ["_grp"];
+                    while { !isNull _grp && { ({ alive _x } count units _grp) > 0 } } do {
+                        private _players = allPlayers select { side _x == independent && alive _x };
+                        if (count _players > 0) then {
+                            private _leader = leader _grp;
+                            private _nearestPlayer = objNull;
+                            private _minDist = 999999;
+                            {
+                                private _d = _leader distance2D _x;
+                                if (_d < _minDist) then {
+                                    _minDist = _d;
+                                    _nearestPlayer = _x;
+                                };
+                            } forEach _players;
+
+                            if (!isNull _nearestPlayer) then {
+                                _grp move (getPos _nearestPlayer);
+                                _grp reveal [_nearestPlayer, 4.0];
+                            };
+                        };
+                        sleep 15;
+                    };
                 };
 
                 // Attendre l'élimination de tous les traîtres
@@ -121,10 +238,11 @@ if (_mode == "scenario") exitWith {
 
                 ["STR_LL_Speaker_Narrator", "STR_LL_Task_01_Narrative_S3_Start"] remoteExec ["LL_fnc_showSubtitle", 0];
 
-                // Les gardes deviennent mutins (OPFOR) et attaquent le chef et les joueurs
+                // Les gardes deviennent mutins (OPFOR) et rejoignent le même groupe
+                private _opforGrp = createGroup [east, true];
+                _guards joinSilent _opforGrp;
+                
                 {
-                    private _grp = createGroup [east, true];
-                    [_x] joinSilent _grp;
                     _x setBehaviour "COMBAT";
                     _x setCombatMode "RED";
                     _x doFire _chief;
@@ -135,6 +253,32 @@ if (_mode == "scenario") exitWith {
                 [_chief] joinSilent _allyGrp;
                 _chief setBehaviour "COMBAT";
                 _chief setCombatMode "RED";
+
+                // Les Mutins cherchent et fouillent les joueurs les plus proches pour les tuer (Hunt Loop)
+                [_opforGrp] spawn {
+                    params ["_grp"];
+                    while { !isNull _grp && { ({ alive _x } count units _grp) > 0 } } do {
+                        private _players = allPlayers select { side _x == independent && alive _x };
+                        if (count _players > 0) then {
+                            private _leader = leader _grp;
+                            private _nearestPlayer = objNull;
+                            private _minDist = 999999;
+                            {
+                                private _d = _leader distance2D _x;
+                                if (_d < _minDist) then {
+                                    _minDist = _d;
+                                    _nearestPlayer = _x;
+                                };
+                            } forEach _players;
+
+                            if (!isNull _nearestPlayer) then {
+                                _grp move (getPos _nearestPlayer);
+                                _grp reveal [_nearestPlayer, 4.0];
+                            };
+                        };
+                        sleep 15;
+                    };
+                };
 
                 // Attendre l'issue du combat
                 waitUntil {
@@ -167,21 +311,53 @@ if (_mode == "scenario") exitWith {
     };
 
     // ── Détection dynamique des logiques "M_Dans_Bat_XXX" ─────────────────────────
-    private _logics = [];
+    private _rawLogics = [];
     {
         if (_x select [0, 11] == "M_Dans_Bat_") then {
             private _val = missionNamespace getVariable [_x, objNull];
             if (!isNull _val) then {
-                _logics pushBack _val;
+                _rawLogics pushBack _val;
             };
         };
     } forEach (allVariables missionNamespace);
+
+    // Filtrer les logiques : JAMAIS à moins de 100 mètres d'un joueur en vie
+    private _players = allPlayers select { alive _x };
+    private _logics = [];
+    {
+        private _logic = _x;
+        private _tooClose = false;
+        {
+            if (_x distance2D _logic < 100) exitWith { _tooClose = true; };
+        } forEach _players;
+        if (!_tooClose) then {
+            _logics pushBack _logic;
+        };
+    } forEach _rawLogics;
 
     private _meetingPos = [0, 0, 0];
     private _selectedLogic = objNull;
 
     if (count _logics > 0) then {
-        _selectedLogic = selectRandom _logics;
+        // Sélectionne une logique aléatoirement si plusieurs existent (JAMAIS à moins de 250 mètres d'un joueur si possible)
+        private _logicsFar = [];
+        {
+            private _logic = _x;
+            private _tooClose = false;
+            {
+                if (_x distance2D _logic < 250) exitWith { _tooClose = true; };
+            } forEach _players;
+            if (!_tooClose) then {
+                _logicsFar pushBack _logic;
+            };
+        } forEach _logics;
+        
+        if (count _logicsFar > 0) then {
+            _selectedLogic = selectRandom _logicsFar;
+        } else {
+            _selectedLogic = selectRandom _logics;
+        };
+
         private _logicPos = getPosASL _selectedLogic;
         
         // Z + 0.2m pour éviter le clipping dans le sol/bâtiment
@@ -194,30 +370,29 @@ if (_mode == "scenario") exitWith {
             diag_log format ["[LL] task01: Logique de rencontre sélectionnée : %1 à %2.", vehicleVarName _selectedLogic, _meetingPos];
         };
     } else {
-        // Fallback si aucune logique n'est définie : recherche de bâtiment
+        // Fallback si aucune logique n'est valide ou trouvée : recherche progressive de bâtiment (de 250 à 1000m)
         private _aliveIndep = allPlayers select { side _x == independent && alive _x };
         private _leaderUnit = leader (group (_aliveIndep select 0));
         private _leaderPos  = getPos _leaderUnit;
         private _candidates = [];
 
-        {
+        // Recherche progressive de 250m à 1000m
+        for "_radius" from 250 to 1000 step 150 do {
             if (count _candidates == 0) then {
-                private _tryMin = _x + floor (random 601);
-                private _tryMax = _tryMin + 400;
                 private _band = nearestTerrainObjects [
                     _leaderPos,
                     ["House", "Building", "HouseBase", "Church", "Ruin"],
-                    _tryMax,
+                    _radius,
                     false
                 ] select {
-                    (_x distance2D _leaderPos >= _tryMin)
+                    (_x distance2D _leaderPos >= 250)
                     && { (_x buildingPos 0) distance [0,0,0] > 1 }
                 };
                 if (count _band > 0) then {
                     _candidates = _band;
                 };
             };
-        } forEach [300, 200, 250, 200, 150];
+        };
 
         if (count _candidates > 0) then {
             private _building = selectRandom _candidates;
@@ -278,6 +453,32 @@ if (_mode == "scenario") exitWith {
             _unit switchMove "Acts_CivilTalking_1";
         };
     }];
+
+    // Le Chef de milice doit se tourner toutes les 2 secondes vers la position du joueur du serveur le plus proche
+    [_chief] spawn {
+        params ["_unit"];
+        while { alive _unit && { (_unit getVariable ["LL_Task01_Status", "WAIT"]) == "WAIT" } } do {
+            private _players = allPlayers select { alive _x };
+            if (count _players > 0) then {
+                private _nearest = objNull;
+                private _minDist = 999999;
+                {
+                    private _d = _unit distance2D _x;
+                    if (_d < _minDist) then {
+                        _minDist = _d;
+                        _nearest = _x;
+                    };
+                } forEach _players;
+
+                if (!isNull _nearest) then {
+                    private _dir = _unit getDir _nearest;
+                    _unit setDir _dir;
+                    _unit setFormDir _dir;
+                };
+            };
+            sleep 2;
+        };
+    };
 
     // ── Spawn des gardes ────────────────────────────────────────────────────────
     private _guards    = [];
@@ -369,6 +570,40 @@ if (_mode == "scenario") exitWith {
             };
             ["task_01_recon", "FAILED", true] call BIS_fnc_taskSetState;
             deleteMarker _markerID;
+
+            // Les gardes rejoignent OPFOR et traquent les joueurs
+            private _opforGrp = createGroup [east, true];
+            _guards joinSilent _opforGrp;
+            {
+                _x setBehaviour "COMBAT";
+                _x setCombatMode "RED";
+            } forEach _guards;
+
+            [_opforGrp] spawn {
+                params ["_grp"];
+                while { !isNull _grp && { ({ alive _x } count units _grp) > 0 } } do {
+                    private _players = allPlayers select { side _x == independent && alive _x };
+                    if (count _players > 0) then {
+                        private _leader = leader _grp;
+                        private _nearestPlayer = objNull;
+                        private _minDist = 999999;
+                        {
+                            private _d = _leader distance2D _x;
+                            if (_d < _minDist) then {
+                                _minDist = _d;
+                                _nearestPlayer = _x;
+                            };
+                        } forEach _players;
+
+                        if (!isNull _nearestPlayer) then {
+                            _grp move (getPos _nearestPlayer);
+                            _grp reveal [_nearestPlayer, 4.0];
+                        };
+                    };
+                    sleep 15;
+                };
+            };
+
             true
         };
 
@@ -381,13 +616,31 @@ if (_mode == "scenario") exitWith {
 
     // ── Nettoyage différé après éloignement ────────────────────────────────────
     waitUntil {
-        sleep 10;
-        private _alive = allPlayers select { alive _x && side _x == independent };
-        if (count _alive == 0) exitWith { true };
-        (_alive select 0) distance2D _meetingPos > 1500
+        sleep 15;
+        private _alivePlayers = allPlayers select { alive _x && side _x == independent };
+        if (count _alivePlayers == 0) exitWith { true };
+        
+        // Tous les joueurs doivent être à plus de 1500m de la position de rencontre
+        private _farFromMeeting = (_alivePlayers findIf { _x distance2D _meetingPos <= 1500 }) == -1;
+        
+        // Et à plus de 1500m de toutes les unités vivantes de la tâche (sauf celles en fuite)
+        private _aliveUnits = ([_chief] + _guards) select { alive _x && !(_x getVariable ["LL_Task01_Escaping", false]) };
+        private _farFromUnits = true;
+        {
+            private _unit = _x;
+            if ((_alivePlayers findIf { _x distance2D _unit <= 1500 }) != -1) then {
+                _farFromUnits = false;
+            };
+        } forEach _aliveUnits;
+
+        _farFromMeeting && _farFromUnits
     };
 
-    { if (alive _x) then { deleteVehicle _x; }; } forEach ([_chief] + _guards);
+    {
+        if (alive _x && !(_x getVariable ["LL_Task01_Escaping", false])) then {
+            deleteVehicle _x;
+        };
+    } forEach ([_chief] + _guards);
 
     if (DEBUG_MODE) then { diag_log "[LL] task01: Nettoyage des unités de la tâche terminé."; };
 };

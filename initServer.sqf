@@ -19,6 +19,9 @@ diag_log "[LL][initServer] Démarrage de l'initialisation serveur...";
 // Configure les sacs (CUP Tactical Pack CCE) et l'armement initial
 [] call LL_fnc_initPlayerLoadout;
 
+// Assigne un leader parmi les joueurs humains et surveille qu'une IA ne le devienne jamais
+[] spawn LL_fnc_assignLeader;
+
 
 // --- 3. Ambiance & Mécaniques de jeu ---
 // Boucle de lecture de l'appel à la prière depuis les haut-parleurs (ezan_XX)
