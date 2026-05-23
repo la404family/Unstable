@@ -76,6 +76,7 @@ _targetPos = _targetPos apply { if (isNil "_x") then {0} else {_x} };
 private _targetPosFinal = +_targetPos;
 
 // Héliport le plus proche pour les missions non-CAS
+private _heliportObj = objNull;
 if (_supportType in ["LIVRAISON", "VEHICULE", "DEBARQUEMENT", "EMBARQUEMENT"]) then {
     private _heliports = (allMissionObjects "Any") select {
         vehicleVarName _x regexMatch "(?i)heliport_\d+"
@@ -86,8 +87,9 @@ if (_supportType in ["LIVRAISON", "VEHICULE", "DEBARQUEMENT", "EMBARQUEMENT"]) t
         private _nearest = _heliports # 0;
         private _minDist = _nearest distance2D _refPos;
         { private _d = _x distance2D _refPos; if (_d < _minDist) then { _minDist = _d; _nearest = _x; }; } forEach _heliports;
-        _targetPosFinal  = getPosATL _nearest;
-        diag_log format ["[LL][HELI] Héliport sélectionné à %1m", round _minDist];
+        _heliportObj    = _nearest;
+        _targetPosFinal = getPos _nearest;  // centre exact de la dalle héliport
+        diag_log format ["[LL][HELI] Héliport sélectionné : '%1' à %2m", vehicleVarName _nearest, round _minDist];
     } else {
         _targetPosFinal  = getPosATL _caller;
         diag_log "[LL][HELI][WARN] Aucun héliport — fallback position joueur.";
@@ -182,12 +184,12 @@ _group setSpeedMode  "FULL";
 
 [_heli, _targetPosFinal, _group, _crew, _gunners, _homeBase,
  _supportType, _caller, _flyHeight, _hoverHeight,
- _loiterHeight, _loiterRadius, _loiterDuration] spawn {
+ _loiterHeight, _loiterRadius, _loiterDuration, _heliportObj] spawn {
 
     params [
         "_heli", "_dropPos", "_group", "_crew", "_gunners", "_homeBase",
         "_supportType", "_caller", "_flyHeight", "_hoverHeight",
-        "_loiterHeight", "_loiterRadius", "_loiterDuration"
+        "_loiterHeight", "_loiterRadius", "_loiterDuration", "_heliportObj"
     ];
 
     private _isSlingload      = _supportType in ["LIVRAISON", "VEHICULE"];
@@ -416,13 +418,21 @@ _group setSpeedMode  "FULL";
     // ═══ C. DÉBARQUEMENT / EMBARQUEMENT ══════════════════════════════════════
     if (_supportType in ["DEBARQUEMENT", "EMBARQUEMENT"]) then {
         _heli flyInHeight 0;
-        _heli land (if (_supportType == "DEBARQUEMENT") then {"GET OUT"} else {"GET IN"});
+        // Atterrissage précis : landAt cible le centre exact de la dalle héliport
+        if (!isNull _heliportObj) then {
+            _heli landAt _heliportObj;
+            diag_log format ["[LL][HELI] landAt héliport '%1'", vehicleVarName _heliportObj];
+        } else {
+            _heli doMove _dropPos;
+            _heli land "LAND";
+            diag_log "[LL][HELI][WARN] landAt fallback — pas d'objet héliport.";
+        };
 
         private _landTimer = 0;
         waitUntil {
-            sleep 1; _landTimer = _landTimer + 1;
+            sleep 0.5; _landTimer = _landTimer + 0.5;
             !alive _heli || isTouchingGround _heli ||
-            (velocity _heli # 2 == 0 && { getPosVisual _heli # 2 < 2 }) || _landTimer > 60
+            (abs (velocity _heli # 2) < 0.2 && { getPosVisual _heli # 2 < 1.5 }) || _landTimer > 90
         };
 
         if (!alive _heli) exitWith {
