@@ -69,16 +69,46 @@ _crate addAction [
             private _cratePos = getPos _crate;
             private _crateDir = getDir _crate;
 
-            // Calculer les directions perpendiculaires pour les 2 positions de service
-            // (gauche et droite de la caisse, à ~2m)
-            private _dirLeft  = _crateDir - 90;
-            private _dirRight = _crateDir + 90;
-            private _posLeft  = _crate getPos [2, _dirLeft];
-            private _posRight = _crate getPos [2, _dirRight];
+            // Positions de service devant la caisse, côté leader (±20° pour éviter le clipping)
+            // Les 2 unités s'agenouillent face à la caisse, du même côté que le chef — tactiquement
+            // elles gardent la caisse entre elles et la direction ennemie.
+            private _frontDir = _cratePos getDir (getPos _leader); // axe caisse → leader
+            private _posLeft  = _crate getPos [0.2, _frontDir + 20];
+            private _posRight = _crate getPos [0.2, _frontDir - 20];
 
-            // Direction d'éloignement (derrière la caisse par rapport au leader)
-            private _awayDir = _cratePos getDir (getPos _leader);
-            private _awayDir2 = _awayDir + 180;  // direction opposée au leader
+            // Direction d'éloignement (vers le leader après réapprovisionnement)
+            private _awayDir  = _frontDir;            // identique à frontDir pour lisibilité
+            private _awayDir2 = _frontDir + 180;     // opposée = vers l'ennemi (recul de service)
+
+            // ─── Helpers MP-safe : animation sur la machine locale de l'IA ───────────
+            // disableAI / selectWeapon / switchMove sont des commandes LOCALES.
+            // Elles doivent être exécutées là où l'unité est locale :
+            //   → serveur (machine 2) en dédié, hôte en hosted game.
+            // remoteExec ["spawn", owner _u] garantit cela dans les deux cas.
+            private _fnc_doUnitAnim = {
+                params ["_u", "_anim"];
+                if (isNull _u || !alive _u) exitWith {};
+                [[_u, _anim], {
+                    params ["_u", "_anim"];
+                    if (!alive _u) exitWith {};
+                    _u disableAI "MOVE";        // immobilise l'IA pendant la séquence
+                    _u disableAI "ANIM";        // empêche le FSM de l'IA d'annuler l'anim
+                    _u selectWeapon "";         // range l'arme : mains libres pour fouiller
+                    _u switchMove _anim;        // démarre l'animation immédiatement
+                }] remoteExec ["spawn", owner _u];
+            };
+            private _fnc_stopUnitAnim = {
+                params ["_u"];
+                if (isNull _u) exitWith {};
+                private _pw = primaryWeapon _u;
+                [[_u, _pw], {
+                    params ["_u", "_pw"];
+                    if (!alive _u) exitWith {};
+                    _u enableAI "ANIM";
+                    _u enableAI "MOVE";
+                    if (_pw != "") then { _u selectWeapon _pw; }; // reprend son arme
+                }] remoteExec ["spawn", owner _u];
+            };
 
             // ─── Boucle par paires de 2 ─────────────────────────────────────
             private _totalUnits = count _squadAI;
@@ -100,31 +130,37 @@ _crate addAction [
                     _unit2 setUnitPos "UP";
                 };
 
-                // Attente arrivée (timeout 20s)
+                // Attente arrivée naturelle (timeout 20s) — seuil 2.5m
+                // doMove vers _posLeft/Right (à 2.0m de la caisse) : l'IA s'arrête naturellement
+                // à ~2m sans être bloquée par la collision physique de la caisse.
                 private _moveTimeout = 0;
                 waitUntil {
                     sleep 0.5;
                     _moveTimeout = _moveTimeout + 0.5;
-                    private _u1ok = !alive _unit1 || (_unit1 distance2D _cratePos < 3.5);
-                    private _u2ok = isNull _unit2 || !alive _unit2 || (_unit2 distance2D _cratePos < 3.5);
+                    private _u1ok = !alive _unit1 || (_unit1 distance2D _cratePos < 0.7);
+                    private _u2ok = isNull _unit2 || !alive _unit2 || (_unit2 distance2D _cratePos < 0.7);
                     (_u1ok && _u2ok) || _moveTimeout > 20
                 };
 
-                // ── Animation de fouille + réapprovisionnement ──────────────
-                // Orienter les unités vers la caisse
+                // ── Orientation, posture et démarrage de l'animation ────────
+                // AinvPknlMstpSnonWrflDnon_medic :
+                //   Sn on = arme sur le dos, mains libres → les bras se tendent vers l'avant
+                //   Animation bouclante → parfaite pour fouiller une caisse pendant 6 secondes
+                //   disableAI "ANIM" empêche le FSM de combat de reprendre le dessus
+                //   Exécuté via _fnc_doUnitAnim (remoteExec → machine locale de l'IA)
                 if (alive _unit1) then {
                     _unit1 setDir (_unit1 getDir _cratePos);
                     _unit1 setUnitPos "MIDDLE";
-                    _unit1 playMoveNow "AinvPknlMstpSlayWrflDnon_medic";
+                    [_unit1, "AinvPknlMstpSnonWrflDnon_medic"] call _fnc_doUnitAnim;
                 };
                 if (!isNull _unit2 && { alive _unit2 }) then {
                     _unit2 setDir (_unit2 getDir _cratePos);
                     _unit2 setUnitPos "MIDDLE";
-                    _unit2 playMoveNow "AinvPknlMstpSlayWrflDnon_medic";
+                    [_unit2, "AinvPknlMstpSnonWrflDnon_medic"] call _fnc_doUnitAnim;
                 };
 
-                // Pendant l'animation (~6s) : réapprovisionner réellement
-                sleep 2;
+                // Laisser l'animation se lancer et la 1ère phase de prise se dérouler
+                sleep 3.0;
 
                 // Fonction locale de rechargement depuis la caisse
                 private _fnc_resupply = {
@@ -187,8 +223,14 @@ _crate addAction [
                 if (alive _unit1) then { [_unit1, _crate] call _fnc_resupply; };
                 if (!isNull _unit2 && { alive _unit2 }) then { [_unit2, _crate] call _fnc_resupply; };
 
-                // Attendre la fin de l'animation
-                sleep 4;
+                // 2e phase d'animation : range les chargeurs dans le sac (2.5s de plus)
+                sleep 2.5;
+
+                // ── Fin d'animation : restaurer l'état de l'IA ──────────────
+                // enableAI + reprend son arme principale (via remoteExec → machine locale)
+                if (alive _unit1) then { [_unit1] call _fnc_stopUnitAnim; };
+                if (!isNull _unit2 && { alive _unit2 }) then { [_unit2] call _fnc_stopUnitAnim; };
+                sleep 0.3; // court délai pour que l'arme remonte avant de bouger
 
                 // ── Éloignement de la paire ─────────────────────────────────
                 // Les unités servies s'éloignent de 8m pour laisser place aux suivantes

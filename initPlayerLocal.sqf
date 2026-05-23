@@ -16,6 +16,9 @@
 // Ajout de l'action pour ordonner la fouille des bâtiments aux IA
 [] spawn LL_fnc_addSearchAction;
 
+// Ajout de l'action pour forcer le regroupement des IA coincées
+[] spawn LL_fnc_addRallyAction;
+
 // Les actions de demande de support hélicoptère (Chinook RACS)
 [] spawn LL_fnc_addHelicopterActions;
 

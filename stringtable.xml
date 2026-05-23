@@ -442,6 +442,38 @@ Le Roi de Sahrani a lancé cette opération de pacification autonome pour prouve
         <English>Extraction — %1 / %2 on board</English>
         <French>Extraction — %1 / %2 à bord</French>
       </Key>
+      <Key ID="STR_LL_Action_Rally">
+        <English>[Rally] Force AI regroupment</English>
+        <French>[Regroupement] Forcer le regroupement de l'escouade</French>
+      </Key>
+      <Key ID="STR_LL_Msg_Rally_Start">
+        <English>[SQUAD] Regroupment ordered. AI units moving to formation.</English>
+        <French>[ESCOUADE] Regroupement ordonné. Les IA rejoignent la formation.</French>
+      </Key>
+      <Key ID="STR_LL_Msg_Rally_Done">
+        <English>[SQUAD] Regroupment complete.</English>
+        <French>[ESCOUADE] Regroupement terminé.</French>
+      </Key>
+      <Key ID="STR_LL_Msg_Rally_NoAI">
+        <English>[SQUAD] No active AI in your group.</English>
+        <French>[ESCOUADE] Aucune IA active dans votre groupe.</French>
+      </Key>
+      <Key ID="STR_LL_Action_Resupply">
+        <English>[Resupply] Order squad to rearm</English>
+        <French>[Ravitaillement] Ordonner le réapprovisionnement</French>
+      </Key>
+      <Key ID="STR_LL_Msg_Resupply_Start">
+        <English>[SUPPORT] Squad is resupplying from the crate.</English>
+        <French>[SUPPORT] L'escouade se réapprovisionne depuis la caisse.</French>
+      </Key>
+      <Key ID="STR_LL_Msg_Resupply_Done">
+        <English>[SUPPORT] Resupply complete. Squad regrouping.</English>
+        <French>[SUPPORT] Réapprovisionnement terminé. Regroupement.</French>
+      </Key>
+      <Key ID="STR_LL_Msg_Resupply_NoAI">
+        <English>[SUPPORT] No AI squad members available to resupply.</English>
+        <French>[SUPPORT] Aucune IA disponible pour le réapprovisionnement.</French>
+      </Key>
     </Container>
   </Package>
 </Project>

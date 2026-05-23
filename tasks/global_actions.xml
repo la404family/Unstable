@@ -234,6 +234,22 @@
       </Key>
 
       <!-- Réapprovisionnement depuis caisse de munitions -->
+      <Key ID="STR_LL_Action_Rally">
+        <English>[Rally] Force AI regroupment</English>
+        <French>[Regroupement] Forcer le regroupement de l'escouade</French>
+      </Key>
+      <Key ID="STR_LL_Msg_Rally_Start">
+        <English>[SQUAD] Regroupment ordered. AI units moving to formation.</English>
+        <French>[ESCOUADE] Regroupement ordonné. Les IA rejoignent la formation.</French>
+      </Key>
+      <Key ID="STR_LL_Msg_Rally_Done">
+        <English>[SQUAD] Regroupment complete.</English>
+        <French>[ESCOUADE] Regroupement terminé.</French>
+      </Key>
+      <Key ID="STR_LL_Msg_Rally_NoAI">
+        <English>[SQUAD] No active AI in your group.</English>
+        <French>[ESCOUADE] Aucune IA active dans votre groupe.</French>
+      </Key>
       <Key ID="STR_LL_Action_Resupply">
         <English>[Resupply] Order squad to rearm</English>
         <French>[Ravitaillement] Ordonner le réapprovisionnement</French>
