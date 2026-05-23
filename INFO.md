@@ -18,7 +18,7 @@
 - les barbes sont déterminées par la variable CUP_Beard_Brown ou CUP_Beard_Black
 - Les chapeaux sont déterminés par : CPU_H_TKI_Lungee_Open_01 à CPU_H_TKI_Lungee_Open_06 ou CPU_H_TKI_Pakol_1_01 à CPU_H_TKI_Pakol_1_05 ou - CPU_H_TKI_SkullCap_01 à CPU_H_TKI_SkullCap_06
 - Les chapeaux et les barbes sont réservés aux hommes.
-- heliport_00 à heliport_XX sont des heliports invisible
+- Heliport_00 à Heliport_XX sont des heliports invisible
 - La variable du drone est : CUP_B_USMC_DYN_MQ9
 - vehicule_team est le véhicule des joueurs en début de mission. (nom de variable du véhicule : CUP_B_nM1025_SOV_M2_USMC_DES)
 - l'hélicoptère allié est un CH-47F (CUP_I_CH47F_RACS)
