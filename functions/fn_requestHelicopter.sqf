@@ -734,7 +734,7 @@ _group setSpeedMode  "FULL";
                 private _allHumans     = allPlayers select { alive _x };
                 private _playersInHeli = { isPlayer _x && { alive _x } } count (crew _heli);
                 // Compteur d'embarquement non-intrusif (hintSilent)
-                (format ["Extraction — %1 / %2 à bord", _playersInHeli, count _allHumans]) remoteExec ["hintSilent", 0];
+                (format [localize "STR_LL_Heli_Msg_Extract_Counter", _playersInHeli, count _allHumans]) remoteExec ["hintSilent", 0];
                 if (_playersInHeli > 0) then {
                     if (_playersInHeli >= count _allHumans) then { _shouldLeave = true; };
                 } else {

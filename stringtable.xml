@@ -438,6 +438,10 @@ Le Roi de Sahrani a lancé cette opération de pacification autonome pour prouve
         <English>[LL ERROR] assignLeader: No player detected to assign as leader!</English>
         <French>[LL ERREUR] assignLeader : Aucun joueur détecté pour attribuer le leader !</French>
       </Key>
+      <Key ID="STR_LL_Heli_Msg_Extract_Counter">
+        <English>Extraction — %1 / %2 on board</English>
+        <French>Extraction — %1 / %2 à bord</French>
+      </Key>
     </Container>
   </Package>
 </Project>
