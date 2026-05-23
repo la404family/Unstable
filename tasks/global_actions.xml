@@ -232,6 +232,24 @@
         <English>Extraction — %1 / %2 on board</English>
         <French>Extraction — %1 / %2 à bord</French>
       </Key>
+
+      <!-- Réapprovisionnement depuis caisse de munitions -->
+      <Key ID="STR_LL_Action_Resupply">
+        <English>[Resupply] Order squad to rearm</English>
+        <French>[Ravitaillement] Ordonner le réapprovisionnement</French>
+      </Key>
+      <Key ID="STR_LL_Msg_Resupply_Start">
+        <English>[SUPPORT] Squad is resupplying from the crate.</English>
+        <French>[SUPPORT] L'escouade se réapprovisionne depuis la caisse.</French>
+      </Key>
+      <Key ID="STR_LL_Msg_Resupply_Done">
+        <English>[SUPPORT] Resupply complete. Squad regrouping.</English>
+        <French>[SUPPORT] Réapprovisionnement terminé. Regroupement.</French>
+      </Key>
+      <Key ID="STR_LL_Msg_Resupply_NoAI">
+        <English>[SUPPORT] No AI squad members available to resupply.</English>
+        <French>[SUPPORT] Aucune IA disponible pour le réapprovisionnement.</French>
+      </Key>
     </Container>
   </Package>
 </Project>

@@ -378,6 +378,8 @@ _group setSpeedMode  "FULL";
 
         if (_supportType == "LIVRAISON") then {
             (localize "STR_TAG_Msg_Ammo_Dropped") remoteExec ["systemChat", _caller];
+            // Ajout addAction réapprovisionnement sur la caisse (exécuté sur tous les clients + JIP)
+            [_cargo] remoteExec ["LL_fnc_addResupplyAction", 0, true];
             [_cargo] spawn {
                 params ["_crate"];
                 if (isNull _crate) exitWith {};
