@@ -166,15 +166,9 @@ private _homeBase = +_spawnPos;
 // 4. CRÉATION DU VÉHICULE
 // ─────────────────────────────────────────────────────────────────────────────
 
-private _heliClass    = "CUP_I_CH47F_RACS";
-private _pilotClass   = "CUP_I_RACS_Pilot";
-private _soldierClass = "CUP_I_RACS_Soldier";
+private _heliClass = "CUP_I_CH47F_RACS";
 
 private _side = if (!isNull _caller) then { side (group _caller) } else { independent };
-if (_side == west) then {
-    _pilotClass   = "B_Helipilot_F";
-    _soldierClass = "B_Soldier_F";
-};
 
 private _heli     = objNull;
 private _attempts = 0;
@@ -201,64 +195,74 @@ if (isNull _heli) exitWith {
 missionNamespace setVariable ["LL_missionHelicopter", _heli, true];
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 5. CRÉATION DE L'ÉQUIPAGE — GROUPE UNIQUE
+// 5. ÉQUIPAGE NATIF — createVehicleCrew (PLANHELI FIX)
+//    Crée le pilote + copilote + artilleurs de tourelle M134 automatiquement.
+//    Les artilleurs opèrent nativement les miniguns du véhicule (pas d'arme perso).
 // ─────────────────────────────────────────────────────────────────────────────
 
-private _group = createGroup [_side, true];
-private _crew  = [];
-
-// 1. Pilote (Index 0)
-private _pilot = _group createUnit [_pilotClass, [0,0,0], [], 0, "NONE"];
-_pilot moveInAny _heli;
-_crew pushBack _pilot;
-
-// 2. Copilote (Index 1)
-private _copilot = _group createUnit [_pilotClass, [0,0,0], [], 0, "NONE"];
-_copilot moveInAny _heli;
-_crew pushBack _copilot;
-
-// 3. Les 4 passagers test demandés
-for "_i" from 1 to 4 do {
-    private _crewMember = _group createUnit [_soldierClass, [0,0,0], [], 0, "NONE"];
-    _crewMember moveInAny _heli;
-    _crew pushBack _crewMember;
-};
-
-// Attribution des IA (Les pilotes conduisent, les autres tirent)
-{
-    private _u = _x;
-    
-    _u enableAI "FSM";
-    _u enableAI "MOVE";
-    _u allowFleeing  0;
-    _u allowDamage   false;
-    
-    // Pilote/copilot
-    if (_forEachIndex < 2) then {
-        _u disableAI "TARGET";
-        _u disableAI "AUTOTARGET";
-        _u disableAI "AUTOCOMBAT";
-        _u disableAI "SUPPRESSION";
-    } else {
-        // Tireurs
-        _u setSkill 1;
-        { _u setSkill [_x, 1.0]; } forEach ["aimingAccuracy","aimingShake","aimingSpeed","spotDistance","spotTime","courage","commanding"];
-        _u enableAI "TARGET";
-        _u enableAI "AUTOTARGET";
-        _u enableAI "AUTOCOMBAT";
-        _u enableAI "SUPPRESSION";
-    };
-} forEach _crew;
-
+createVehicleCrew _heli;
 sleep 0.3;
 _heli setVehicleAmmo 1;
 
-// Configuration des comportements de groupes
+// Récupérer l'équipage et le groupe créés par le moteur
+private _crew    = crew _heli;
+private _group   = group (_crew # 0);
+private _pilot   = driver _heli;
+private _copilot = _heli turretUnit [0];
+private _gunners = _crew select { _x != _pilot && { _x != _copilot } };
+
+// Diagnostic RPT : vérifier que les artilleurs sont sur les bonnes tourelles
+diag_log format ["[LL][HELI] createVehicleCrew → %1 membres | pilote=%2 | copilote=%3 | artilleurs=%4",
+    count _crew, _pilot, _copilot, count _gunners];
+{
+    private _tp = _heli unitTurret _x;
+    private _tw = _heli weaponsTurret _tp;
+    diag_log format ["[LL][HELI]   %1 → tourelle %2 → armes %3", _x, _tp, _tw];
+} forEach _crew;
+
+// Changer le camp si nécessaire (le caller peut être BLUFOR alors que le CH47F est Independent)
+if (side _group != _side) then {
+    private _newGroup = createGroup [_side, true];
+    { [_x] joinSilent _newGroup; } forEach (units _group);
+    deleteGroup _group;
+    _group = _newGroup;
+    diag_log format ["[LL][HELI] Équipage transféré vers le camp %1", _side];
+};
+
+// ── PILOTES : concentrés sur le vol, ne tirent pas ───────────────────────────
+{
+    _x disableAI "TARGET";
+    _x disableAI "AUTOTARGET";
+    _x disableAI "AUTOCOMBAT";
+    _x disableAI "SUPPRESSION";
+    _x enableAI  "FSM";
+    _x enableAI  "MOVE";
+    _x allowFleeing 0;
+    _x allowDamage  false;
+} forEach [_pilot, _copilot];
+
+// ── ARTILLEURS : skill max, tirent à vue ─────────────────────────────────────
+{
+    _x setSkill 1;
+    { _x setSkill [_x, 1.0]; } forEach [
+        "aimingAccuracy","aimingShake","aimingSpeed",
+        "spotDistance","spotTime","courage","commanding"
+    ];
+    _x enableAI "TARGET";
+    _x enableAI "AUTOTARGET";
+    _x enableAI "AUTOCOMBAT";
+    _x enableAI "SUPPRESSION";
+    _x enableAI "FSM";
+    _x enableAI "MOVE";
+    _x setCombatMode "RED";
+    _x allowFleeing 0;
+    _x allowDamage  false;
+} forEach _gunners;
+
+// Configuration du groupe
 _group setBehaviour "COMBAT";
 _group setCombatMode "RED";
-_group setSpeedMode "FULL";
-
-_heli setCombatMode "RED"; 
+_group setSpeedMode  "FULL";
 
 // Destination courante stockée sur l'heli pour le sub-thread combat
 _heli setVariable ["TAG_Heli_CurrentDestination", _targetPosFinal, true];
@@ -266,14 +270,14 @@ _heli setVariable ["TAG_Heli_CurrentDestination", _targetPosFinal, true];
 // ─────────────────────────────────────────────────────────────────────────────
 // 6. THREAD DE VOL PRINCIPAL
 // ─────────────────────────────────────────────────────────────────────────────
-[_heli, _targetPosFinal, _group, _crew, _homeBase,
+[_heli, _targetPosFinal, _group, _crew, _gunners, _homeBase,
  _supportType, _caller, _flyHeight, _hoverHeight, _side,
- _pilotClass, _soldierClass, _loiterHeight, _loiterRadius, _loiterDuration] spawn {
+ _loiterHeight, _loiterRadius, _loiterDuration] spawn {
 
     params [
-        "_heli", "_dropPos", "_group", "_crew", "_homeBase",
+        "_heli", "_dropPos", "_group", "_crew", "_gunners", "_homeBase",
         "_supportType", "_caller", "_flyHeight", "_hoverHeight", "_side",
-        "_pilotClass", "_soldierClass", "_loiterHeight", "_loiterRadius", "_loiterDuration"
+        "_loiterHeight", "_loiterRadius", "_loiterDuration"
     ];
 
     private _isSlingload      = _supportType in ["LIVRAISON", "VEHICULE"];
@@ -281,27 +285,37 @@ _heli setVariable ["TAG_Heli_CurrentDestination", _targetPosFinal, true];
     private _originalMass     = 0;
     private _victoryTriggered = false;
 
-    // ── SUB-THREAD COMBAT ─────────────────────────────────────────────────────
-    // Intervalle 3s — maintient le cap et force le tir des artilleurs.
-    [_heli, _group] spawn {
-        params ["_heli", "_group"];
-
-        private _reloadTick = 0;
+    // ── SUB-THREAD COMBAT — tir à vue des artilleurs (toutes les 3s) ─────────
+    [_heli, _group, _gunners] spawn {
+        params ["_heli", "_group", "_gunners"];
 
         while { alive _heli && { missionNamespace getVariable ["TAG_AirSupport_Active", false] } } do {
             sleep 3;
             if (!alive _heli) exitWith {};
 
-            _reloadTick = _reloadTick + 1;
+            // Recharger les munitions du véhicule périodiquement
+            _heli setVehicleAmmo 1;
 
-            // Détection
+            // Maintenir le mode combat agressif
+            _group setCombatMode "RED";
+
+            // Maintenir le cap vers la destination
+            private _dest = _heli getVariable ["TAG_Heli_CurrentDestination", []];
+            if (count _dest > 0) then {
+                _heli doMove _dest;
+                _group setSpeedMode "FULL";
+            };
+
+            // Détecter les ennemis à 1000m
             private _enemies = allUnits select {
-                alive _x && { side _x == east } && { _x distance2D _heli < 800 }
+                alive _x && { side _x == east } && { _x distance2D _heli < 1000 }
             };
 
             if (count _enemies > 0) then {
+                // Révéler toutes les cibles au groupe
                 { _group reveal [_x, 4]; } forEach _enemies;
 
+                // Trouver la cible la plus proche
                 private _target   = _enemies # 0;
                 private _bestDist = _target distance _heli;
                 {
@@ -309,28 +323,14 @@ _heli setVariable ["TAG_Heli_CurrentDestination", _targetPosFinal, true];
                     if (_d < _bestDist) then { _bestDist = _d; _target = _x; };
                 } forEach _enemies;
 
+                // Ordonner le tir à chaque artilleur vivant
                 {
-                    // Boucle de tir EXCLUSIVEMENT sur les passagers/gunners (pas les 2 pilotes à l'avant)
-                    private _gunner = _x;
-                    
-                    // Récupère nativement l'arme de l'endroit où le jeu l'a assis
-                    private _turretPath = _heli unitTurret _gunner;
-                    private _turretWeapon = (_heli weaponsTurret _turretPath) param [0, ""];
-
-                    _gunner doTarget _target;
-                    _gunner doWatch  _target;
-                    
-                    // Ordres natifs ultra-agressifs
-                    _group reveal [_target, 4];
-                    _gunner doFire _target;
-                    _gunner suppressFor 3; // Force l'IA à tirer même si la cible n'est pas "parfaite"
-
-                    // Force mécanique absolue si l'IA s'endort
-                    if (_turretWeapon != "") then {
-                        _heli selectWeaponTurret [_turretWeapon, _turretPath];
-                        _gunner forceWeaponFire [_turretWeapon, _turretWeapon]; 
+                    if (alive _x) then {
+                        _x doWatch  _target;
+                        _x doTarget _target;
+                        _x doFire   _target;
                     };
-                } forEach ((units _group) select { _x != (driver _heli) && { _heli unitTurret _x isNotEqualTo [0] } });
+                } forEach _gunners;
             };
         };
     };
