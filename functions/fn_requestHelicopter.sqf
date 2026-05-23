@@ -440,16 +440,12 @@ _group setSpeedMode  "FULL";
             _wpDeb setWaypointSpeed      "LIMITED";
             _heli doMove _dropPos;
 
+            // Attente survol — l'hélicoptère n'est PAS arrêté :
+            // s'il se pose, il peut descendre sur les troupes éjectées.
             private _hovTimer = 0;
             waitUntil {
                 sleep 0.5; _hovTimer = _hovTimer + 0.5;
-                if (_heli distance2D _dropPos < 40) then {
-                    private _hp = getPosVisual _heli;
-                    private _vx = (((_dropPos # 0) - (_hp # 0)) * 0.35) min 5 max -5;
-                    private _vy = (((_dropPos # 1) - (_hp # 1)) * 0.35) min 5 max -5;
-                    _heli setVelocity [_vx, _vy, 0];
-                };
-                !alive _heli || (_heli distance2D _dropPos < 4) || _hovTimer > 90
+                !alive _heli || (_heli distance2D _dropPos < 30) || _hovTimer > 90
             };
 
             if (!alive _heli) exitWith {
@@ -458,16 +454,26 @@ _group setSpeedMode  "FULL";
                 missionNamespace setVariable ["LL_missionHelicopter",   objNull, true];
             };
 
-            _heli setVelocity [0, 0, 0];
-            _heli flyInHeight 25;
+            // Waypoint de transit : l'hélicoptère continue vers la base
+            // pendant que les troupes parachutent — plus de collision.
             while { count (waypoints _group) > 0 } do { deleteWaypoint [_group, 0]; };
-            diag_log format ["[LL][HELI] Hover 25m — parachutage sur '%1'.", vehicleVarName _heliportObj];
+            private _transitDir = _dropPos getDir _homeBase;
+            private _transitPos = _dropPos getPos [400, _transitDir];
+            private _wpTransit  = _group addWaypoint [_transitPos, 0];
+            _wpTransit setWaypointType       "MOVE";
+            _wpTransit setWaypointBehaviour  "CARELESS";
+            _wpTransit setWaypointCombatMode "BLUE";
+            _wpTransit setWaypointSpeed      "LIMITED";
+            _heli doMove _transitPos;
+
+            diag_log format ["[LL][HELI] Survol 25m — parachutage sur '%1'.", vehicleVarName _heliportObj];
         };
 
         if (_supportType == "EMBARQUEMENT") then {
-            // Phase 1 : Positionnement précis au-dessus du pad à 8m
-            // Le CH-47 se stabilise exactement avant l'atterrissage → pas de rebond
-            _heli flyInHeight 8;
+            // Descente par paliers — positionnement vérifié à chaque étape.
+            // setVelocity [vx, vy, velocity _heli # 2] : vz naturel préservé → pas de boucle.
+            // La correction XY n'est activée qu'à < 300 m (approche libre au-delà).
+
             private _wpEmb = _group addWaypoint [_dropPos, 0];
             _wpEmb setWaypointType       "MOVE";
             _wpEmb setWaypointBehaviour  "CARELESS";
@@ -475,48 +481,119 @@ _group setSpeedMode  "FULL";
             _wpEmb setWaypointSpeed      "LIMITED";
             _heli doMove _dropPos;
 
-            private _preTimer = 0;
+            // ── Palier 1 : 100 m — approche rapide, correction active < 300 m ────
+            _heli flyInHeight 100;
+            private _p1Timer = 0;
             waitUntil {
-                sleep 0.5; _preTimer = _preTimer + 0.5;
-                if (_heli distance2D _dropPos < 40) then {
-                    private _hp = getPosVisual _heli;
-                    private _vx = (((_dropPos # 0) - (_hp # 0)) * 0.35) min 4 max -4;
-                    private _vy = (((_dropPos # 1) - (_hp # 1)) * 0.35) min 4 max -4;
-                    _heli setVelocity [_vx, _vy, 0];
+                sleep 0.3; _p1Timer = _p1Timer + 0.3;
+                private _dist2d = _heli distance2D _dropPos;
+                if (_dist2d < 300) then {
+                    private _hp     = getPosVisual _heli;
+                    private _maxSpd = (_dist2d * 0.06) min 12 max 1;
+                    private _vx = (((_dropPos # 0) - (_hp # 0)) * 0.5) min _maxSpd max (-_maxSpd);
+                    private _vy = (((_dropPos # 1) - (_hp # 1)) * 0.5) min _maxSpd max (-_maxSpd);
+                    _heli setVelocity [_vx, _vy, velocity _heli # 2];
                 };
-                !alive _heli || (_heli distance2D _dropPos < 5) || _preTimer > 90
+                !alive _heli || _dist2d < 15 || _p1Timer > 180
             };
-
             if (!alive _heli) exitWith {
                 deleteMarker _markerName;
                 missionNamespace setVariable ["TAG_AirSupport_Active",  false,   true];
                 missionNamespace setVariable ["LL_missionHelicopter",   objNull, true];
             };
+            diag_log format ["[LL][HELI][P1] 100m validé — dist2D=%1m", round (_heli distance2D _dropPos)];
 
+            // ── Palier 2 : 50 m — confirmation position, vitesse réduite ─────────
+            _heli flyInHeight 50;
+            private _p2Timer = 0;
+            waitUntil {
+                sleep 0.3; _p2Timer = _p2Timer + 0.3;
+                private _dist2d = _heli distance2D _dropPos;
+                private _hp     = getPosVisual _heli;
+                private _maxSpd = (_dist2d * 0.06) min 6 max 0.5;
+                private _vx = (((_dropPos # 0) - (_hp # 0)) * 0.5) min _maxSpd max (-_maxSpd);
+                private _vy = (((_dropPos # 1) - (_hp # 1)) * 0.5) min _maxSpd max (-_maxSpd);
+                _heli setVelocity [_vx, _vy, velocity _heli # 2];
+                !alive _heli || _dist2d < 8 || _p2Timer > 90
+            };
+            if (!alive _heli) exitWith {
+                deleteMarker _markerName;
+                missionNamespace setVariable ["TAG_AirSupport_Active",  false,   true];
+                missionNamespace setVariable ["LL_missionHelicopter",   objNull, true];
+            };
+            diag_log format ["[LL][HELI][P2] 50m validé — dist2D=%1m", round (_heli distance2D _dropPos)];
+
+            // ── Palier 3 : 15 m — positionnement final, vitesse très réduite ─────
+            _heli flyInHeight 15;
+            private _p3Timer = 0;
+            waitUntil {
+                sleep 0.3; _p3Timer = _p3Timer + 0.3;
+                private _dist2d = _heli distance2D _dropPos;
+                private _hp     = getPosVisual _heli;
+                private _maxSpd = (_dist2d * 0.05) min 2 max 0.2;
+                private _vx = (((_dropPos # 0) - (_hp # 0)) * 0.5) min _maxSpd max (-_maxSpd);
+                private _vy = (((_dropPos # 1) - (_hp # 1)) * 0.5) min _maxSpd max (-_maxSpd);
+                _heli setVelocity [_vx, _vy, velocity _heli # 2];
+                !alive _heli || _dist2d < 4 || _p3Timer > 60
+            };
+            if (!alive _heli) exitWith {
+                deleteMarker _markerName;
+                missionNamespace setVariable ["TAG_AirSupport_Active",  false,   true];
+                missionNamespace setVariable ["LL_missionHelicopter",   objNull, true];
+            };
+            diag_log format ["[LL][HELI][P3] 15m validé — dist2D=%1m", round (_heli distance2D _dropPos)];
+
+            // ── Attente altitude réelle ≤ 10m avant coupure carburant ─────────────
+            // flyInHeight 15 est une instruction, pas un bloquant — l'hélico peut
+            // encore être à 40-50m quand le dist2D < 4m est validé.
+            // On attend qu'il soit physiquement bas avant de couper le moteur.
+            private _altWait = 0;
+            waitUntil {
+                sleep 0.3; _altWait = _altWait + 0.3;
+                diag_log format ["[LL][HELI][ALT] Altitude AGL=%1m dist2D=%2m", round ((getPosATL _heli) # 2), round (_heli distance2D _dropPos)];
+                !alive _heli || (getPosATL _heli) # 2 <= 10 || _altWait > 30
+            };
+            if (!alive _heli) exitWith {
+                deleteMarker _markerName;
+                missionNamespace setVariable ["TAG_AirSupport_Active",  false,   true];
+                missionNamespace setVariable ["LL_missionHelicopter",   objNull, true];
+            };
+            diag_log format ["[LL][HELI][ALT] Altitude ok — AGL=%1m, coupure carburant.", round ((getPosATL _heli) # 2)];
+
+            // ── Atterrissage forcé par coupure carburant ──────────────────────────
+            // Sans puissance moteur, l'IA descend sans se battre contre la physique.
             _heli setVelocity [0, 0, 0];
             while { count (waypoints _group) > 0 } do { deleteWaypoint [_group, 0]; };
-
-            // Phase 2 : Atterrissage depuis la position précise — moteur maintenu
+            _heli setFuel 0;
             _heli flyInHeight 0;
-            if (!isNull _heliportObj) then {
-                _heli landAt _heliportObj;
-                diag_log format ["[LL][HELI] Positionné + landAt '%1' — embarquement.", vehicleVarName _heliportObj];
-            } else {
-                _heli doMove _dropPos;
-                _heli land "LAND";
-                diag_log "[LL][HELI][WARN] landAt fallback — embarquement.";
-            };
-            private _landTimer = 0;
+            _heli land "LAND";
+            diag_log "[LL][HELI] Atterrissage fuel=0 — descente finale.";
+
+            private _landTimeout = time + 45;
             waitUntil {
-                sleep 0.5; _landTimer = _landTimer + 0.5;
-                !alive _heli || isTouchingGround _heli ||
-                (abs (velocity _heli # 2) < 0.2 && { getPosVisual _heli # 2 < 1.5 }) || _landTimer > 90
+                sleep 0.5;
+                !alive _heli || isTouchingGround _heli || time > _landTimeout
             };
+            if (!isTouchingGround _heli && { alive _heli }) then {
+                _heli setVelocity [0, 0, 0];
+                _heli setPos [_dropPos # 0, _dropPos # 1, 0];
+                diag_log "[LL][HELI][WARN] Timeout atterrissage — setPos sol forcé.";
+            };
+            sleep 1;
+
             if (!alive _heli) exitWith {
                 deleteMarker _markerName;
                 missionNamespace setVariable ["TAG_AirSupport_Active",  false,   true];
                 missionNamespace setVariable ["LL_missionHelicopter",   objNull, true];
             };
+
+            // Restauration carburant + rampe arrière CH-47 ouverte
+            _heli setFuel 1;
+            _heli engineOn true;
+            _heli setVehicleLock "UNLOCKED";
+            _heli animateSource ["door_rear_source", 1];
+            _heli animateDoor   ["door_rear_source", 1];
+            diag_log "[LL][HELI] Rampe arrière ouverte — prêt à l'embarquement.";
         };
 
         // ── DÉBARQUEMENT — spawn escouade RACS ────────────────────────────────
@@ -677,39 +754,53 @@ _group setSpeedMode  "FULL";
             private _timeout = time + 600;
             private _shouldLeave = false;
             waitUntil {
-                sleep 2;
-                private _allHumans = allPlayers select { alive _x };
-                private _inHeli    = crew _heli select { _x in _allHumans };
-                if (count _inHeli > 0) then {
-                    if (count _inHeli >= count _allHumans) then { _shouldLeave = true; };
+                sleep 3;
+                private _allHumans     = allPlayers select { alive _x };
+                private _playersInHeli = { isPlayer _x && { alive _x } } count (crew _heli);
+                // Compteur d'embarquement non-intrusif (hintSilent)
+                (format ["Extraction — %1 / %2 à bord", _playersInHeli, count _allHumans]) remoteExec ["hintSilent", 0];
+                if (_playersInHeli > 0) then {
+                    if (_playersInHeli >= count _allHumans) then { _shouldLeave = true; };
                 } else {
                     if (time > _timeout) then { _shouldLeave = true; };
                 };
                 !alive _heli || _shouldLeave
             };
 
-            // 5 secondes de pause après embarquement — l'hélicoptère attend avant de partir
-            if (alive _heli) then {
-                sleep 5;
-                _group setBehaviour  "CARELESS";
-                _group setCombatMode "RED";
-                _group setSpeedMode  "FULL";
-                diag_log "[LL][HELI] Embarquement — 5s pause, CARELESS/RED restauré.";
+            if (!alive _heli) exitWith {
+                "" remoteExec ["hintSilent", 0];
+                deleteMarker _markerName;
+                missionNamespace setVariable ["TAG_AirSupport_Active",  false,   true];
+                missionNamespace setVariable ["LL_missionHelicopter",   objNull, true];
             };
+
+            // Séquence décollage : fermeture rampe → annulation mode atterrissage → moteur
+            _heli animateSource ["door_rear_source", 0];
+            _heli animateDoor   ["door_rear_source", 0];
+            _heli land "NONE";
+            _heli setFuel 1;
+            _heli engineOn true;
+            sleep 3;  // Démarrage moteur
+
+            _group setBehaviour  "CARELESS";
+            _group setCombatMode "RED";
+            _group setSpeedMode  "FULL";
+            diag_log "[LL][HELI] Embarquement — rampe fermée, CARELESS/RED restauré.";
 
             (localize "STR_LL_Heli_Msg_Departing") remoteExec ["systemChat", 0];
 
             if (alive _heli) then {
-                private _playersInHeli = crew _heli select { isPlayer _x && { alive _x } };
-                if (count _playersInHeli > 0) then {
+                private _boardedPlayers = crew _heli select { isPlayer _x && { alive _x } };
+                if (count _boardedPlayers > 0) then {
                     _victoryTriggered = true;
                     deleteMarker _markerName;
+                    "" remoteExec ["hintSilent", 0];  // Efface le compteur
                     _heli flyInHeight _flyHeight;
                     private _wpVic = _group addWaypoint [_homeBase, 0];
-                    _wpVic setWaypointType      "MOVE";
-                    _wpVic setWaypointBehaviour "CARELESS";
+                    _wpVic setWaypointType       "MOVE";
+                    _wpVic setWaypointBehaviour  "CARELESS";
                     _wpVic setWaypointCombatMode "RED";
-                    _wpVic setWaypointSpeed     "FULL";
+                    _wpVic setWaypointSpeed      "FULL";
                     _heli doMove _homeBase;
                     { _x hideObjectGlobal true; } forEach (crew _heli select { !(_x in _crew) });
                     _heli lock 2;
