@@ -4,7 +4,7 @@
 
 ### LOGIC DE JEU : 
 
-- M_Dans_Bat_000 à M_Dans_Bat_XXX sont game logic placé dans des batiments (les M_Dans_Bat_XXX déterminent des lieux précis de missions ( respecter absolument le x,y,z + 0.2)
+- M_Dans_Bat_000 à M_Dans_Bat_XXX sont game logic placé dans des batiments les M_Dans_Bat_XXX déterminent des lieux précis de missions ( respecter absolument le x,y,z + 0.2)
 - Heliport_000 à Heliport_XXX sont des heliport invisibles. pour l'hélicoptère allié
 - player_00 à player_XX sont les unités jouables (Royal Army Corps of Sahrani - independant)
 - template_01 ... template_XX sont des personnages dans l'éditeur qui servent de gabarit de personnage pour des missions ou des civils...
@@ -21,7 +21,7 @@
 - heliport_00 à heliport_XX sont des heliports invisible
 - La variable du drone est : CUP_B_USMC_DYN_MQ9
 - vehicule_team est le véhicule des joueurs en début de mission. (nom de variable du véhicule : CUP_B_nM1025_SOV_M2_USMC_DES)
-- l'hélicoptère allié est un MH-47E (CUP_B_MH47E_USA)
+- l'hélicoptère allié est un CH-47F (CUP_I_CH47F_RACS)
 
 ---
 

@@ -4,7 +4,7 @@
  * LL_fnc_requestHelicopter
  *
  * Description:
- *   Fonction unique côté serveur de gestion du support hélicoptère (Chinook CUP_B_MH47E_USA).
+ *   Fonction unique côté serveur de gestion du support hélicoptère (Chinook CUP_I_CH47F_RACS).
  *   Garantit qu'un seul hélicoptère de support est actif sur la carte (verrou TAG_AirSupport_Active).
  *   La livraison de véhicule ("VEHICULE") ne peut être demandée qu'une seule fois dans la partie.
  *   L'hélicoptère apparaît à l'un des coins de la carte de Porto (le plus éloigné de la cible pour éviter les bugs)
@@ -161,7 +161,7 @@ private _maxDist = 0;
 } forEach _corners;
 
 private _homeBase = +_spawnPos;
-private _helicoClass = "CUP_B_MH47E_USA";
+private _helicoClass = "CUP_I_CH47F_RACS";
 
 // --- 3. CRÉATION DE L'HÉLICOPTÈRE ET DE L'ÉQUIPAGE ---
 private _heli = objNull;
@@ -174,6 +174,7 @@ while {isNull _heli && _spawnAttempts < 5} do {
         _heli setDir (_spawnPos getDir _targetPosFinal);
         _heli flyInHeight _flyHeight;
         _heli allowDamage false; // Invincible pour la sécurité du vol IA
+        _heli setVehicleAmmo 1; // Remplir toutes les munitions des armes du véhicule
     } else {
         sleep 1;
     };
@@ -190,7 +191,6 @@ if (isNull _heli) exitWith {
 // Assigner les pilotes et artilleurs de l'équipage dans le bon camp (allié aux joueurs - indépendant RACS)
 private _side = if (!isNull _caller) then { side (group _caller) } else { independent };
 private _group = createGroup [_side, true];
-private _gunnersGroup = createGroup [_side, true];
 private _crew = [];
 
 private _pilotClass = "CUP_I_RACS_Pilot";
@@ -210,36 +210,97 @@ private _copilot = _group createUnit [_pilotClass, [0,0,0], [], 0, "NONE"];
 _copilot moveInTurret [_heli, [0]];
 _crew pushBack _copilot;
 
-// Artilleurs des autres tourelles
+// --- DIAGNOSTIC : Logger les tourelles disponibles pour debug RPT ---
 private _turrets = allTurrets _heli;
-private _gunnerTurrets = _turrets select { _x isNotEqualTo [0] };
+diag_log format ["[LL][HELI] allTurrets retourne %1 tourelles : %2", count _turrets, _turrets];
 {
-    private _gunner = _gunnersGroup createUnit [_soldierClass, [0,0,0], [], 0, "NONE"];
-    _gunner moveInTurret [_heli, _x];
+    private _weapons = _heli weaponsTurret _x;
+    private _magazines = _heli magazinesTurret _x;
+    diag_log format ["[LL][HELI]   Tourelle %1 : armes=%2 | magazines=%3", _x, _weapons, _magazines];
+} forEach _turrets;
+
+// Artilleurs des tourelles armées (exclure copilote [0] et les sièges FFV sans arme montée)
+private _gunnerTurrets = _turrets select { 
+    _x isNotEqualTo [0] && { count (_heli weaponsTurret _x) > 0 } 
+};
+diag_log format ["[LL][HELI] Tourelles armées filtrées : %1 (total: %2)", _gunnerTurrets, count _gunnerTurrets];
+
+{
+    private _turretPath = _x;
+    private _gunner = _group createUnit [_soldierClass, [0,0,0], [], 0, "NONE"];
+    _gunner moveInTurret [_heli, _turretPath];
     _crew pushBack _gunner;
+    
+    // Rendre l'artilleur ultra agressif et réactif
+    _gunner setSkill 1;
+    { _gunner setSkill [_x, 1.0]; } forEach ["aimingAccuracy", "aimingShake", "aimingSpeed", "spotDistance", "spotTime", "courage", "commanding"];
+    
+    // Activer TOUS les modules IA de combat pour garantir l'engagement
+    _gunner enableAI "TARGET";
+    _gunner enableAI "AUTOTARGET";
+    _gunner enableAI "AUTOCOMBAT";
+    _gunner enableAI "SUPPRESSION";
+    _gunner enableAI "FSM";
+    _gunner enableAI "MOVE";
+    
+    // Forcer le mode combat individuel sur l'artilleur
+    _gunner setCombatMode "RED";
+    _gunner setBehaviour "COMBAT";
+    
+    diag_log format ["[LL][HELI]   Artilleur %1 placé sur tourelle %2", _gunner, _turretPath];
 } forEach _gunnerTurrets;
 
-// Pilotes ignorants les combats pour naviguer sereinement
-_group setBehaviour "CARELESS";
-_group setCombatMode "BLUE";
+// CRITIQUE : Recharger les munitions du véhicule APRÈS placement de l'équipage dans les tourelles
+sleep 0.5;
+_heli setVehicleAmmo 1;
+diag_log "[LL][HELI] setVehicleAmmo 1 appliqué APRÈS placement équipage.";
+
+// Forcer la sélection de l'arme de tourelle pour chaque artilleur
+{
+    private _turretPath = _gunnerTurrets select (_forEachIndex);
+    private _turretWeapons = _heli weaponsTurret _turretPath;
+    if (count _turretWeapons > 0) then {
+        _x selectWeapon (_turretWeapons select 0);
+        diag_log format ["[LL][HELI]   Artilleur %1 : arme de tourelle sélectionnée = %2", _x, _turretWeapons select 0];
+    };
+} forEach (_crew select [2, count _crew]);
+
+// Configurer le groupe en mode combat agressif pour que le véhicule autorise le tir des artilleurs
+_group setBehaviour "COMBAT";
+_group setCombatMode "RED";
 _group setSpeedMode "FULL";
 
-// Artilleurs agressifs pour engager les menaces
-_gunnersGroup setBehaviour "COMBAT";
-_gunnersGroup setCombatMode "RED";
-_gunnersGroup setSpeedMode "FULL";
+// Appliquer également les modes au véhicule lui-même pour forcer l'armement
+_heli setCombatMode "RED";
 
+// Désigner le premier artilleur comme leader pour que les ordres de combat du groupe soient transmis, 
+// car les pilotes ont leur IA de ciblage désactivée et bloqueraient sinon la transmission
+if (count _crew > 2) then {
+    private _firstGunner = _crew select 2;
+    _group selectLeader _firstGunner;
+};
+
+// Neutraliser sélectivement le comportement de combat des pilotes (vol imperturbable)
 {
+    _x disableAI "TARGET";
+    _x disableAI "AUTOTARGET";
+    _x disableAI "AUTOCOMBAT";
+    _x disableAI "SUPPRESSION";
     _x disableAI "FSM";
-    _x allowDamage false; // Invincibles également
+    _x setCombatMode "BLUE"; // Never fire (pilotes uniquement)
+} forEach [_pilot, _copilot];
+
+// Tout l'équipage est invincible
+{
+    _x allowDamage false;
 } forEach _crew;
 
 // Enregistrer l'hélicoptère globalement
 missionNamespace setVariable ["LL_missionHelicopter", _heli, true];
 
 // --- 4. EXÉCUTION DU THREAD DE VOL ET COMPORTEMENT ---
-[_heli, _targetPosFinal, _group, _gunnersGroup, _crew, _homeBase, _supportType, _caller, _flyHeight, _hoverHeight, _side, _pilotClass, _soldierClass, _loiterHeight, _loiterRadius, _loiterDuration] spawn {
-    params ["_heli", "_dropPos", "_group", "_gunnersGroup", "_crew", "_homeBase", "_supportType", "_caller", "_flyHeight", "_hoverHeight", "_side", "_pilotClass", "_soldierClass", "_loiterHeight", "_loiterRadius", "_loiterDuration"];
+[_heli, _targetPosFinal, _group, _crew, _homeBase, _supportType, _caller, _flyHeight, _hoverHeight, _side, _pilotClass, _soldierClass, _loiterHeight, _loiterRadius, _loiterDuration] spawn {
+    params ["_heli", "_dropPos", "_group", "_crew", "_homeBase", "_supportType", "_caller", "_flyHeight", "_hoverHeight", "_side", "_pilotClass", "_soldierClass", "_loiterHeight", "_loiterRadius", "_loiterDuration"];
     
     private _isSlingload = (_supportType == "LIVRAISON" || _supportType == "VEHICULE");
     private _cargo = objNull;
@@ -249,23 +310,70 @@ missionNamespace setVariable ["LL_missionHelicopter", _heli, true];
     // Initialiser la destination courante pour la boucle de rappel
     _heli setVariable ["TAG_Heli_CurrentDestination", _dropPos, true];
 
-    // Sous-thread de rappel toutes les 5 secondes pour forcer le comportement et l'ordre de vol des pilotes
-    [_heli, _group] spawn {
-        params ["_heli", "_group"];
+    // Sous-thread de combat : forcer le tir des artilleurs toutes les 2 secondes
+    [_heli, _group, _crew] spawn {
+        params ["_heli", "_group", "_crew"];
+        private _ammoReloadCounter = 0;
+        
         while {alive _heli && {missionNamespace getVariable ["TAG_AirSupport_Active", false]}} do {
-            sleep 5;
-            if (alive _heli) then {
-                if (behaviour (leader _group) != "CARELESS") then {
-                    _group setBehaviour "CARELESS";
-                };
-                if (combatMode _group != "BLUE") then {
-                    _group setCombatMode "BLUE";
-                };
-                
-                private _dest = _heli getVariable ["TAG_Heli_CurrentDestination", [0,0,0]];
-                if (_dest isNotEqualTo [0,0,0]) then {
-                    _heli doMove _dest;
-                    _group setSpeedMode "FULL";
+            sleep 2;
+            if (!alive _heli) exitWith {};
+            _ammoReloadCounter = _ammoReloadCounter + 1;
+
+            // 1. Maintenir le mode combat du groupe (forcer COMBAT + RED en permanence)
+            _group setBehaviour "COMBAT";
+            _group setCombatMode "RED";
+
+            // 2. Maintenir la destination de vol (le pilote suit les ordres malgré le combat)
+            private _dest = _heli getVariable ["TAG_Heli_CurrentDestination", [0,0,0]];
+            if (_dest isNotEqualTo [0,0,0]) then {
+                _heli doMove _dest;
+                _group setSpeedMode "FULL";
+            };
+
+            // 3. Recharger les munitions toutes les 30 secondes (15 itérations × 2s)
+            if (_ammoReloadCounter mod 15 == 0) then {
+                _heli setVehicleAmmo 1;
+            };
+
+            // 4. Identifier les artilleurs vivants (tout sauf pilote index 0 et copilote index 1)
+            private _gunners = [];
+            { if (alive _x && {_forEachIndex >= 2}) then { _gunners pushBack _x; }; } forEach _crew;
+
+            // 5. Révéler les ennemis proches ET forcer le tir
+            private _enemies = allUnits select { alive _x && {side _x == east} && {_x distance2D _heli < 1000} };
+
+            if (count _enemies > 0) then {
+                // Révéler toutes les cibles à connaissance maximale
+                { _group reveal [_x, 4]; } forEach _enemies;
+
+                // Trouver la cible prioritaire (la plus proche de l'hélicoptère)
+                private _bestTarget = objNull;
+                private _bestDist = 9999;
+                {
+                    private _d = _x distance _heli;
+                    if (_d < _bestDist) then { _bestDist = _d; _bestTarget = _x; };
+                } forEach _enemies;
+
+                // Ordonner le tir à chaque artilleur + forcer physiquement le tir de la tourelle
+                if (!isNull _bestTarget) then {
+                    {
+                        _x doWatch _bestTarget;
+                        _x doTarget _bestTarget;
+                        _x doFire _bestTarget;
+                        
+                        // Forcer le tir physique de l'arme de tourelle si l'IA refuse
+                        private _cw = currentWeapon _x;
+                        if (_cw != "") then {
+                            _x forceWeaponFire [_cw, "FullAuto"];
+                        };
+                    } forEach _gunners;
+
+                    // Aussi commander le tir du véhicule directement sur la cible
+                    _heli fireAtTarget [_bestTarget, currentWeapon ((crew _heli) select {_x in _gunners} param [0, objNull])];
+
+                    // Ordre hiérarchique depuis le leader du groupe
+                    (leader _group) commandTarget _bestTarget;
                 };
             };
         };
@@ -417,7 +525,8 @@ missionNamespace setVariable ["LL_missionHelicopter", _heli, true];
     // --- PHASE 1 : VOL VERS LA CIBLE ---
     private _wp1 = _group addWaypoint [_dropPos, 0];
     _wp1 setWaypointType "MOVE";
-    _wp1 setWaypointBehaviour "CARELESS";
+    _wp1 setWaypointBehaviour "COMBAT";
+    _wp1 setWaypointCombatMode "RED";
     _wp1 setWaypointSpeed "FULL";
     _heli doMove _dropPos;
     
@@ -449,7 +558,8 @@ missionNamespace setVariable ["LL_missionHelicopter", _heli, true];
         
         private _wp2 = _group addWaypoint [_dropPos, 0];
         _wp2 setWaypointType "MOVE";
-        _wp2 setWaypointBehaviour "CARELESS";
+        _wp2 setWaypointBehaviour "COMBAT";
+        _wp2 setWaypointCombatMode "RED";
         _wp2 setWaypointSpeed "FULL";
         _heli doMove _dropPos;
         
@@ -480,7 +590,7 @@ missionNamespace setVariable ["LL_missionHelicopter", _heli, true];
             missionNamespace setVariable ["LL_missionHelicopter", objNull, true];
         };
         
-        doStop _heli;
+        _heli setVelocity [0, 0, 0];
         _heli flyInHeight _hoverHeight;
         
         // Descente progressive du colis
@@ -593,8 +703,8 @@ missionNamespace setVariable ["LL_missionHelicopter", _heli, true];
         _wpCAS setWaypointType "LOITER";
         _wpCAS setWaypointLoiterType "CIRCLE";
         _wpCAS setWaypointLoiterRadius _loiterRadius;
-        _wpCAS setWaypointBehaviour "CARELESS";
-        _wpCAS setWaypointCombatMode "BLUE";
+        _wpCAS setWaypointBehaviour "COMBAT";
+        _wpCAS setWaypointCombatMode "RED";
         _wpCAS setWaypointSpeed "LIMITED";
         
         _heli doMove _dropPos;
@@ -617,7 +727,7 @@ missionNamespace setVariable ["LL_missionHelicopter", _heli, true];
                     _lastReveal = time;
                     private _targets = allUnits select { alive _x && {side _x == east} && {_x distance2D _dropPos < 500} };
                     {
-                        _gunnersGroup reveal [_x, 4];
+                        _group reveal [_x, 4];
                     } forEach _targets;
                 };
             };
@@ -947,7 +1057,8 @@ missionNamespace setVariable ["LL_missionHelicopter", _heli, true];
                     _heli flyInHeight _flyHeight;
                     private _wpHome = _group addWaypoint [_homeBase, 0];
                     _wpHome setWaypointType "MOVE";
-                    _wpHome setWaypointBehaviour "CARELESS";
+                    _wpHome setWaypointBehaviour "COMBAT";
+                    _wpHome setWaypointCombatMode "RED";
                     _wpHome setWaypointSpeed "FULL";
                     _heli doMove _homeBase;
 
@@ -990,7 +1101,8 @@ missionNamespace setVariable ["LL_missionHelicopter", _heli, true];
         
         private _wpHome = _group addWaypoint [_homeBase, 0];
         _wpHome setWaypointType "MOVE";
-        _wpHome setWaypointBehaviour "CARELESS";
+        _wpHome setWaypointBehaviour "COMBAT";
+        _wpHome setWaypointCombatMode "RED";
         _wpHome setWaypointSpeed "FULL";
         _group setCurrentWaypoint _wpHome;
         _heli doMove _homeBase;
@@ -1013,14 +1125,12 @@ missionNamespace setVariable ["LL_missionHelicopter", _heli, true];
                 { deleteVehicle _x } forEach _crew;
                 deleteVehicle _heli;
                 deleteGroup _group;
-                deleteGroup _gunnersGroup;
                 if (_supportType == "CAS") then {
                     missionNamespace setVariable ["TAG_CAS_Cooldown_Until", time + 300, true];
                 };
             };
         } else {
             deleteGroup _group;
-            deleteGroup _gunnersGroup;
             if (_supportType == "CAS") then {
                 missionNamespace setVariable ["TAG_CAS_Cooldown_Until", time + 300, true];
             };
