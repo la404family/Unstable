@@ -1,4 +1,4 @@
-﻿#include "..\macros.hpp"
+#include "..\macros.hpp"
 /*
  * LL_fnc_requestHelicopter — v3 HELIFIX
  * Locality : Serveur uniquement
@@ -298,29 +298,22 @@ _group setSpeedMode  "FULL";
             _cargo addMagazineCargoGlobal ["SmokeShellGreen", 10];
         };
 
-        // Descente slingload
-        _heli flyInHeight    _hoverHeight;
+        // ── Approche finale et vol stationnaire ──────────────────────────────
+        _heli flyInHeight _hoverHeight;
         _heli flyInHeightASL [_hoverHeight, _hoverHeight, _hoverHeight];
 
         private _wp2 = _group addWaypoint [_dropPos, 0];
         _wp2 setWaypointType      "MOVE";
         _wp2 setWaypointBehaviour "CARELESS";
-        _wp2 setWaypointCombatMode "RED";
         _wp2 setWaypointSpeed     "FULL";
         _heli doMove _dropPos;
 
-        // Approche précise sur point de largage
-        private _posTimer = 0;
+        // Attente arrivée au-dessus du point de largage (seuil 5m = réaliste pour CH-47)
+        private _positionTimeout = 0;
         waitUntil {
-            sleep 0.25; _posTimer = _posTimer + 0.25;
-            private _d = _heli distance2D _dropPos;
-            if (_d < 25) then {
-                private _hp = getPosVisual _heli;
-                private _px = ((_dropPos # 0) - (_hp # 0)) * 0.4;
-                private _py = ((_dropPos # 1) - (_hp # 1)) * 0.4;
-                _heli setVelocity [((_px min 5) max -5), ((_py min 5) max -5), velocity _heli # 2];
-            };
-            (_d < 2) || _posTimer > 50 || !alive _heli
+            sleep 0.5;
+            _positionTimeout = _positionTimeout + 0.5;
+            ((_heli distance2D _dropPos) < 5) || _positionTimeout > 30 || !alive _heli
         };
 
         if (!alive _heli) exitWith {
@@ -330,22 +323,34 @@ _group setSpeedMode  "FULL";
             missionNamespace setVariable ["LL_missionHelicopter",   objNull, true];
         };
 
-        _heli setVelocity [0,0,0];
+        // Vol stationnaire stabilisé — l'IA arrête de suivre les waypoints
+        doStop _heli;
         _heli flyInHeight _hoverHeight;
 
-        // Descente progressive du colis
-        private _dropTimer = 0;
-        private _minCargoH = if (_supportType == "LIVRAISON") then {5} else {4};
+        // ── Descente progressive du colis ────────────────────────────────────
+        // Réduit l'altitude de vol de 0.5m par tick (0.5s) → descente lisse.
+        // Pas de setVelocity XY → la physique naturelle maintient la stabilité.
+        // VEHICULE : plancher +2m (7m) pour éviter d'écraser le véhicule au sol.
+        private _minDropHeight  = if (_supportType == "VEHICULE") then {7} else {5};
+        private _cargoThreshold = if (_supportType == "VEHICULE") then {5} else {3};
+        private _heliThreshold  = if (_supportType == "VEHICULE") then {6} else {4};
+        private _dropTimeout = 0;
+        private _cargoGrounded = false;
         waitUntil {
-            sleep 0.25; _dropTimer = _dropTimer + 0.25;
-            private _newH = (_hoverHeight - _dropTimer) max _minCargoH;
-            _heli flyInHeight    _newH;
-            _heli flyInHeightASL [_newH, _newH, _newH];
-            private _hp = getPosVisual _heli;
-            private _px = ((_dropPos # 0) - (_hp # 0)) * 0.4;
-            private _py = ((_dropPos # 1) - (_hp # 1)) * 0.4;
-            _heli setVelocity [((_px min 4) max -4), ((_py min 4) max -4), velocity _heli # 2];
-            (getPosATL _cargo # 2 < 3) || _dropTimer > 40 || !alive _heli || !alive _cargo
+            sleep 0.5;
+            _dropTimeout = _dropTimeout + 0.5;
+            private _newHeight = _hoverHeight - _dropTimeout;
+            if (_newHeight < _minDropHeight) then { _newHeight = _minDropHeight; };
+
+            _heli flyInHeight _newHeight;
+            _heli flyInHeightASL [_newHeight, _newHeight, _newHeight];
+
+            // Double vérification : cargo au sol OU hélicoptère très bas
+            _cargoGrounded = (getPosATL _cargo select 2) < _cargoThreshold;
+            if ((getPosATL _heli select 2) < _heliThreshold) then {
+                _cargoGrounded = true;
+            };
+            _cargoGrounded || _dropTimeout > 30 || !alive _heli || !alive _cargo
         };
 
         if (!alive _heli || !alive _cargo) exitWith {
@@ -355,13 +360,20 @@ _group setSpeedMode  "FULL";
             missionNamespace setVariable ["LL_missionHelicopter",   objNull, true];
         };
 
+        // ── Détachement propre ───────────────────────────────────────────────
         sleep 1;
-        { ropeDestroy _x; } forEach (ropes _heli);
+
+        // Destruction de toutes les cordes + reset slingload
+        private _allRopes = ropes _heli;
+        { ropeDestroy _x; } forEach _allRopes;
         _heli setSlingLoad objNull;
+
         sleep 1;
-        _cargo setVelocity [0,0,0];
-        _cargo setVectorUp [0,0,1];
-        _cargo setMass     _originalMass;
+
+        // Stabilisation cargo : annule inertie résiduelle + remet à plat
+        _cargo setVelocity [0, 0, 0];
+        _cargo setVectorUp [0, 0, 1];
+        _cargo setMass _originalMass;
         _cargo allowDamage true;
 
         if (_supportType == "LIVRAISON") then {
@@ -470,110 +482,76 @@ _group setSpeedMode  "FULL";
         };
 
         if (_supportType == "EMBARQUEMENT") then {
-            // Descente par paliers — positionnement vérifié à chaque étape.
-            // setVelocity [vx, vy, velocity _heli # 2] : vz naturel préservé → pas de boucle.
-            // La correction XY n'est activée qu'à < 300 m (approche libre au-delà).
+            // ── Approche finale — même logique que livraison slingload ────────
+            // Waypoint MOVE + doMove → l'IA pilote naturellement vers le point.
+            // Pas de setVelocity XY → pas d'oscillations ni de tangage.
+
+            _heli flyInHeight _hoverHeight;
+            _heli flyInHeightASL [_hoverHeight, _hoverHeight, _hoverHeight];
 
             private _wpEmb = _group addWaypoint [_dropPos, 0];
             _wpEmb setWaypointType       "MOVE";
             _wpEmb setWaypointBehaviour  "CARELESS";
             _wpEmb setWaypointCombatMode "BLUE";
-            _wpEmb setWaypointSpeed      "LIMITED";
+            _wpEmb setWaypointSpeed      "FULL";
             _heli doMove _dropPos;
 
-            // ── Palier 1 : 100 m — approche rapide, correction active < 300 m ────
-            _heli flyInHeight 100;
-            private _p1Timer = 0;
+            // Attente arrivée au-dessus de l'héliport (seuil 5m)
+            private _positionTimeout = 0;
             waitUntil {
-                sleep 0.3; _p1Timer = _p1Timer + 0.3;
-                private _dist2d = _heli distance2D _dropPos;
-                if (_dist2d < 300) then {
-                    private _hp     = getPosVisual _heli;
-                    private _maxSpd = (_dist2d * 0.06) min 12 max 1;
-                    private _vx = (((_dropPos # 0) - (_hp # 0)) * 0.5) min _maxSpd max (-_maxSpd);
-                    private _vy = (((_dropPos # 1) - (_hp # 1)) * 0.5) min _maxSpd max (-_maxSpd);
-                    _heli setVelocity [_vx, _vy, velocity _heli # 2];
-                };
-                !alive _heli || _dist2d < 15 || _p1Timer > 180
+                sleep 0.5;
+                _positionTimeout = _positionTimeout + 0.5;
+                ((_heli distance2D _dropPos) < 5) || _positionTimeout > 30 || !alive _heli
             };
+
             if (!alive _heli) exitWith {
                 deleteMarker _markerName;
                 missionNamespace setVariable ["TAG_AirSupport_Active",  false,   true];
                 missionNamespace setVariable ["LL_missionHelicopter",   objNull, true];
             };
-            diag_log format ["[LL][HELI][P1] 100m validé — dist2D=%1m", round (_heli distance2D _dropPos)];
 
-            // ── Palier 2 : 50 m — confirmation position, vitesse réduite ─────────
-            _heli flyInHeight 50;
-            private _p2Timer = 0;
+            // Vol stationnaire stabilisé
+            doStop _heli;
+            _heli flyInHeight _hoverHeight;
+
+            // ── Descente progressive vers le sol ─────────────────────────────
+            // Même principe que le slingload : flyInHeight décrémenté de 0.5m/tick.
+            // Plancher à 3m → l'hélico est quasi au sol, prêt pour land "LAND".
+            private _descentTimeout = 0;
             waitUntil {
-                sleep 0.3; _p2Timer = _p2Timer + 0.3;
-                private _dist2d = _heli distance2D _dropPos;
-                private _hp     = getPosVisual _heli;
-                private _maxSpd = (_dist2d * 0.06) min 6 max 0.5;
-                private _vx = (((_dropPos # 0) - (_hp # 0)) * 0.5) min _maxSpd max (-_maxSpd);
-                private _vy = (((_dropPos # 1) - (_hp # 1)) * 0.5) min _maxSpd max (-_maxSpd);
-                _heli setVelocity [_vx, _vy, velocity _heli # 2];
-                !alive _heli || _dist2d < 8 || _p2Timer > 90
+                sleep 0.5;
+                _descentTimeout = _descentTimeout + 0.5;
+                private _newHeight = _hoverHeight - _descentTimeout;
+                if (_newHeight < 3) then { _newHeight = 3; };
+
+                _heli flyInHeight _newHeight;
+                _heli flyInHeightASL [_newHeight, _newHeight, _newHeight];
+
+                // Condition de sortie : hélico physiquement bas (≤ 5m AGL)
+                ((getPosATL _heli select 2) <= 5) || _descentTimeout > 30 || !alive _heli
             };
+
             if (!alive _heli) exitWith {
                 deleteMarker _markerName;
                 missionNamespace setVariable ["TAG_AirSupport_Active",  false,   true];
                 missionNamespace setVariable ["LL_missionHelicopter",   objNull, true];
             };
-            diag_log format ["[LL][HELI][P2] 50m validé — dist2D=%1m", round (_heli distance2D _dropPos)];
 
-            // ── Palier 3 : 15 m — positionnement final, vitesse très réduite ─────
-            _heli flyInHeight 15;
-            private _p3Timer = 0;
-            waitUntil {
-                sleep 0.3; _p3Timer = _p3Timer + 0.3;
-                private _dist2d = _heli distance2D _dropPos;
-                private _hp     = getPosVisual _heli;
-                private _maxSpd = (_dist2d * 0.05) min 2 max 0.2;
-                private _vx = (((_dropPos # 0) - (_hp # 0)) * 0.5) min _maxSpd max (-_maxSpd);
-                private _vy = (((_dropPos # 1) - (_hp # 1)) * 0.5) min _maxSpd max (-_maxSpd);
-                _heli setVelocity [_vx, _vy, velocity _heli # 2];
-                !alive _heli || _dist2d < 4 || _p3Timer > 60
-            };
-            if (!alive _heli) exitWith {
-                deleteMarker _markerName;
-                missionNamespace setVariable ["TAG_AirSupport_Active",  false,   true];
-                missionNamespace setVariable ["LL_missionHelicopter",   objNull, true];
-            };
-            diag_log format ["[LL][HELI][P3] 15m validé — dist2D=%1m", round (_heli distance2D _dropPos)];
+            diag_log format ["[LL][HELI] Descente progressive terminée — AGL=%1m, atterrissage.", round ((getPosATL _heli) # 2)];
 
-            // ── Attente altitude réelle ≤ 10m avant coupure carburant ─────────────
-            // flyInHeight 15 est une instruction, pas un bloquant — l'hélico peut
-            // encore être à 40-50m quand le dist2D < 4m est validé.
-            // On attend qu'il soit physiquement bas avant de couper le moteur.
-            private _altWait = 0;
-            waitUntil {
-                sleep 0.3; _altWait = _altWait + 0.3;
-                diag_log format ["[LL][HELI][ALT] Altitude AGL=%1m dist2D=%2m", round ((getPosATL _heli) # 2), round (_heli distance2D _dropPos)];
-                !alive _heli || (getPosATL _heli) # 2 <= 10 || _altWait > 30
-            };
-            if (!alive _heli) exitWith {
-                deleteMarker _markerName;
-                missionNamespace setVariable ["TAG_AirSupport_Active",  false,   true];
-                missionNamespace setVariable ["LL_missionHelicopter",   objNull, true];
-            };
-            diag_log format ["[LL][HELI][ALT] Altitude ok — AGL=%1m, coupure carburant.", round ((getPosATL _heli) # 2)];
-
-            // ── Atterrissage forcé par coupure carburant ──────────────────────────
-            // Sans puissance moteur, l'IA descend sans se battre contre la physique.
-            _heli setVelocity [0, 0, 0];
+            // ── Atterrissage final ───────────────────────────────────────────
+            // L'hélico est déjà à ~3-5m AGL → land "LAND" fonctionne sans hack carburant.
             while { count (waypoints _group) > 0 } do { deleteWaypoint [_group, 0]; };
-            _heli setFuel 0;
             _heli flyInHeight 0;
             _heli land "LAND";
-            diag_log "[LL][HELI] Atterrissage fuel=0 — descente finale.";
 
-            private _landTimeout = time + 45;
+            private _landTimeout = time + 30;
             waitUntil {
                 sleep 0.5;
                 !alive _heli || isTouchingGround _heli || time > _landTimeout
             };
+
+            // Fallback : si le timeout expire, forcer la position au sol
             if (!isTouchingGround _heli && { alive _heli }) then {
                 _heli setVelocity [0, 0, 0];
                 _heli setPos [_dropPos # 0, _dropPos # 1, 0];
@@ -587,9 +565,7 @@ _group setSpeedMode  "FULL";
                 missionNamespace setVariable ["LL_missionHelicopter",   objNull, true];
             };
 
-            // Restauration carburant + rampe arrière CH-47 ouverte
-            _heli setFuel 1;
-            _heli engineOn true;
+            // Rampe arrière CH-47 ouverte — prêt à l'embarquement
             _heli setVehicleLock "UNLOCKED";
             _heli animateSource ["door_rear_source", 1];
             _heli animateDoor   ["door_rear_source", 1];
