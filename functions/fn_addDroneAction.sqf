@@ -31,7 +31,7 @@ if (!hasInterface) exitWith {};
                 };
                 [_caller] remoteExec ["LL_fnc_requestDrone", 2];
             },
-            nil, 5.0, false, true, "", "alive _target"
+            nil, 3.5, false, true, "", "alive _target"
         ];
     };
 

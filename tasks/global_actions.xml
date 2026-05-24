@@ -3,28 +3,28 @@
   <Package name="Missions">
     <Container name="Actions">
       <Key ID="STR_LL_Action_Heal">
-        <English>[ESCOUADE] Order squad to self-heal</English>
+        <English>[SQUAD] Order squad to self-heal</English>
         <French>[ESCOUADE] Ordonner a l'escouade de se soigner</French>
       </Key>
       <Key ID="STR_LL_Action_RoE_Stealth">
-        <English>RoE: Stealth (Infiltration)</English>
-        <French>Règles d'engagement : Infiltration (Silencieux/Marche)</French>
+        <English>[SQUAD] RoE: Stealth (Infiltration)</English>
+        <French>[ESCOUADE] Règles d'engagement : Infiltration (Silencieux/Marche)</French>
       </Key>
       <Key ID="STR_LL_Action_RoE_Vigilance">
-        <English>RoE: Vigilance</English>
-        <French>Règles d'engagement : Vigilance (Combat/Prudent)</French>
+        <English>[SQUAD] RoE: Vigilance</English>
+        <French>[ESCOUADE] Règles d'engagement : Vigilance (Combat/Prudent)</French>
       </Key>
       <Key ID="STR_LL_Action_RoE_Assault">
-        <English>RoE: Assault</English>
-        <French>Règles d'engagement : Assaut (Tir libre/Combat)</French>
+        <English>[SQUAD] RoE: Assault</English>
+        <French>[ESCOUADE] Règles d'engagement : Assaut (Tir libre/Combat)</French>
       </Key>
       <Key ID="STR_LL_Action_RoE_Charge">
-        <English>RoE: Charge (Sprint)</English>
-        <French>Règles d'engagement : Charge (Sprint/Assaut permanent)</French>
+        <English>[SQUAD] RoE: Charge (Sprint)</English>
+        <French>[ESCOUADE] Règles d'engagement : Charge (Sprint/Assaut permanent)</French>
       </Key>
       <Key ID="STR_LL_Action_Search">
-        <English>Order Squad: Search Buildings</English>
-        <French>Ordonner au groupe : Fouiller les bâtiments</French>
+        <English>[SQUAD] Search Buildings</English>
+        <French>[ESCOUADE] Fouiller les bâtiments</French>
       </Key>
       <Key ID="STR_LL_Msg_Search_NoBuilding">
         <English>[LL ERROR] Search: No buildings with garrison positions nearby.</English>
@@ -235,8 +235,8 @@
 
       
       <Key ID="STR_LL_Action_Rally">
-        <English>[Regroupement] Force squad regroupment</English>
-        <French>[Regroupement] Forcer le regroupement de l'escouade</French>
+        <English>[SQUAD] Force squad regroupment</English>
+        <French>[ESCOUADE] Forcer le regroupement de l'escouade</French>
       </Key>
       <Key ID="STR_LL_Msg_Rally_Start">
         <English>[SQUAD] Regroupment ordered. Squad moving to formation.</English>

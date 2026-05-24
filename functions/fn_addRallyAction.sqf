@@ -207,7 +207,7 @@ if (!hasInterface) exitWith {};
                 };
             },
             [],   // arguments supplémentaires
-            4.4,  // priorité (juste en dessous des autres actions tactiques)
+            5.3,  // priorité : groupe ESCOUADE
             false, // show window
             true,  // hide on use
             "",    // shortcut

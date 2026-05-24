@@ -145,7 +145,7 @@ LL_Search_BuildingsNearby = false;
                 };
             },
             [],
-            5.5,
+            5.1,
             false,
             true,
             "",
