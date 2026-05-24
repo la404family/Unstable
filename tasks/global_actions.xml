@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <Project name="UnstablePorto">
   <Package name="Missions">
     <Container name="Actions">
       <Key ID="STR_LL_Action_Heal">
-        <English>Order AI to self-heal</English>
-        <French>Ordonner aux IA de se soigner</French>
+        <English>[ESCOUADE] Order squad to self-heal</English>
+        <French>[ESCOUADE] Ordonner a l'escouade de se soigner</French>
       </Key>
       <Key ID="STR_LL_Action_RoE_Stealth">
         <English>RoE: Stealth (Infiltration)</English>
@@ -35,12 +35,12 @@
         <French>[LL ERREUR] Fouille : Les positions dans les bâtiments ne sont pas accessibles.</French>
       </Key>
       <Key ID="STR_LL_Msg_Search_NoInfantry">
-        <English>[LL ERROR] Search: No active AI infantry in your group to search.</English>
-        <French>[LL ERREUR] Fouille : Aucune infanterie I.A. active dans votre groupe pour fouiller.</French>
+        <English>[LL ERROR] Search: No active squad members in your group to search.</English>
+        <French>[LL ERREUR] Fouille : Aucun membre d'escouade actif dans votre groupe pour fouiller.</French>
       </Key>
       <Key ID="STR_LL_Msg_Switch_Error">
-        <English>[LL ERROR] Locality transfer timed out. Could not switch to AI.</English>
-        <French>[LL ERREUR] Délai d'attente dépassé pour le transfert de localité. Impossible de basculer sur l'IA.</French>
+        <English>[LL ERROR] Locality transfer timed out. Could not switch unit.</English>
+        <French>[LL ERREUR] Delai d'attente depasse pour le transfert de localite. Impossible de basculer sur l'unite.</French>
       </Key>
       <Key ID="STR_LL_Heli_Action_Supply">
         <English>[Helicopter] Request Ammo Supply</English>
@@ -171,7 +171,7 @@
         <French>[SUPPORT] Soutien CAS indisponible. Veuillez patienter %1 secondes avant le prochain appel.</French>
       </Key>
 
-      <!-- Marqueurs du Support Hélicoptère -->
+      
       <Key ID="STR_TAG_Marker_Heli_Ammo">
         <English>Ammo Delivery Zone</English>
         <French>Zone de Livraison Munitions</French>
@@ -193,17 +193,17 @@
         <French>Zone d'Appui CAS</French>
       </Key>
 
-      <!-- Erreurs Soins -->
+      
       <Key ID="STR_LL_Msg_Heal_NoKit">
-        <English>[LL ERROR] Injured AI do not have a first aid kit (FirstAidKit/Medikit).</English>
-        <French>[LL ERREUR] Les IA blessées n'ont pas de kit de soin (FirstAidKit/Medikit).</French>
+        <English>[LL ERROR] Injured squad members do not have a first aid kit (FirstAidKit/Medikit).</English>
+        <French>[LL ERREUR] Les membres blesses de l'escouade n'ont pas de kit de soin (FirstAidKit/Medikit).</French>
       </Key>
       <Key ID="STR_LL_Msg_Heal_NoInjured">
-        <English>[LL ERROR] No injured AI requires healing.</English>
-        <French>[LL ERREUR] Aucune IA blessée n'a besoin de soins.</French>
+        <English>[LL ERROR] No injured squad member requires healing.</English>
+        <French>[LL ERREUR] Aucun membre blesse de l'escouade n'a besoin de soins.</French>
       </Key>
 
-      <!-- Erreurs RoE -->
+      
       <Key ID="STR_LL_Msg_RoE_Stealth_Error">
         <English>[LL ERROR] Failed to apply stealth: Group not found.</English>
         <French>[LL ERREUR] Impossible d'appliquer l'infiltration : Groupe introuvable.</French>
@@ -221,34 +221,34 @@
         <French>[LL ERREUR] Impossible d'appliquer la charge : Groupe introuvable.</French>
       </Key>
 
-      <!-- Erreurs Leadership -->
+      
       <Key ID="STR_LL_Msg_AssignLeader_Error">
         <English>[LL ERROR] assignLeader: No player detected to assign as leader!</English>
         <French>[LL ERREUR] assignLeader : Aucun joueur détecté pour attribuer le leader !</French>
       </Key>
 
-      <!-- Compteur Embarquement Hélicoptère -->
+      
       <Key ID="STR_LL_Heli_Msg_Extract_Counter">
         <English>Extraction — %1 / %2 on board</English>
         <French>Extraction — %1 / %2 à bord</French>
       </Key>
 
-      <!-- Réapprovisionnement depuis caisse de munitions -->
+      
       <Key ID="STR_LL_Action_Rally">
-        <English>[Rally] Force AI regroupment</English>
+        <English>[Regroupement] Force squad regroupment</English>
         <French>[Regroupement] Forcer le regroupement de l'escouade</French>
       </Key>
       <Key ID="STR_LL_Msg_Rally_Start">
-        <English>[SQUAD] Regroupment ordered. AI units moving to formation.</English>
-        <French>[ESCOUADE] Regroupement ordonné. Les IA rejoignent la formation.</French>
+        <English>[SQUAD] Regroupment ordered. Squad moving to formation.</English>
+        <French>[ESCOUADE] Regroupement ordonne. L'escouade rejoint la formation.</French>
       </Key>
       <Key ID="STR_LL_Msg_Rally_Done">
         <English>[SQUAD] Regroupment complete.</English>
-        <French>[ESCOUADE] Regroupement terminé.</French>
+        <French>[ESCOUADE] Regroupement termine.</French>
       </Key>
       <Key ID="STR_LL_Msg_Rally_NoAI">
-        <English>[SQUAD] No active AI in your group.</English>
-        <French>[ESCOUADE] Aucune IA active dans votre groupe.</French>
+        <English>[SQUAD] No active squad members in your group.</English>
+        <French>[ESCOUADE] Aucun membre actif dans votre groupe.</French>
       </Key>
       <Key ID="STR_LL_Action_Resupply">
         <English>[Resupply] Order squad to rearm</English>
@@ -263,8 +263,8 @@
         <French>[SUPPORT] Réapprovisionnement terminé. Regroupement.</French>
       </Key>
       <Key ID="STR_LL_Msg_Resupply_NoAI">
-        <English>[SUPPORT] No AI squad members available to resupply.</English>
-        <French>[SUPPORT] Aucune IA disponible pour le réapprovisionnement.</French>
+        <English>[SUPPORT] No squad members available to resupply.</English>
+        <French>[SUPPORT] Aucun membre d'escouade disponible pour le reapprovisionnement.</French>
       </Key>
     </Container>
   </Package>
