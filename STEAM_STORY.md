@@ -1,4 +1,4 @@
-# Sahrani Post-Conflict: Operation Royal Alliance [SP / COOP] Dynamic Tasks [CUP - RACS]
+# Sahrani Post-Conflict: Operation Royal Alliance [SP / COOP] Dynamic Tasks [CUP - RACS] NO DLC 
 
 Ce document présente le cadre historique, géopolitique et narratif de la campagne militaire à Porto, mettant en scène le Corps Expéditionnaire Multinational du **RACS** (Royal Army Corps of Sahrani).
 
