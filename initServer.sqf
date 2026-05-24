@@ -15,8 +15,15 @@ diag_log "[LL][initServer] Démarrage de l'initialisation serveur...";
 [] spawn LL_fnc_spawnCivilianPresence;
 
 
-// --- 2. Groupement et Initialisation des joueurs/IA ---
-// On force tout le monde dans le même groupe AVANT d'appliquer les identités et loadouts.
+// --- 2. Initialisation de l'identité et du loadout des joueurs ---
+// Assigne les grades et l'apparence Légion aux slots player_00 ... player_06
+[] call LL_fnc_initPlayerIdentity;
+
+// Assigne les sacs (CUP Tactical Pack CCE) et l'armement initial
+[] spawn LL_fnc_initPlayerLoadout;
+
+// --- 2.5 Groupement de tous les joueurs ---
+// Force tous les slots joueurs et leurs IA dans le même groupe (player_00)
 [] spawn {
     waitUntil { time > 0 };
     private _leaderUnit = missionNamespace getVariable ["player_00", objNull];
@@ -29,15 +36,6 @@ diag_log "[LL][initServer] Démarrage de l'initialisation serveur...";
             };
         } forEach [1,2,3,4,5,6];
     };
-
-    // Attendre un court instant pour que le regroupement soit effectif
-    sleep 1;
-
-    // Assigne les grades et l'apparence Légion aux slots player_00 ... player_06 (Background)
-    [] spawn LL_fnc_initPlayerIdentity;
-
-    // Assigne l'équipement et les munitions aux slots player_00 ... player_06 (Background)
-    [] spawn LL_fnc_initPlayerLoadout;
 };
 
 // Assigne un leader parmi les joueurs humains et surveille qu'une IA ne le devienne jamais
