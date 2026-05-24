@@ -3,11 +3,11 @@
  *
  * Description:
  *   Gère l'inventaire des unités jouables (BLUFOR).
- *   Distribue de manière aléatoire et diversifiée le loadout.
- *   Optimisé pour le multijoueur (Host, Clients et IA).
+ *   Applique les tenues et items sans modifier les armes de l'éditeur.
+ *   Distribue les munitions adaptées à chaque arme.
  *
  * Locality:
- *   Serveur uniquement (scanne et applique à toutes les unités)
+ *   Serveur uniquement
  */
 
 if (!isServer) exitWith {};
@@ -61,19 +61,44 @@ private _shuffledBackpacks = _backpacks call _fn_shuffle;
 private _shuffledCagoules  = _cagoules call _fn_shuffle;
 private _shuffledVests     = _vests call _fn_shuffle;
 
-// Fonction de traitement interne
+// Fonction utilitaire pour ajouter des munitions compatibles dans un conteneur spécifique
+private _fnc_addMagsForWeapon = {
+    params ["_unit", "_weapon", "_count", "_container"];
+    if (_weapon == "") exitWith {};
+    private _compatibleMags = getArray (configFile >> "CfgWeapons" >> _weapon >> "magazines");
+    if (count _compatibleMags > 0) then {
+        private _mag = _compatibleMags select 0;
+        for "_i" from 1 to _count do {
+            switch (_container) do {
+                case "VEST": { _unit addItemToVest _mag; };
+                case "UNIFORM": { _unit addItemToUniform _mag; };
+                case "BACKPACK": { _unit addItemToBackpack _mag; };
+                default { _unit addItem _mag; };
+            };
+        };
+    };
+};
+
+// Fonction de traitement d'une unité
 private _fnc_applyLoadout = {
     params ["_unit", "_varName", "_u", "_v", "_b", "_h", "_c"];
 
-    // Nettoyage complet (Global)
-    removeAllWeapons _unit;
-    removeAllItems _unit;
-    removeAllAssignedItems _unit;
+    // Attendre que l'unité ait ses armes de l'éditeur (Timeout 5s)
+    private _timeout = time + 5;
+    waitUntil { primaryWeapon _unit != "" || handgunWeapon _unit != "" || time > _timeout };
+
+    // Sauvegarde des armes (Editeur)
+    private _pWeapon = primaryWeapon _unit;
+    private _sWeapon = secondaryWeapon _unit;
+    private _hWeapon = handgunWeapon _unit;
+
+    // Nettoyage conteneurs uniquement
     removeUniform _unit;
     removeVest _unit;
     removeBackpack _unit;
     removeHeadgear _unit;
     removeGoggles _unit;
+    removeAllItems _unit;
 
     // Habillage (Global)
     _unit forceAddUniform _u;
@@ -82,45 +107,36 @@ private _fnc_applyLoadout = {
     _unit addHeadgear _h;
     _unit addGoggles _c;
 
-    // Attendre que les contenants soient synchronisés (Essentiel pour les clients distants)
+    // Attendre la synchro réseau des conteneurs
     sleep 1.5;
 
-    // Items de base (Global)
+    // Items réglementaires
     [_unit, "CSAT_ScimitarRegiment"] call BIS_fnc_setUnitInsignia;
     _unit linkItem "NVGogglesB_blk_F";
-    _unit addWeapon "CUP_LRTV";
-    _unit linkItem "ItemMap";
-    _unit linkItem "ItemCompass";
-    _unit linkItem "ItemWatch";
-    _unit linkItem "ItemRadio";
+    if (binocular _unit == "") then { _unit addWeapon "CUP_LRTV"; };
+    
+    // Munitions dynamiques (Ciblées vers les conteneurs pour éviter les pertes)
+    [_unit, _pWeapon, 6, "VEST"] call _fnc_addMagsForWeapon;
+    [_unit, _hWeapon, 2, "UNIFORM"] call _fnc_addMagsForWeapon;
+    [_unit, _sWeapon, 1, "BACKPACK"] call _fnc_addMagsForWeapon;
 
-    // Munitions
-    private _mag = "CUP_30Rnd_556x45_Stanag";
-    if (_varName == "player_05") then { _mag = "CUP_100Rnd_TE4_LRT4_White_Tracer_762x51_Belt_M"; };
-
-    for "_i" from 1 to 6 do { _unit addItemToVest _mag; };
+    // Équipement de survie
     for "_i" from 1 to 3 do { _unit addItemToUniform "FirstAidKit"; };
     for "_i" from 1 to 2 do { _unit addItemToVest "CUP_HandGrenade_M67"; };
     for "_i" from 1 to 2 do { _unit addItemToVest "SmokeShell"; };
     
     if (_varName == "player_04") then { _unit addItemToBackpack "Medikit"; };
 
-    // Armes (Global)
-    if (_varName == "player_05") then {
-        _unit addWeapon "CUP_lmg_M60E4";
-    } else {
-        _unit addWeapon "CUP_arifle_Mk16_STD_FG_black";
-        _unit addPrimaryWeaponItem "CUP_acc_ANPEQ_15_Black";
-        _unit addPrimaryWeaponItem "CUP_optic_HoloBlack";
-    };
-
-    _unit addWeapon "CUP_hgun_Glock17_blk";
-    for "_i" from 1 to 2 do { _unit addItemToUniform "CUP_17Rnd_9x19_glock17"; };
+    // Matériel de navigation
+    if !("ItemMap" in assignedItems _unit) then { _unit linkItem "ItemMap"; };
+    if !("ItemCompass" in assignedItems _unit) then { _unit linkItem "ItemCompass"; };
+    if !("ItemWatch" in assignedItems _unit) then { _unit linkItem "ItemWatch"; };
+    if !("ItemRadio" in assignedItems _unit) then { _unit linkItem "ItemRadio"; };
 
     _unit setVariable ["LL_LoadoutSet", true, true];
 };
 
-// Boucle de scan pour attraper tout le monde (Start + JIP)
+// Boucle de scan (Start + JIP)
 private _endTime = time + 300;
 while { time < _endTime } do {
     private _toProcess = allUnits select {
@@ -134,7 +150,6 @@ while { time < _endTime } do {
         private _unit = _x;
         private _varName = str _unit;
 
-        // Sélection aléatoire
         private _u = _shuffledUniforms select 0; _shuffledUniforms = _shuffledUniforms - [_u];
         if (count _shuffledUniforms == 0) then { _shuffledUniforms = _uniforms call _fn_shuffle; };
         
@@ -155,7 +170,6 @@ while { time < _endTime } do {
         private _c = _shuffledCagoules select 0; _shuffledCagoules = _shuffledCagoules - [_c];
         if (count _shuffledCagoules == 0) then { _shuffledCagoules = _cagoules call _fn_shuffle; };
 
-        // Exécution du traitement
         [_unit, _varName, _u, _v, _b, _h, _c] spawn _fnc_applyLoadout;
         
     } forEach _toProcess;
