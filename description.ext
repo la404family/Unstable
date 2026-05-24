@@ -21,7 +21,8 @@ joinInProgress      = 1; // Permet aux joueurs de rejoindre en cours de partie
 
 // --- Système de Respawn ---
 respawn             = 3;  // 3 = Respawn sur position personnalisée (ex: marqueur "respawn_west")
-respawnDelay        = 10; // Délai en secondes avant réapparition
+respawnDelay        = 999999; // Temps infini pour empêcher le respawn natif
+respawnTemplates[]  = {"Tickets"}; // Utiliser le système de tickets pour bloquer le respawn
 respawnButton       = 0;  // 0 = Désactive la mort forcée, incompatible avec fn_switchToAI
 respawnOnStart      = 0;  // 0 = Ne lance pas les scripts de respawn au démarrage initial
 

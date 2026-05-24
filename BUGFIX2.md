@@ -77,6 +77,9 @@ disabledAI = 0;
 | Fichier | Action | Impact |
 |---|---|---|
 | `description.ext` | Modifier `disabledAI = 0` | Autorise les IA dans les slots vides au démarrage. |
+| `description.ext` | `respawnDelay = 999999` et `respawnTemplates[] = {"Tickets"}` | Bloque définitivement le respawn natif Arma 3. |
+| `initServer.sqf` | `[west, 0] call BIS_fnc_respawnTickets` | Met les tickets de respawn à zéro dès le départ. |
+| `initServer.sqf` | Regroupement des joueurs | Force tous les joueurs et IA dans le même groupe pour partager le pool de vies. |
 | `functions/fn_switchToAI.sqf` | Ajouter `setPlayerRespawnTime` et `BIS_fnc_EGSpectator` | Bloque le respawn à la base et permet de spectater. |
 | `functions/fn_checkGameOver.sqf` | Ajouter un `sleep 5` avant le check | Évite les fins de mission prématurées par désynchronisation. |
 
