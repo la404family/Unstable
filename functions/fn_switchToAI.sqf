@@ -71,12 +71,19 @@ if (count _livingAI > 0) then {
     };
 } else {
     // Aucune IA disponible pour le basculement.
+    
+    // Empêcher le respawn natif Arma 3 (le mettre à un temps infini)
+    setPlayerRespawnTime 999999;
+    
+    // Activer le mode spectateur (Standard Arma 3)
+    ["Initialize", [player, [], true]] call BIS_fnc_EGSpectator;
+
     // Déclencher immédiatement une vérification de fin de partie côté serveur.
     // Le délai de 10 s (respawnDelay) laisse une fenêtre pour que endMission
     // s'exécute avant tout respawn Arma 3.
     [] remoteExec ["LL_fnc_checkGameOver", 2];
 
     if (DEBUG_MODE) then {
-        diag_log "[LL] switchToAI: Aucune IA disponible. Vérification de fin de partie déclenchée.";
+        diag_log "[LL] switchToAI: Aucune IA disponible. Respawn bloqué, Spectateur activé.";
     };
 };

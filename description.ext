@@ -16,7 +16,7 @@ class Header {
 };
 
 // --- Paramètres réseau & performance ---
-disabledAI          = 1; // 1 = Désactive les IA dans les slots de joueurs vides au démarrage
+disabledAI          = 0; // 0 = Autorise les IA dans les slots de joueurs vides au démarrage
 joinInProgress      = 1; // Permet aux joueurs de rejoindre en cours de partie
 
 // --- Système de Respawn ---
