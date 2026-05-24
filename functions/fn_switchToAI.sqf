@@ -40,6 +40,10 @@ if (count _livingAI > 0) then {
         // Prendre le contrôle de la nouvelle IA
         selectPlayer _targetAI;
         
+        // Retirer le Respawn EH du corps original (_deadUnit) pour éviter
+        // qu'Arma 3 ne respawn l'ancienne unité et ne duplique le Killed EH.
+        _deadUnit removeAllEventHandlers "Respawn";
+        
         // Une IA ne doit jamais être leader s'il y a un joueur.
         // Si le leader actuel n'est pas un joueur (ex: une IA), le joueur prend le commandement.
         if (!isPlayer (leader _group)) then {
@@ -66,7 +70,13 @@ if (count _livingAI > 0) then {
         diag_log format ["[LL][ERROR] switchToAI: Échec du transfert de localité pour %1 (timeout)", _targetAI];
     };
 } else {
+    // Aucune IA disponible pour le basculement.
+    // Déclencher immédiatement une vérification de fin de partie côté serveur.
+    // Le délai de 10 s (respawnDelay) laisse une fenêtre pour que endMission
+    // s'exécute avant tout respawn Arma 3.
+    [] remoteExec ["LL_fnc_checkGameOver", 2];
+
     if (DEBUG_MODE) then {
-        diag_log "[LL] switchToAI: Aucune IA vivante disponible dans le groupe pour le basculement.";
+        diag_log "[LL] switchToAI: Aucune IA disponible. Vérification de fin de partie déclenchée.";
     };
 };

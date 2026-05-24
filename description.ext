@@ -22,7 +22,7 @@ joinInProgress      = 1; // Permet aux joueurs de rejoindre en cours de partie
 // --- Système de Respawn ---
 respawn             = 3;  // 3 = Respawn sur position personnalisée (ex: marqueur "respawn_west")
 respawnDelay        = 10; // Délai en secondes avant réapparition
-respawnButton       = 1;  // 1 = Permet de forcer le respawn via le menu pause
+respawnButton       = 0;  // 0 = Désactive la mort forcée, incompatible avec fn_switchToAI
 respawnOnStart      = 0;  // 0 = Ne lance pas les scripts de respawn au démarrage initial
 
 // --- Bibliothèque de fonctions de la mission ---
@@ -44,6 +44,7 @@ class CfgFunctions {
             class switchToAI            {};
             class transferLocality      {};
             class manageLeadership      {};
+            class checkGameOver         {};
             
             // Système de Présence Civile
             class initCivilians         {};
