@@ -2,9 +2,9 @@
  * LL_fnc_initPlayerLoadout
  *
  * Description:
- *   Gère l'inventaire des unités jouables (BLUFOR).
- *   Applique les tenues et items sans modifier les armes de l'éditeur.
- *   Distribue les munitions adaptées à chaque arme.
+ *   Gère l'apparence des unités jouables (BLUFOR).
+ *   Change les vêtements, casques, sacs et lunettes aléatoirement.
+ *   Standardise le nombre de munitions (8 chargeurs fusil, 3 chargeurs pistolet).
  *
  * Locality:
  *   Serveur uniquement
@@ -12,6 +12,7 @@
 
 if (!isServer) exitWith {};
 
+// --- Définition des pools d'équipements ---
 private _vests = [
     "CUP_V_JPC_medical_coy", "CUP_V_JPC_tl_coy", "CUP_V_JPC_weapons_coy",
     "CUP_V_JPC_communicationsbelt_coy", "CUP_V_JPC_Fastbelt_coy", "CUP_V_JPC_lightbelt_coy",
@@ -61,77 +62,85 @@ private _shuffledBackpacks = _backpacks call _fn_shuffle;
 private _shuffledCagoules  = _cagoules call _fn_shuffle;
 private _shuffledVests     = _vests call _fn_shuffle;
 
-// Fonction utilitaire pour ajouter des munitions compatibles dans un conteneur spécifique
-private _fnc_addMagsForWeapon = {
-    params ["_unit", "_weapon", "_count", "_container"];
-    if (_weapon == "") exitWith {};
-    private _compatibleMags = getArray (configFile >> "CfgWeapons" >> _weapon >> "magazines");
-    if (count _compatibleMags > 0) then {
-        private _mag = _compatibleMags select 0;
-        for "_i" from 1 to _count do {
-            switch (_container) do {
-                case "VEST": { _unit addItemToVest _mag; };
-                case "UNIFORM": { _unit addItemToUniform _mag; };
-                case "BACKPACK": { _unit addItemToBackpack _mag; };
-                default { _unit addItem _mag; };
-            };
-        };
+// Fonction robuste pour ajouter des munitions avec fallback
+private _fnc_addMagsStandard = {
+    params ["_unit", "_weapon", "_count"];
+    if (isNil "_weapon" || {_weapon == ""}) exitWith {};
+    
+    private _mags = [_weapon] call BIS_fnc_compatibleMagazines;
+    if (count _mags == 0) exitWith {};
+    private _mag = _mags select 0;
+
+    // Ajouter les chargeurs dans les conteneurs (Priorité : Vest -> Backpack -> Uniform)
+    for "_i" from 1 to _count do {
+        private _added = false;
+        if (_unit canAddItemToVest _mag) then { _unit addItemToVest _mag; _added = true; };
+        if (!_added && {_unit canAddItemToBackpack _mag}) then { _unit addItemToBackpack _mag; _added = true; };
+        if (!_added && {_unit canAddItemToUniform _mag}) then { _unit addItemToUniform _mag; _added = true; };
     };
 };
 
 // Fonction de traitement d'une unité
-private _fnc_applyLoadout = {
+private _fnc_applyVisuals = {
     params ["_unit", "_varName", "_u", "_v", "_b", "_h", "_c"];
 
-    // Attendre que l'unité ait ses armes de l'éditeur (Timeout 5s)
-    private _timeout = time + 5;
-    waitUntil { primaryWeapon _unit != "" || handgunWeapon _unit != "" || time > _timeout };
+    if (isNull _unit) exitWith {};
 
-    // Sauvegarde des armes (Editeur)
-    private _pWeapon = primaryWeapon _unit;
-    private _sWeapon = secondaryWeapon _unit;
-    private _hWeapon = handgunWeapon _unit;
+    // 1. SAUVEGARDE des armes et des items (mais pas des chargeurs en vrac pour éviter le cumul)
+    private _pWeapon    = primaryWeapon _unit;
+    private _sWeapon    = secondaryWeapon _unit;
+    private _hWeapon    = handgunWeapon _unit;
+    private _pItems     = primaryWeaponItems _unit;
+    private _sItems     = secondaryWeaponItems _unit;
+    private _hItems     = handgunItems _unit;
+    private _assigned   = assignedItems _unit;
+    // On garde uniquement les items qui ne sont pas des chargeurs
+    private _cleanItems = items _unit select { !(_x in (magazines _unit)) };
 
-    // Nettoyage conteneurs uniquement
+    // 2. CHANGEMENT des conteneurs
     removeUniform _unit;
     removeVest _unit;
     removeBackpack _unit;
     removeHeadgear _unit;
     removeGoggles _unit;
+    // On vide tout l'inventaire pour standardiser les munitions
     removeAllItems _unit;
 
-    // Habillage (Global)
     _unit forceAddUniform _u;
     _unit addVest _v;
     _unit addBackpack _b;
     _unit addHeadgear _h;
     _unit addGoggles _c;
 
-    // Attendre la synchro réseau des conteneurs
+    // Pause pour synchronisation réseau
     sleep 1.5;
 
-    // Items réglementaires
+    // 3. DISTRIBUTION STANDARDISÉE des munitions
+    // Arme principale : 8 chargeurs
+    [_unit, _pWeapon, 8] call _fnc_addMagsStandard;
+    // Arme de poing : 3 chargeurs
+    [_unit, _hWeapon, 3] call _fnc_addMagsStandard;
+    // Arme secondaire (lanceur) : 2 roquettes
+    [_unit, _sWeapon, 2] call _fnc_addMagsStandard;
+
+    // 4. RESTAURATION des items et accessoires
+    { _unit linkItem _x; } forEach _assigned;
+    { _unit addItem _x; } forEach _cleanItems;
+
+    // Recharger les armes si besoin
+    if (count (primaryWeaponMagazine _unit) == 0 && {_pWeapon != ""}) then {
+        private _pMags = [_pWeapon] call BIS_fnc_compatibleMagazines;
+        if (count _pMags > 0) then { _unit addPrimaryWeaponItem (_pMags select 0); };
+    };
+    if (count (handgunMagazine _unit) == 0 && {_hWeapon != ""}) then {
+        private _hMags = [_hWeapon] call BIS_fnc_compatibleMagazines;
+        if (count _hMags > 0) then { _unit addHandgunItem (_hMags select 0); };
+    };
+
+    // Insigne et matériel spécifique
     [_unit, "CSAT_ScimitarRegiment"] call BIS_fnc_setUnitInsignia;
     _unit linkItem "NVGogglesB_blk_F";
     if (binocular _unit == "") then { _unit addWeapon "CUP_LRTV"; };
-    
-    // Munitions dynamiques (Ciblées vers les conteneurs pour éviter les pertes)
-    [_unit, _pWeapon, 6, "VEST"] call _fnc_addMagsForWeapon;
-    [_unit, _hWeapon, 2, "UNIFORM"] call _fnc_addMagsForWeapon;
-    [_unit, _sWeapon, 1, "BACKPACK"] call _fnc_addMagsForWeapon;
-
-    // Équipement de survie
-    for "_i" from 1 to 3 do { _unit addItemToUniform "FirstAidKit"; };
-    for "_i" from 1 to 2 do { _unit addItemToVest "CUP_HandGrenade_M67"; };
-    for "_i" from 1 to 2 do { _unit addItemToVest "SmokeShell"; };
-    
-    if (_varName == "player_04") then { _unit addItemToBackpack "Medikit"; };
-
-    // Matériel de navigation
-    if !("ItemMap" in assignedItems _unit) then { _unit linkItem "ItemMap"; };
-    if !("ItemCompass" in assignedItems _unit) then { _unit linkItem "ItemCompass"; };
-    if !("ItemWatch" in assignedItems _unit) then { _unit linkItem "ItemWatch"; };
-    if !("ItemRadio" in assignedItems _unit) then { _unit linkItem "ItemRadio"; };
 
     _unit setVariable ["LL_LoadoutSet", true, true];
 };
@@ -157,6 +166,11 @@ while { time < _endTime } do {
         if (_varName == "player_04") then {
             private _mv = _shuffledVests select { (_x find "medical") != -1 };
             if (count _mv > 0) then { _v = _mv select 0; _shuffledVests = _shuffledVests - [_v]; };
+        } else {
+            if (_varName in ["player_00", "player_01"]) then {
+                private _tlv = _shuffledVests select { (_x find "_tl") != -1 };
+                if (count _tlv > 0) then { _v = _tlv select 0; _shuffledVests = _shuffledVests - [_v]; };
+            };
         };
         if (_v == "") then { _v = _shuffledVests select 0; _shuffledVests = _shuffledVests - [_v]; };
         if (count _shuffledVests == 0) then { _shuffledVests = _vests call _fn_shuffle; };
@@ -170,7 +184,7 @@ while { time < _endTime } do {
         private _c = _shuffledCagoules select 0; _shuffledCagoules = _shuffledCagoules - [_c];
         if (count _shuffledCagoules == 0) then { _shuffledCagoules = _cagoules call _fn_shuffle; };
 
-        [_unit, _varName, _u, _v, _b, _h, _c] spawn _fnc_applyLoadout;
+        [_unit, _varName, _u, _v, _b, _h, _c] spawn _fnc_applyVisuals;
         
     } forEach _toProcess;
 
