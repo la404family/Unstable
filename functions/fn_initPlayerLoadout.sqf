@@ -4,7 +4,7 @@
  * Description:
  *   Gère l'apparence des unités jouables (BLUFOR).
  *   Change les vêtements, casques, sacs et lunettes aléatoirement.
- *   Standardise le nombre de munitions.
+ *   Standardise le nombre de munitions (8 chargeurs fusil, 3 chargeurs pistolet).
  *
  * Locality:
  *   Serveur uniquement
@@ -44,7 +44,6 @@ private _cagoules = [
     "CUP_G_ESS_KHK_Facewrap_Tan", "G_Bandana_khk"
 ];
 
-// Fonction de mélange (shuffle)
 private _fn_shuffle = {
     private _arr = +_this;
     private _cnt = count _arr;
@@ -57,39 +56,37 @@ private _fn_shuffle = {
     _arr
 };
 
-// Fonction d'ajout de munitions (corrigée et améliorée)
-private _fn_addMagsStandard = {
-    params [["_unit", objNull], ["_weapon", ""], ["_count", 0]];
+private _shuffledUniforms  = _uniforms call _fn_shuffle;
+private _shuffledHelmets   = _helmets call _fn_shuffle;
+private _shuffledBackpacks = _backpacks call _fn_shuffle;
+private _shuffledCagoules  = _cagoules call _fn_shuffle;
+private _shuffledVests     = _vests call _fn_shuffle;
 
-    if (isNull _unit || {_weapon == ""} || {_count <= 0}) exitWith {};
-
+// Fonction robuste pour ajouter des munitions avec fallback
+private _fnc_addMagsStandard = {
+    params ["_unit", "_weapon", "_count"];
+    if (isNil "_weapon" || {_weapon == ""}) exitWith {};
+    
     private _mags = [_weapon] call BIS_fnc_compatibleMagazines;
-    if (_mags isEqualTo []) exitWith {};
-
+    if (count _mags == 0) exitWith {};
     private _mag = _mags select 0;
 
+    // Ajouter les chargeurs dans les conteneurs (Priorité : Vest -> Backpack -> Uniform)
     for "_i" from 1 to _count do {
-        if (_unit canAddItemToVest _mag) then {
-            _unit addItemToVest _mag;
-        } else {
-            if (_unit canAddItemToBackpack _mag) then {
-                _unit addItemToBackpack _mag;
-            } else {
-                if (_unit canAddItemToUniform _mag) then {
-                    _unit addItemToUniform _mag;
-                };
-            };
-        };
+        private _added = false;
+        if (_unit canAddItemToVest _mag) then { _unit addItemToVest _mag; _added = true; };
+        if (!_added && {_unit canAddItemToBackpack _mag}) then { _unit addItemToBackpack _mag; _added = true; };
+        if (!_added && {_unit canAddItemToUniform _mag}) then { _unit addItemToUniform _mag; _added = true; };
     };
 };
 
-// Fonction principale d'application du loadout
+// Fonction de traitement d'une unité
 private _fnc_applyVisuals = {
-    params ["_unit", "_varName", "_u", "_v", "_b", "_h", "_c", "_fn_addMags"];
+    params ["_unit", "_varName", "_u", "_v", "_b", "_h", "_c"];
 
     if (isNull _unit) exitWith {};
 
-    // 1. SAUVEGARDE des armes et items
+    // 1. SAUVEGARDE des armes et des items (mais pas des chargeurs en vrac pour éviter le cumul)
     private _pWeapon    = primaryWeapon _unit;
     private _sWeapon    = secondaryWeapon _unit;
     private _hWeapon    = handgunWeapon _unit;
@@ -97,6 +94,7 @@ private _fnc_applyVisuals = {
     private _sItems     = secondaryWeaponItems _unit;
     private _hItems     = handgunItems _unit;
     private _assigned   = assignedItems _unit;
+    // On garde uniquement les items qui ne sont pas des chargeurs
     private _cleanItems = items _unit select { !(_x in (magazines _unit)) };
 
     // 2. CHANGEMENT des conteneurs
@@ -105,6 +103,7 @@ private _fnc_applyVisuals = {
     removeBackpack _unit;
     removeHeadgear _unit;
     removeGoggles _unit;
+    // On vide tout l'inventaire pour standardiser les munitions
     removeAllItems _unit;
 
     _unit forceAddUniform _u;
@@ -113,29 +112,32 @@ private _fnc_applyVisuals = {
     _unit addHeadgear _h;
     _unit addGoggles _c;
 
-    sleep 1.5; // Pause pour synchronisation réseau
+    // Pause pour synchronisation réseau
+    sleep 1.5;
 
     // 3. DISTRIBUTION STANDARDISÉE des munitions
-    [_unit, _pWeapon, 8] call _fn_addMags;   // Fusil
-    [_unit, _hWeapon, 3] call _fn_addMags;   // Pistolet
-    [_unit, _sWeapon, 2] call _fn_addMags;   // Lanceur
+    // Arme principale : 8 chargeurs
+    [_unit, _pWeapon, 8] call _fnc_addMagsStandard;
+    // Arme de poing : 3 chargeurs
+    [_unit, _hWeapon, 3] call _fnc_addMagsStandard;
+    // Arme secondaire (lanceur) : 2 roquettes
+    [_unit, _sWeapon, 2] call _fnc_addMagsStandard;
 
     // 4. RESTAURATION des items et accessoires
     { _unit linkItem _x; } forEach _assigned;
     { _unit addItem _x; } forEach _cleanItems;
 
-    // Rechargement des armes si nécessaire
+    // Recharger les armes si besoin
     if (count (primaryWeaponMagazine _unit) == 0 && {_pWeapon != ""}) then {
         private _pMags = [_pWeapon] call BIS_fnc_compatibleMagazines;
         if (count _pMags > 0) then { _unit addPrimaryWeaponItem (_pMags select 0); };
     };
-
     if (count (handgunMagazine _unit) == 0 && {_hWeapon != ""}) then {
         private _hMags = [_hWeapon] call BIS_fnc_compatibleMagazines;
         if (count _hMags > 0) then { _unit addHandgunItem (_hMags select 0); };
     };
 
-    // Matériel spécifique
+    // Insigne et matériel spécifique
     [_unit, "CSAT_ScimitarRegiment"] call BIS_fnc_setUnitInsignia;
     _unit linkItem "NVGogglesB_blk_F";
     if (binocular _unit == "") then { _unit addWeapon "CUP_LRTV"; };
@@ -143,20 +145,12 @@ private _fnc_applyVisuals = {
     _unit setVariable ["LL_LoadoutSet", true, true];
 };
 
-// Initialisation des tableaux mélangés
-private _shuffledUniforms  = _uniforms call _fn_shuffle;
-private _shuffledHelmets   = _helmets call _fn_shuffle;
-private _shuffledBackpacks = _backpacks call _fn_shuffle;
-private _shuffledCagoules  = _cagoules call _fn_shuffle;
-private _shuffledVests     = _vests call _fn_shuffle;
-
-// Boucle principale (Start + JIP)
+// Boucle de scan (Start + JIP)
 private _endTime = time + 300;
-
 while { time < _endTime } do {
     private _toProcess = allUnits select {
-        (side _x in [independent, resistance]) &&
-        alive _x &&
+        (side _x == independent || side _x == resistance) && 
+        alive _x && 
         !(_x getVariable ["LL_LoadoutSet", false]) &&
         { (str _x) find "player_" == 0 }
     };
@@ -165,41 +159,33 @@ while { time < _endTime } do {
         private _unit = _x;
         private _varName = str _unit;
 
-        // Uniforme
-        private _u = _shuffledUniforms select 0;
-        _shuffledUniforms deleteAt 0;
+        private _u = _shuffledUniforms select 0; _shuffledUniforms = _shuffledUniforms - [_u];
         if (count _shuffledUniforms == 0) then { _shuffledUniforms = _uniforms call _fn_shuffle; };
-
-        // Gilet (spécial pour medic et team leader)
+        
         private _v = "";
         if (_varName == "player_04") then {
             private _mv = _shuffledVests select { (_x find "medical") != -1 };
-            if (count _mv > 0) then { _v = _mv select 0; _shuffledVests deleteAt (_shuffledVests find _v); };
+            if (count _mv > 0) then { _v = _mv select 0; _shuffledVests = _shuffledVests - [_v]; };
         } else {
             if (_varName in ["player_00", "player_01"]) then {
                 private _tlv = _shuffledVests select { (_x find "_tl") != -1 };
-                if (count _tlv > 0) then { _v = _tlv select 0; _shuffledVests deleteAt (_shuffledVests find _v); };
+                if (count _tlv > 0) then { _v = _tlv select 0; _shuffledVests = _shuffledVests - [_v]; };
             };
         };
-        if (_v == "") then {
-            _v = _shuffledVests select 0;
-            _shuffledVests deleteAt 0;
-        };
+        if (_v == "") then { _v = _shuffledVests select 0; _shuffledVests = _shuffledVests - [_v]; };
         if (count _shuffledVests == 0) then { _shuffledVests = _vests call _fn_shuffle; };
 
-        // Sac, Casque, Lunettes
-        private _b = _shuffledBackpacks select 0; _shuffledBackpacks deleteAt 0;
+        private _b = _shuffledBackpacks select 0; _shuffledBackpacks = _shuffledBackpacks - [_b];
         if (count _shuffledBackpacks == 0) then { _shuffledBackpacks = _backpacks call _fn_shuffle; };
 
-        private _h = _shuffledHelmets select 0; _shuffledHelmets deleteAt 0;
+        private _h = _shuffledHelmets select 0; _shuffledHelmets = _shuffledHelmets - [_h];
         if (count _shuffledHelmets == 0) then { _shuffledHelmets = _helmets call _fn_shuffle; };
 
-        private _c = _shuffledCagoules select 0; _shuffledCagoules deleteAt 0;
+        private _c = _shuffledCagoules select 0; _shuffledCagoules = _shuffledCagoules - [_c];
         if (count _shuffledCagoules == 0) then { _shuffledCagoules = _cagoules call _fn_shuffle; };
 
-        // Appel corrigé
-        [_unit, _varName, _u, _v, _b, _h, _c, _fn_addMagsStandard] spawn _fnc_applyVisuals;
-
+        [_unit, _varName, _u, _v, _b, _h, _c] spawn _fnc_applyVisuals;
+        
     } forEach _toProcess;
 
     sleep 2;
