@@ -33,11 +33,11 @@ diag_log "[LL][initServer] Démarrage de l'initialisation serveur...";
     // Attendre un court instant pour que le regroupement soit effectif
     sleep 1;
 
-    // Assigne les grades et l'apparence Légion aux slots player_00 ... player_06
-    [] call LL_fnc_initPlayerIdentity;
+    // Assigne les grades et l'apparence Légion aux slots player_00 ... player_06 (Background)
+    [] spawn LL_fnc_initPlayerIdentity;
 
-    // Assigne les sacs (CUP Tactical Pack CCE) et l'armement initial
-    [] call LL_fnc_initPlayerLoadout;
+    // Assigne l'équipement et les munitions aux slots player_00 ... player_06 (Background)
+    [] spawn LL_fnc_initPlayerLoadout;
 };
 
 // Assigne un leader parmi les joueurs humains et surveille qu'une IA ne le devienne jamais
