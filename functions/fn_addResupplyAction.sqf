@@ -142,6 +142,10 @@ _crate addAction [
                     (_u1ok && _u2ok) || _moveTimeout > 20
                 };
 
+                // Positionnement précis contre la caisse (micro-ajustement, unités déjà proches)
+                if (alive _unit1) then { _unit1 setPos _posLeft; };
+                if (!isNull _unit2 && { alive _unit2 }) then { _unit2 setPos _posRight; };
+
                 // ── Orientation, posture et démarrage de l'animation ────────
                 // AinvPknlMstpSnonWrflDnon_medic :
                 //   Sn on = arme sur le dos, mains libres → les bras se tendent vers l'avant

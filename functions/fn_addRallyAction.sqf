@@ -50,7 +50,7 @@ if (!hasInterface) exitWith {};
 
         _unit addAction [
             // Libellé affiché dans le menu scroll (vert clair + icône regroupement)
-            format ["<t color='#AAFFAA'>%1</t>", localize "STR_LL_Action_Rally"],
+            format ["<t color='#FFFFFF'>%1</t>", localize "STR_LL_Action_Rally"],
 
             // ── Code exécuté au déclenchement de l'action ──────────────────
             {
