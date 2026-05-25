@@ -32,31 +32,33 @@ addMissionEventHandler ["PlayerConnected", {
     params ["_id", "_uid", "_name", "_jip", "_owner", "_idstr"];
     [_owner] spawn {
         params ["_ownerId"];
-        // Attendre que les identités soient assignées ET que le joueur soit prêt
+        // Attendre que les identités soient assignées
         waitUntil { !isNil "LL_g_usedPlayerNames" };
-        sleep 3;
 
-        private _allPlayersVars = [];
-        for "_i" from 0 to 99 do {
-            private _suffix = if (_i < 10) then { format ["0%1", _i] } else { str _i };
-            private _varName = format ["player_%1", _suffix];
-            private _unit = missionNamespace getVariable [_varName, objNull];
-            if (!isNull _unit) then {
-                _allPlayersVars pushBack _varName;
+        // Sous-fonction : envoie toutes les identités connues au client cible
+        private _fnc_sendAllIdentities = {
+            params ["_ownerId2"];
+            for "_i" from 0 to 99 do {
+                private _suffix = if (_i < 10) then { format ["0%1", _i] } else { str _i };
+                private _unit = missionNamespace getVariable [format ["player_%1", _suffix], objNull];
+                if (!isNull _unit) then {
+                    private _identity = _unit getVariable ["LL_s_identity", []];
+                    if (count _identity >= 5) then {
+                        _identity params ["_nameData", "_faceType", "_face", "_speaker", "_pitch", ["_beard", "", [""]]];
+                        [_unit, _nameData, _face, _speaker, _pitch, _beard]
+                            remoteExec ["LL_fnc_applyIdentity", _ownerId2];
+                    };
+                };
             };
         };
 
-        {
-            private _unit = missionNamespace getVariable [_x, objNull];
-            if (!isNull _unit) then {
-                private _identity = _unit getVariable ["LL_s_identity", []];
-                if (count _identity >= 5) then {
-                    _identity params ["_nameData", "_faceType", "_face", "_speaker", "_pitch", ["_beard", "", [""]]];
-                    [_unit, _nameData, _face, _speaker, _pitch, _beard]
-                        remoteExec ["LL_fnc_applyIdentity", _ownerId];
-                };
-            };
-        } forEach _allPlayersVars;
+        // Envoi 1 : 5 s après connexion (laisse le joueur finir de charger)
+        sleep 5;
+        [_ownerId] call _fnc_sendAllIdentities;
+
+        // Envoi 2 : 30 s après connexion — double vérification contre la re-sync du profil Steam
+        sleep 25;
+        [_ownerId] call _fnc_sendAllIdentities;
     };
 }];
 
@@ -206,31 +208,57 @@ private _fnc_processUnit = {
     _unit setVariable ["LL_IdentitySet", true, true];
 };
 
-// ── Boucle principale : scan des unités indépendantes ──────────────────────────
+// ── Boucle principale : scan ciblé sur player_00…player_06 ───────────────────
+// Utilise directement _unitRoles (construit plus haut depuis missionNamespace)
+// au lieu de allUnits filtré par side — fonctionne en I.A, solo et serveur dédié
+// sans dépendance au camp ni à la connexion joueur.
 // • Première passe immédiate — les unités existantes sont traitées d'un coup.
-// • Sortie anticipée immédiate si aucune unité n'est à traiter ou si tout a été traité.
-// • Limite de 5 minutes au cas où des unités tardives ou JIP apparaîtraient (avec sleep de 2s).
+// • Sortie anticipée dès que toutes les unités du groupe ont leur identité.
+// • Limite de 5 minutes pour les JIP ou les unités en cours de spawn (sleep 2s).
 private _endTime = time + 300;
 while { time < _endTime } do {
-    private _unprocessed = allUnits select {
-        (side _x == independent || side _x == resistance) && 
-        alive _x && 
-        !(_x getVariable ["LL_IdentitySet", false])
+
+    // Filtrer les unités du groupe (player_00…player_06) sans identité
+    private _unprocessed = _unitRoles select {
+        private _u = missionNamespace getVariable [_x select 0, objNull];
+        !isNull _u && alive _u && !(_u getVariable ["LL_IdentitySet", false])
     };
 
     if (_unprocessed isEqualTo []) exitWith {};
 
     {
-        [_x, _allNamesTyped, _unitRoles] call _fnc_processUnit;
+        private _unit = missionNamespace getVariable [_x select 0, objNull];
+        if (!isNull _unit) then {
+            [_unit, _allNamesTyped, _unitRoles] call _fnc_processUnit;
+        };
     } forEach _unprocessed;
 
-    // Re-vérification immédiate après traitement de cette passe
-    private _remaining = allUnits select {
-        (side _x == independent || side _x == resistance) && 
-        alive _x && 
-        !(_x getVariable ["LL_IdentitySet", false])
+    // Re-vérification immédiate : sortie si toutes les unités sont traitées
+    private _remaining = _unitRoles select {
+        private _u = missionNamespace getVariable [_x select 0, objNull];
+        !isNull _u && alive _u && !(_u getVariable ["LL_IdentitySet", false])
     };
     if (_remaining isEqualTo []) exitWith {};
 
     sleep 2;
+};
+
+// ── Re-broadcast global 60 s après l'assignation initiale ────────────────────
+// Compense la re-synchronisation du nom de profil Steam/Arma par le moteur réseau :
+// pousse toutes les identités vers TOUS les clients connectés (pas de JIP flag ici,
+// les JIP reçoivent déjà les identités via le PlayerConnected handler ci-dessus).
+[_unitRoles] spawn {
+    params ["_roles"];
+    sleep 60;
+    {
+        private _unit = missionNamespace getVariable [_x select 0, objNull];
+        if (!isNull _unit) then {
+            private _identity = _unit getVariable ["LL_s_identity", []];
+            if (count _identity >= 5) then {
+                _identity params ["_nameData", "_faceType", "_face", "_speaker", "_pitch", ["_beard", "", [""]]];
+                [_unit, _nameData, _face, _speaker, _pitch, _beard]
+                    remoteExec ["LL_fnc_applyIdentity", 0];
+            };
+        };
+    } forEach _roles;
 };

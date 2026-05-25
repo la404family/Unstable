@@ -37,6 +37,7 @@ class CfgFunctions {
             class initPlayer            {};
             class initPlayerIdentity    {};
             class initPlayerLoadout     {};
+            class applyLocalLoadout     {};
             class applyIdentity         {};
             class assignLeader          {};
             class addHealAction         {};

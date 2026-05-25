@@ -83,3 +83,4 @@ Les cagoules sont :
         - G_Bandana_khk
 LNV : NVGooglesB_blk_F
 Jummelles : CUP_LRTV
+grenades : M67
