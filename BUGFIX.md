@@ -1,283 +1,241 @@
-# BUGFIX — Rapport d'analyse : Respawn intempestif en 2 joueurs sans IA
+# BUGFIX — Système de basculement IA en Multijoueur
 
-**Symptôme rapporté :**
-En multijoueur à 2 joueurs sans IA, lorsque les deux joueurs meurent (ou qu'un joueur déclenche la mort forcée via le menu pause), un nouveau joueur apparaît au marqueur `respawn_west` au lieu de terminer la partie.
-
----
-
-## Schéma d'exécution attendu vs observé
-
-| Scénario | Comportement attendu | Comportement observé |
-|---|---|---|
-| 2 joueurs, avec IA — un joueur meurt | Basculement vers une IA du groupe | ✅ Correct |
-| 2 joueurs, sans IA — un joueur meurt | Mort permanente, attendre l'autre | ❌ Respawn au marqueur après 10 s |
-| 2 joueurs, sans IA — les deux morts | Fin de partie (défaite) | ❌ Les deux respawn au marqueur |
-| Un joueur appuie sur le bouton Respawn (mort forcée) | Fin de partie si dernier joueur | ❌ Respawn immédiat au marqueur |
+**Mission :** Unstable.porto  
+**Scope :** Analyse et plan de correction du système `fn_switchToAI` pour la compatibilité MP + réintégration depuis le spectateur.
 
 ---
 
-## Analyse des fichiers — Bugs identifiés
+## Contexte
+
+En solo, le système fonctionne parfaitement :  
+`Killed` EH → `fn_switchToAI` → `fn_transferLocality` → `selectPlayer` sur une IA.
+
+En multijoueur, trois problèmes distincts sont identifiés, plus un comportement non implémenté (spectateur sans IA).
 
 ---
 
-### BUG #1 — [CRITIQUE] `description.ext` : `respawn = 3` universel sans garde-fou de fin de partie
+## BUG-01 — CRITIQUE : `fn_transferLocality` transfère tout le groupe en MP
 
-**Fichier :** `description.ext`
-**Lignes concernées :**
+### Fichier concerné
+`functions/fn_transferLocality.sqf`
+
+### Description
+La fonction reçoit une unité IA cible et un `clientOwner`. Lorsque l'unité appartient à un groupe (ce qui est toujours le cas ici), elle exécute :
+
 ```sqf
-respawn        = 3;   // Respawn sur marqueur — TOUJOURS actif
-respawnDelay   = 10;  // 10 secondes de délai
-respawnButton  = 1;   // Bouton de mort forcée activé
+_grp setGroupOwner _clientOwner;
 ```
 
-**Explication :**
-Arma 3 gère le respawn de manière **native et inconditionnelle**. Dès que `respawn = 3` est défini, le moteur de jeu programme **automatiquement** la réapparition d'un joueur mort après `respawnDelay` secondes, **indépendamment** de tout script SQF.
+En solo, cela est inoffensif : le client = le serveur, la localité ne change pas réellement.
 
-Le système `fn_switchToAI` est conçu pour interrompre ce cycle en prenant le contrôle d'une IA **avant** que le respawn ne se produise. Mais si aucune IA n'est disponible (scénario 2 joueurs sans IA), `fn_switchToAI` ne fait rien — et Arma 3 respawn le joueur quand même.
+**En MP avec N joueurs dans le même groupe**, c'est un bug destructeur :
 
-**Il n'existe aucun mécanisme dans la mission qui surveille si tous les joueurs sont simultanément morts et déclenche une fin de partie.**
+| Scénario | Effet réel de `setGroupOwner` |
+|---|---|
+| Joueur A meurt (machine 3) | Toutes les IA + tout le groupe migrent vers la machine 3 |
+| Joueur B meurt ensuite (machine 4) | `setGroupOwner` redéplace tout vers la machine 4 |
+| Joueur A (sur AI1, machine 3) | L'IA qu'il contrôle n'est plus locale → désynchronisation, perte de contrôle |
+| Joueur B vivant commande les IA | Les IA sont sur machine 3 → les ordres de B transitent mal |
+
+### Impact
+- Race condition entre plusieurs morts simultanées ou successives.  
+- Le dernier `setGroupOwner` gagne, rendant les switchs précédents instables.  
+- Les IA d'un joueur qui a déjà switché peuvent ne plus être locales sur sa machine.
+
+### Solution
+Remplacer `setGroupOwner` par `setOwner` sur **l'unité individuelle uniquement** :
+
+```sqf
+// AVANT (problématique en MP)
+_grp setGroupOwner _clientOwner;
+
+// APRÈS (MP-safe)
+_unit setOwner _clientOwner;
+```
+
+`selectPlayer` requiert seulement que l'unité cible soit locale sur la machine du client appelant.  
+Les autres IA restent locales au serveur. Chaque joueur mort transfère uniquement SON IA cible.
+
+> **Attention :** Si le joueur mort était le seul propriétaire du groupe (solo), conserver `setGroupOwner` comme fallback.  
+> Condition : `if (isMultiplayer) then { _unit setOwner _clientOwner } else { _grp setGroupOwner _clientOwner }`.
 
 ---
 
-### BUG #2 — [CRITIQUE] `fn_switchToAI.sqf` : branche `else` silencieuse, aucune détection de fin de partie
+## BUG-02 — MOYEN : Race condition dans `fn_checkGameOver` en MP
 
-**Fichier :** `functions/fn_switchToAI.sqf`
-**Lignes concernées :**
+### Fichier concerné
+`functions/fn_checkGameOver.sqf`
+
+### Description
+La fonction attend 5 secondes puis vérifie si tous les joueurs sont morts :
+
 ```sqf
-} else {
-    if (DEBUG_MODE) then {
-        diag_log "[LL] switchToAI: Aucune IA vivante disponible dans le groupe pour le basculement.";
-    };
+sleep 5;
+private _alivePlayers = _allPlayers select { alive _x };
+if (count _allPlayers > 0 && { count _alivePlayers == 0 }) then { ... endMission };
+```
+
+En MP avec N joueurs :
+
+- `fn_checkGameOver` est appelé par **chaque client** quand il entre en spectateur.
+- Si deux joueurs morts entrent en spectateur à 1 s d'intervalle, deux instances de `fn_checkGameOver` tournent en parallèle.
+- La vérification `alive _x` sur le serveur porte sur les **unités joueurs originales** (mortes), pas sur les IA qu'ils contrôlent maintenant via `selectPlayer`.
+- Après `selectPlayer _targetAI` : `isPlayer _targetAI == true` et `alive _targetAI == true`.  
+  Mais il peut exister un délai réseau avant que le serveur voie l'état `isPlayer` mis à jour.
+
+### Impact
+Risque de fin de mission prématurée si le serveur évalue `allPlayers` dans la fenêtre entre `Killed` et la résolution complète de `selectPlayer`.
+
+### Solution
+Dans `fn_checkGameOver`, filtrer les joueurs en croisant deux critères :
+
+```sqf
+// Considérer un joueur comme "mort" seulement s'il n'a aucune unité vivante sous contrôle
+// ET qu'il n'est pas en train de basculer vers une IA (vérifier la variable de flag)
+private _alivePlayers = _allPlayers select {
+    alive _x || { _x getVariable ["LL_Switching_To_AI", false] }
 };
 ```
 
-**Explication :**
-Quand `_livingAI` est vide (aucune IA à prendre en contrôle), la fonction se termine **silencieusement**. Elle log un message en mode debug, puis rend la main. À ce stade, Arma 3 a déjà démarré son compteur de 10 secondes (`respawnDelay`) pour respawn le joueur.
-
-La branche `else` devrait être le **point de déclenchement d'une vérification de fin de partie** côté serveur. Elle ne l'est pas. C'est la cause directe du symptôme rapporté.
+Cela suppose de poser un flag `LL_Switching_To_AI = true` au début de `fn_switchToAI`  
+et de le retirer à la fin (succès ou échec).
 
 ---
 
-### BUG #3 — [MAJEUR] `description.ext` : `respawnButton = 1` contourne entièrement `fn_switchToAI`
+## BUG-03 — FONCTIONNALITÉ MANQUANTE : Pas de réintégration depuis le spectateur
 
-**Fichier :** `description.ext`
-**Ligne concernée :** `respawnButton = 1;`
+### Fichiers concernés
+`functions/fn_switchToAI.sqf` (branche "aucune IA disponible")
 
-**Explication :**
-Le bouton « Respawn » dans le menu Échap (mort forcée) **déclenche directement le système de respawn natif d'Arma 3**, sans passer par le cycle `Killed` → `fn_switchToAI`. Résultat :
-
-- Le joueur mort appuie sur le bouton → réapparition immédiate au marqueur `respawn_west`
-- Aucune vérification du nombre de joueurs vivants
-- Aucune chance pour `fn_switchToAI` d'intercepter l'action
-
-Ce bouton est **incompatible** avec le système de basculement IA : soit le joueur bascule vers une IA (automatiquement via le `Killed` EH, le bouton est inutile), soit il doit mourir définitivement et le bouton ne devrait pas être disponible.
-
----
-
-### BUG #4 — [MAJEUR] `fn_switchToAI.sqf` : duplication possible du `Killed` EH après basculement + respawn natif
-
-**Fichier :** `functions/fn_switchToAI.sqf` (lignes du bloc `if (local _targetAI)`)
-**Fichier connexe :** `initPlayerLocal.sqf` (bloc `Respawn` EH)
-
-**Explication — chaîne d'événements problématique :**
-
-1. **Joueur A** meurt → `Killed` EH → `fn_switchToAI` → bascule vers `_targetAI` (IA du groupe)
-2. `fn_switchToAI` attache un **nouveau `Killed` EH** à `player` (= `_targetAI` après `selectPlayer`)
-3. Pendant ce temps, le moteur Arma 3 voit le **corps original du Joueur A** comme un joueur mort avec `respawn = 3` → il programme un respawn
-4. Après 10 s, le **corps original du Joueur A** est respawné → le `Respawn` EH dans `initPlayerLocal.sqf` se déclenche sur `_newUnit` → attache **un deuxième `Killed` EH** au nouveau corps
-
-Résultat : deux corps distincts (`_targetAI` et le nouveau respawn du Joueur A) ont chacun un `Killed` EH actif, et chacun appellera `fn_switchToAI` et `fn_manageLeadership` lors de leur prochaine mort. Les appels en double à `fn_manageLeadership` via `remoteExec` sur le serveur peuvent produire des comportements incohérents (double réassignation de leader, double transfert de groupe).
+### Description
+Lorsque `fn_switchToAI` ne trouve aucune IA vivante, le joueur entre en spectateur :
 
 ```sqf
-// Dans fn_switchToAI.sqf — EH ajouté à l'IA basculée
-player addEventHandler ["Killed", { ... }];
-
-// Dans initPlayerLocal.sqf — EH ajouté au corps respawné (10 s plus tard)
-_newUnit addEventHandler ["Killed", { ... }];
+["Initialize", [player, [], true]] call BIS_fnc_EGSpectator;
+[] remoteExec ["LL_fnc_checkGameOver", 2];
 ```
 
----
+Il n'existe aucun mécanisme pour surveiller l'arrivée de nouvelles IA dans le groupe  
+(p. ex. : renforts livrés par hélicoptère via `LL_fnc_requestHelicopter`).
 
-### BUG #5 — [MINEUR] `fn_manageLeadership.sqf` : aucune détection de fin de partie quand toutes les unités sont mortes
+### Impact
+Un joueur en spectateur reste bloqué en spectateur même si des IA rejoignent le groupe  
+(renforts DEBARQUEMENT = nouvelles unités RACS ajoutées au groupe du leader).
 
-**Fichier :** `functions/fn_manageLeadership.sqf`
-**Lignes concernées :**
-```sqf
-} else {
-    if (count _livingUnits > 0) then {
-        private _newLeader = _livingUnits select 0;
-        _group selectLeader _newLeader;
-        ...
-    };
-    // ← Aucune action si count _livingUnits == 0
-};
-```
+### Solution — Boucle de surveillance dans la branche spectateur
 
-**Explication :**
-Quand `_livingUnits` est vide (plus aucune unité vivante dans le groupe), la fonction se termine silencieusement. C'est un défaut secondaire, car `fn_manageLeadership` n'est appelé **que lorsque c'est le leader qui meurt** (condition dans le `Killed` EH). Si le dernier joueur vivant n'est pas le leader, `fn_manageLeadership` n'est pas invoqué du tout, et cette branche n'est jamais atteinte. Ce bug ne peut pas seul déclencher la fin de partie.
-
----
-
-### BUG #6 — [MINEUR] `initPlayerLocal.sqf` : cycle mort→respawn→mort perpétué sans fin
-
-**Fichier :** `initPlayerLocal.sqf`
-**Bloc concerné :** le `Respawn` EH
-
-**Explication :**
-Le `Respawn` EH re-attache systématiquement un `Killed` EH sur le nouveau corps à chaque respawn. C'est le comportement **voulu** pour que le système de basculement IA fonctionne aussi après une réapparition.
-
-En revanche, si la fin de partie n'est jamais déclenchée (voir Bug #1), ce mécanisme garantit que le cycle `mort → respawn → mort → respawn` se répète **indéfiniment** en 2 joueurs sans IA. Ce n'est pas un bug en soi mais un amplificateur du Bug #1.
-
----
-
-## Synthèse des causes racines
-
-```
-description.ext
-  └── respawn = 3             ← Moteur Arma 3 respawn TOUJOURS (Bug #1)
-  └── respawnButton = 1       ← Mort forcée contourne fn_switchToAI (Bug #3)
-
-fn_switchToAI.sqf
-  └── else { /* rien */ }     ← Aucun déclencheur de fin de partie (Bug #2)
-  └── player addEH "Killed"   ← Potentielle duplication d'EH (Bug #4)
-
-fn_manageLeadership.sqf
-  └── count == 0 → rien       ← Opportunité manquée (Bug #5)
-
-initPlayerLocal.sqf
-  └── Respawn EH              ← Perpétue le cycle (Bug #6, amplifie Bug #1)
-```
-
----
-
-## Corrections proposées
-
-> **Contraintes respectées :**
-> - Ne pas modifier la logique native Arma 3
-> - Ne pas casser le système de résurrection (basculement vers IA)
-> - Cibler la cause racine, pas les symptômes
-
----
-
-### CORRECTION #1 — `fn_switchToAI.sqf` — Déclencher la vérification de fin de partie quand aucune IA n'est disponible
-
-**Remplacer la branche `else` silencieuse :**
+Remplacer le bloc "aucune IA" par :
 
 ```sqf
 } else {
-    // Aucune IA disponible pour le basculement.
-    // Déclencher immédiatement une vérification de fin de partie côté serveur.
-    // Le délai de 10 s (respawnDelay) laisse une fenêtre pour que endMission
-    // s'exécute avant tout respawn Arma 3.
+    // Aucune IA disponible : entrer en spectateur
+    private _originalGroup = group _deadUnit;
+
+    setPlayerRespawnTime 999999;
+    ["Initialize", [player, [], true]] call BIS_fnc_EGSpectator;
     [] remoteExec ["LL_fnc_checkGameOver", 2];
 
-    if (DEBUG_MODE) then {
-        diag_log "[LL] switchToAI: Aucune IA disponible. Vérification de fin de partie déclenchée.";
-    };
-};
-```
-
----
-
-### CORRECTION #2 — Créer `functions/fn_checkGameOver.sqf` (nouvelle fonction serveur)
-
-```sqf
-#include "..\macros.hpp"
-
-/*
- * LL_fnc_checkGameOver
- *
- * Description:
- *   Vérifie si tous les joueurs connectés sont morts simultanément.
- *   Si oui, déclenche la fin de mission (défaite) avant l'expiration
- *   du respawnDelay Arma 3 (10 s).
- *   Ne doit pas être appelé si une IA vivante reste disponible pour le basculement.
- *
- * Locality:
- *   Serveur uniquement — appelé via remoteExec [..., 2]
- */
-
-if (!isServer) exitWith {};
-
-// Exclure les Headless Clients de la liste des joueurs
-private _allPlayers = allPlayers - entities "HeadlessClient_F";
-
-// Compter les joueurs encore en vie
-private _alivePlayers = _allPlayers select { alive _x };
-
-if (count _allPlayers > 0 && { count _alivePlayers == 0 }) then {
-    if (DEBUG_MODE) then {
-        diag_log "[LL] checkGameOver: Tous les joueurs sont morts. Fin de mission déclenchée.";
-    };
-
-    // Court délai dramatique (3 s) avant l'écran de défaite,
-    // bien inférieur au respawnDelay (10 s) pour éviter tout respawn.
+    // Boucle de surveillance : attend qu'une IA rejoigne le groupe
     [] spawn {
-        sleep 3;
-        ["LOSER", false, 0] call BIS_fnc_endMission;
+        private _grp = _originalGroup; // capturer le groupe dans la closure
+
+        waitUntil {
+            sleep 5;
+            private _availableAI = (units _grp) select { alive _x && !isPlayer _x };
+            count _availableAI > 0
+        };
+
+        // Sortir du spectateur
+        ["Terminate"] call BIS_fnc_EGSpectator;
+
+        // Re-tenter le basculement vers la nouvelle IA disponible
+        [_deadUnit] spawn LL_fnc_switchToAI;
     };
 };
 ```
 
-**Déclarer la fonction dans `description.ext` :**
+> **Note :** `_originalGroup` doit être capturé **avant** le `spawn` pour rester accessible  
+> dans la closure via la variable privée du bloc parent.
+
+---
+
+## BUG-04 — DESIGN : Boutons de renforts inaccessibles en mode spectateur
+
+### Fichiers concernés
+`functions/fn_addHelicopterActions.sqf`, `functions/fn_addDroneAction.sqf`
+
+### Description
+Les `addAction` (hélicoptère, drone) sont attachées à l'unité joueur (son corps).  
+En mode spectateur `BIS_fnc_EGSpectator`, le joueur est dans une caméra libre :  
+**le menu d'actions scroll n'est pas accessible** sur le corps mort.
+
+Le BUG-03 suppose pourtant qu'un spectateur peut appeler des renforts pour réintégrer le jeu.
+
+### Solution recommandée — Ajouter les actions via `BIS_fnc_EGSpectator` callbacks
+
+`BIS_fnc_EGSpectator` expose une interface scriptable. Une option simple est d'ouvrir  
+une action carte (`createDialog` ou `addMissionEventHandler "Map"`) pour les joueurs spectateurs.
+
+**Alternative légère** : garder les actions sur l'unité morte mais retirer la condition  
+`alive _target` lorsque le joueur est en mode spectateur confirmé :
+
 ```sqf
-class MissionFunctions {
-    file = "functions";
-    // ... fonctions existantes ...
-    class checkGameOver         {};   // ← Ajouter cette ligne
+// Condition modifiée pour autoriser le mort-spectateur à appeler des renforts
+"leader (group _target) isEqualTo _target || (_target getVariable ['LL_Spectating', false])"
+```
+
+Poser `_deadUnit setVariable ["LL_Spectating", true]` lors de l'entrée en spectateur  
+(dans `fn_switchToAI`, branche aucune IA).
+
+> Cette approche permet de réutiliser tout le système `addAction` existant sans le refactoriser.  
+> Le menu scroll devient accessible sur le corps mort via interaction directe (se placer dessus).  
+> En spectateur libre, une interaction via la carte reste la solution la plus ergonomique.
+
+---
+
+## Compatibilité — Système de blessure / réanimation
+
+### Analyse
+
+| Système | Comportement du `Killed` EH | Compatibilité `fn_switchToAI` |
+|---|---|---|
+| **Vanilla (sans revive)** | Déclenché à `damage == 1.0` (mort définitive) | ✅ Aucun conflit |
+| **BIS Revive** (`respawnTemplates[] = {"Revive"}`) | `Killed` déclenché **pendant** l'état inconscient | ⚠️ Conflit possible |
+| **ACE3 Medical** | ACE gère ses propres états; `Killed` EH vanilla = mort ACE confirmée | ✅ Aucun conflit si ACE3 actif |
+
+### État actuel (`description.ext`)
+```sqf
+respawnTemplates[] = {"Tickets"}; // Pas de "Revive"
+respawn             = 3;
+respawnButton       = 0;
+```
+
+**Le système BIS Revive n'est pas activé.** Le `Killed` EH ne se déclenche qu'à la mort définitive.  
+Si ACE3 est utilisé (probable vu la mention "système de blessure"), ACE intercepte les états  
+inconscients **avant** que le `Killed` EH vanilla ne se déclenche → aucun conflit.
+
+### Précaution si BIS Revive est ajouté ultérieurement
+Ajouter une garde dans `fn_switchToAI` :
+
+```sqf
+// Ne pas switcher si le joueur est en état de réanimation BIS (incapacité temporaire)
+if (_deadUnit getVariable ["BIS_revive_incapacitated", false]) exitWith {
+    diag_log "[LL] switchToAI: Joueur incapacité (BIS Revive) — basculement annulé.";
 };
 ```
 
 ---
 
-### CORRECTION #3 — `description.ext` — Désactiver le bouton de mort forcée
+## Récapitulatif des actions à mener
 
-```sqf
-// AVANT
-respawnButton = 1;
-
-// APRÈS
-respawnButton = 0;
-```
-
-**Justification :** Le bouton de mort forcée contourne le `Killed` EH et donc toute vérification de fin de partie. Il n'apporte aucune valeur dans ce système (le basculement IA est automatique). Sa suppression élimine le Bug #3 sans impact sur le gameplay.
+| # | Priorité | Fichier | Action |
+|---|---|---|---|
+| BUG-01 | 🔴 CRITIQUE | `fn_transferLocality.sqf` | Remplacer `setGroupOwner` par `setOwner` individuel en MP |
+| BUG-02 | 🟡 MOYEN | `fn_checkGameOver.sqf` | Ajouter le flag `LL_Switching_To_AI` pour éviter les faux positifs |
+| BUG-02 | 🟡 MOYEN | `fn_switchToAI.sqf` | Poser/retirer le flag `LL_Switching_To_AI` au début/fin |
+| BUG-03 | 🟠 IMPORTANT | `fn_switchToAI.sqf` | Ajouter la boucle de surveillance dans la branche spectateur |
+| BUG-04 | 🔵 DESIGN | `fn_switchToAI.sqf` + actions | Flag `LL_Spectating` + retirer `alive _target` pour les spectateurs |
 
 ---
 
-### CORRECTION #4 (optionnelle) — `fn_switchToAI.sqf` — Éviter la duplication du `Killed` EH
-
-Après `selectPlayer _targetAI`, utiliser `removeAllEventHandlers` sur le corps original pour lui retirer son `Respawn` EH avant qu'Arma 3 ne le respawn et ne crée un EH en double :
-
-```sqf
-if (local _targetAI) then {
-    selectPlayer _targetAI;
-
-    // Retirer le Respawn EH du corps original (_deadUnit) pour éviter
-    // qu'Arma 3 ne respawn l'ancienne unité et ne duplique le Killed EH.
-    _deadUnit removeAllEventHandlers "Respawn";
-
-    // ... reste de la logique existante ...
-};
-```
-
----
-
-## Ordre d'implémentation recommandé
-
-| Priorité | Correction | Impact |
-|---|---|---|
-| 1 | Créer `fn_checkGameOver.sqf` | Élimine la cause racine du respawn |
-| 2 | Modifier `fn_switchToAI.sqf` (branche `else`) | Connecte la mort sans IA à la fin de partie |
-| 3 | Déclarer `checkGameOver` dans `description.ext` | Nécessaire pour que la fonction soit reconnue |
-| 4 | `respawnButton = 0` dans `description.ext` | Bloque le contournement par mort forcée |
-| 5 | `removeAllEventHandlers "Respawn"` dans `fn_switchToAI.sqf` | Nettoyage préventif des EH en double |
-
----
-
-## Fichiers à modifier / créer
-
-| Fichier | Action | Bug(s) corrigé(s) |
-|---|---|---|
-| `functions/fn_checkGameOver.sqf` | **Créer** | #1, #2 |
-| `functions/fn_switchToAI.sqf` | **Modifier** (branche `else` + `removeAllEventHandlers`) | #2, #4 |
-| `description.ext` | **Modifier** (`respawnButton`, déclaration `checkGameOver`) | #1, #3 |
+*Document d'analyse — à implémenter après validation des solutions proposées.*

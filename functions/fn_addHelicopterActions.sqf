@@ -29,7 +29,7 @@ if (!hasInterface) exitWith {};
                 params ["_target", "_caller", "_actionId"];
                 ["LIVRAISON", getPos player, player, _target, _actionId] remoteExec ["LL_fnc_requestHelicopter", 2];
             },
-            nil, 3.3, false, true, "", "alive _target"
+            nil, 3.3, false, true, "", "alive _target && leader (group _target) isEqualTo _target"
         ];
 
         // 2. Demander Livraison Véhicule (Usage Unique)
@@ -43,7 +43,7 @@ if (!hasInterface) exitWith {};
                 };
                 ["VEHICULE", getPos player, player, _target, _actionId] remoteExec ["LL_fnc_requestHelicopter", 2];
             },
-            nil, 3.1, false, true, "", "alive _target"
+            nil, 3.1, false, true, "", "alive _target && leader (group _target) isEqualTo _target"
         ];
 
         // 3. Demander Appui Aérien CAS (Cooldown de 5 minutes)
@@ -59,7 +59,7 @@ if (!hasInterface) exitWith {};
                 };
                 ["CAS", getPos player, player, _target, _actionId] remoteExec ["LL_fnc_requestHelicopter", 2];
             },
-            nil, 2.9, false, true, "", "alive _target"
+            nil, 2.9, false, true, "", "alive _target && leader (group _target) isEqualTo _target"
         ];
 
         // 4. Demander Renforts (Débarquement)
@@ -69,7 +69,7 @@ if (!hasInterface) exitWith {};
                 params ["_target", "_caller", "_actionId"];
                 ["DEBARQUEMENT", getPos player, player, _target, _actionId] remoteExec ["LL_fnc_requestHelicopter", 2];
             },
-            nil, 2.7, false, true, "", "alive _target"
+            nil, 2.7, false, true, "", "alive _target && leader (group _target) isEqualTo _target"
         ];
 
         // 5. Demander Extraction (Embarquement)
@@ -79,7 +79,7 @@ if (!hasInterface) exitWith {};
                 params ["_target", "_caller", "_actionId"];
                 ["EMBARQUEMENT", getPos player, player, _target, _actionId] remoteExec ["LL_fnc_requestHelicopter", 2];
             },
-            nil, 2.5, false, true, "", "alive _target"
+            nil, 2.5, false, true, "", "alive _target && leader (group _target) isEqualTo _target"
         ];
     };
 

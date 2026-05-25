@@ -42,13 +42,13 @@ if (DEBUG_MODE) then { diag_log "[LL] requestDrone: Demande approuvée, déploie
 
     // ── Constantes ────────────────────────────────────────────────────────────
     private _droneClass     = "CUP_B_USMC_DYN_MQ9";
-    private _approachHeight = 300;  // Altitude d'approche et de retrait (m)
+    private _approachHeight = 250;  // Altitude d'approche et de retrait (m)
     private _loiterHeight   = 180;  // Altitude de surveillance (m)
-    private _loiterRadius   = 600;  // Rayon de loiter (m) — voilure fixe, large cercle
+    private _loiterRadius   = 450;  // Rayon de loiter (m) — voilure fixe, large cercle
     private _missionTime    = 900;  // Durée de mission : 15 minutes
     private _markerPrefix   = "LL_drone_";
     private _markerPool     = 25;   // Nb max de marqueurs par faction
-    private _scanRadius     = 1500; // Rayon de détection (m)
+    private _scanRadius     = 1000; // Rayon de détection (m)
 
     // ── Centre de masse des joueurs actifs ────────────────────────────────────
     private _activePlayers = allPlayers select { alive _x };
