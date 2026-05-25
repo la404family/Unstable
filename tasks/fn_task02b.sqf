@@ -42,9 +42,26 @@ if (!isServer) exitWith {};
 
     _rawSpawns = _rawSpawns call BIS_fnc_arrayShuffle;
 
+    // Filtrer les points trop proches du lieu de rencontre de task01 (immersion — min 200m)
+    private _task01MeetingPos = if (!isNil "LL_g_usedTaskPos" && { count LL_g_usedTaskPos > 0 }) then {
+        LL_g_usedTaskPos select 0
+    } else {
+        [0, 0, 0]
+    };
+    private _farSpawns02b = _rawSpawns select { _x distance2D _task01MeetingPos >= 200 };
+    if (count _farSpawns02b >= 3) then { _rawSpawns = _farSpawns02b; };
+
+    // Sélectionner 3 points espacés d'au moins 150m entre eux (immersion)
     private _selectedSpawns = [];
     {
-        if (count _selectedSpawns < 3) then { _selectedSpawns pushBack _x; };
+        private _candidate = _x;
+        if (count _selectedSpawns < 3) then {
+            private _tooClose = false;
+            {
+                if (_candidate distance2D _x < 150) exitWith { _tooClose = true; };
+            } forEach _selectedSpawns;
+            if (!_tooClose) then { _selectedSpawns pushBack _candidate; };
+        };
     } forEach _rawSpawns;
 
     if (count _selectedSpawns < 3) exitWith {
@@ -201,7 +218,7 @@ if (!isServer) exitWith {};
             localize "STR_LL_Task_02b_Title",
             localize "STR_LL_Task_02b_Marker"
         ],
-        getPos _hostageLogic,
+        [0,0,0],  // Pas de marqueur 3D initial — 3 zones de recherche, découverte progressive (carte seule)
         "AUTOASSIGNED",
         5,
         true,

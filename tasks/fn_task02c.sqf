@@ -164,6 +164,15 @@ if (_mode == "chief_talk") exitWith {
 
     _rawSpawns = _rawSpawns call BIS_fnc_arrayShuffle;
 
+    // Filtrer les points trop proches du lieu de rencontre de task01 (immersion — min 200m)
+    private _task01MeetingPos = if (!isNil "LL_g_usedTaskPos" && { count LL_g_usedTaskPos > 0 }) then {
+        LL_g_usedTaskPos select 0
+    } else {
+        [0, 0, 0]
+    };
+    private _farSpawns02c = _rawSpawns select { _x distance2D _task01MeetingPos >= 200 };
+    if (count _farSpawns02c >= 1) then { _rawSpawns = _farSpawns02c; };
+
     private _players = allPlayers select { alive _x };
     private _spawnLogic = objNull;
     {
