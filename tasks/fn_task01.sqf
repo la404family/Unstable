@@ -46,6 +46,9 @@ if (_mode == "scenario") exitWith {
 
         if (isNull _chief) exitWith {};
 
+        // Enregistrer le scénario globalement pour fn_taskManager (branchement task04a/b/c)
+        missionNamespace setVariable ["LL_g_task01_scenario", _scenario, true];
+
         // S'assurer que le camp OPFOR (East) et les Indépendants se considèrent hostiles
         east setFriend [independent, 0];
         independent setFriend [east, 0];
@@ -72,95 +75,62 @@ if (_mode == "scenario") exitWith {
                 // Succès immédiat
                 ["task_01_recon", "SUCCEEDED", true] call BIS_fnc_taskSetState;
 
-                // À la fin du scénario 1, le groupe se rejoint et s'éloigne
+                // Le groupe se dirige vers un M_Dans_Bat_XXX à minimum 200m
+                // et disparaît dès qu'il arrive à 3m (immersif : entrent dans le bâtiment)
                 private _escapeGrp = createGroup [independent, true];
                 ([_chief] + _guards) joinSilent _escapeGrp;
-                
-                // Activer les mouvements et animations
-                _chief enableAI "MOVE";
-                _chief enableAI "ANIM";
+
                 {
                     _x enableAI "MOVE";
                     _x enableAI "ANIM";
                     _x setBehaviour "SAFE";
                     _x setSpeedMode "FULL";
-                    _x setVariable ["LL_Task01_Escaping", true, true]; // Empêcher la suppression prématurée globale
+                    _x setVariable ["LL_Task01_Escaping", true, true];
                 } forEach ([_chief] + _guards);
 
-                // Rechercher toutes les logiques M_Dans_Bat_
+                // Rechercher toutes les logiques M_Dans_Bat_ à minimum 200m des joueurs
                 private _allLogics = [];
                 {
                     if (_x select [0, 11] == "M_Dans_Bat_") then {
                         private _val = missionNamespace getVariable [_x, objNull];
-                        if (!isNull _val) then {
-                            _allLogics pushBack _val;
-                        };
+                        if (!isNull _val) then { _allLogics pushBack _val; };
                     };
                 } forEach (allVariables missionNamespace);
 
-                // Filtrer celles à plus de 800m de tous les joueurs
                 private _players = allPlayers select { alive _x };
-                private _farLogics = [];
+                private _validLogics = [];
                 {
                     private _logic = _x;
                     private _tooClose = false;
-                    {
-                        if (_x distance2D _logic <= 800) exitWith { _tooClose = true; };
-                    } forEach _players;
-                    if (!_tooClose) then {
-                        _farLogics pushBack _logic;
-                    };
+                    { if (_x distance2D _logic <= 200) exitWith { _tooClose = true; }; } forEach _players;
+                    if (!_tooClose) then { _validLogics pushBack _logic; };
                 } forEach _allLogics;
 
                 private _destPos = [0, 0, 0];
-                if (count _farLogics > 0) then {
-                    _destPos = getPosASL (selectRandom _farLogics);
+                if (count _validLogics > 0) then {
+                    _destPos = getPosASL (selectRandom _validLogics);
                 } else {
-                    // Fallback : à 1000m de la position de rencontre actuelle
-                    _destPos = (getPos _chief) getPos [1000, random 360];
+                    // Fallback : 300m dans une direction aléatoire
+                    _destPos = (getPos _chief) getPos [300, random 360];
                 };
 
-                // Ordonner le mouvement
-                while {count waypoints _escapeGrp > 0} do {
-                    deleteWaypoint [_escapeGrp, 0];
-                };
+                // Waypoint vers la destination
+                while { count waypoints _escapeGrp > 0 } do { deleteWaypoint [_escapeGrp, 0]; };
                 private _wp = _escapeGrp addWaypoint [_destPos, 0];
                 _wp setWaypointType "MOVE";
                 _wp setWaypointSpeed "FULL";
                 _wp setWaypointBehaviour "SAFE";
 
-                // Boucle de surveillance à 60s
-                [_escapeGrp, [_chief] + _guards] spawn {
-                    params ["_grp", "_units"];
-                    private _exit = false;
-                    while {!_exit} do {
-                        sleep 60;
-                        private _players = allPlayers select { alive _x };
-                        if (count _players == 0) then {
-                            _exit = true;
-                        } else {
-                            private _aliveUnits = _units select { alive _x };
-                            if (count _aliveUnits == 0) then {
-                                _exit = true;
-                            } else {
-                                private _allFar = true;
-                                {
-                                    private _unit = _x;
-                                    if ((_players findIf { _x distance2D _unit <= 800 }) != -1) then {
-                                        _allFar = false;
-                                    };
-                                } forEach _aliveUnits;
-
-                                if (_allFar) then {
-                                    _exit = true;
-                                };
-                            };
-                        };
+                // Disparition immersive dès l'arrivée à 3m de la destination (=seuil du bâtiment)
+                [_escapeGrp, [_chief] + _guards, _destPos] spawn {
+                    params ["_grp", "_units", "_dest"];
+                    waitUntil {
+                        sleep 1;
+                        private _ldr = leader _grp;
+                        ({ alive _x } count _units) == 0
+                        || (!isNull _ldr && { alive _ldr } && { _ldr distance2D _dest <= 3 })
                     };
-
-                    {
-                        if (!isNull _x) then { deleteVehicle _x; };
-                    } forEach _units;
+                    { if (!isNull _x) then { deleteVehicle _x; }; } forEach _units;
                     deleteGroup _grp;
                 };
             };
@@ -184,37 +154,24 @@ if (_mode == "scenario") exitWith {
                     _x setCombatMode "RED";
                 } forEach _hostiles;
 
-                // Engager les joueurs à proximité
-                private _targets = allPlayers select { side _x == independent && alive _x };
-                if (count _targets > 0) then {
-                    { _x doFire (selectRandom _targets); } forEach _hostiles;
-                };
-
-                // Les traîtres cherchent et fouillent les joueurs les plus proches pour les tuer (Hunt Loop)
-                [_opforGrp] spawn {
-                    params ["_grp"];
-                    while { !isNull _grp && { ({ alive _x } count units _grp) > 0 } } do {
-                        private _players = allPlayers select { side _x == independent && alive _x };
-                        if (count _players > 0) then {
-                            private _leader = leader _grp;
-                            private _nearestPlayer = objNull;
-                            private _minDist = 999999;
-                            {
-                                private _d = _leader distance2D _x;
-                                if (_d < _minDist) then {
-                                    _minDist = _d;
-                                    _nearestPlayer = _x;
-                                };
-                            } forEach _players;
-
-                            if (!isNull _nearestPlayer) then {
-                                _grp move (getPos _nearestPlayer);
-                                _grp reveal [_nearestPlayer, 4.0];
+                // Chaque traître : debout, cible alliée aléatoire toutes les 10s (simulation de recherche)
+                {
+                    [_x] spawn {
+                        params ["_unit"];
+                        _unit setUnitPos "UP";  // Force la position debout
+                        _unit allowFleeing 0;   // Empêche la fuite
+                        while { alive _unit } do {
+                            private _targets = allPlayers select { side _x == independent && alive _x };
+                            if (count _targets > 0) then {
+                                private _target = selectRandom _targets;
+                                _unit doMove (getPos _target);
+                                (group _unit) reveal [_target, 4.0];
+                                _unit doFire _target;
                             };
+                            sleep 10;
                         };
-                        sleep 15;
                     };
-                };
+                } forEach _hostiles;
 
                 // Attendre l'élimination de tous les traîtres
                 waitUntil {
@@ -248,37 +205,49 @@ if (_mode == "scenario") exitWith {
                     _x doFire _chief;
                 } forEach _guards;
 
-                // Le chef rejoint le camp des joueurs (Independent) et se défend
+                // Le chef quitte sa position et traque activement les mutins
                 private _allyGrp = createGroup [independent, true];
                 [_chief] joinSilent _allyGrp;
+                _chief enableAI "MOVE";
                 _chief setBehaviour "COMBAT";
                 _chief setCombatMode "RED";
+                _chief setUnitPos "UP";
+                _chief allowFleeing 0;
 
-                // Les Mutins cherchent et fouillent les joueurs les plus proches pour les tuer (Hunt Loop)
-                [_opforGrp] spawn {
-                    params ["_grp"];
-                    while { !isNull _grp && { ({ alive _x } count units _grp) > 0 } } do {
-                        private _players = allPlayers select { side _x == independent && alive _x };
-                        if (count _players > 0) then {
-                            private _leader = leader _grp;
-                            private _nearestPlayer = objNull;
-                            private _minDist = 999999;
-                            {
-                                private _d = _leader distance2D _x;
-                                if (_d < _minDist) then {
-                                    _minDist = _d;
-                                    _nearestPlayer = _x;
-                                };
-                            } forEach _players;
-
-                            if (!isNull _nearestPlayer) then {
-                                _grp move (getPos _nearestPlayer);
-                                _grp reveal [_nearestPlayer, 4.0];
-                            };
+                // Boucle du chef : cible un mutin aléatoire vivant toutes les 10s
+                [_chief, _guards] spawn {
+                    params ["_unit", "_mutins"];
+                    while { alive _unit && ({ alive _x } count _mutins) > 0 } do {
+                        private _aliveMutins = _mutins select { alive _x };
+                        if (count _aliveMutins > 0) then {
+                            private _target = selectRandom _aliveMutins;
+                            _unit doMove (getPos _target);
+                            (group _unit) reveal [_target, 4.0];
+                            _unit doFire _target;
                         };
-                        sleep 15;
+                        sleep 10;
                     };
                 };
+
+                // Chaque mutin : debout, cible aléatoire (joueurs + chef) toutes les 10s
+                {
+                    [_x, _chief] spawn {
+                        params ["_unit", "_chef"];
+                        _unit setUnitPos "UP";
+                        _unit allowFleeing 0;
+                        while { alive _unit } do {
+                            private _targets = allPlayers select { side _x == independent && alive _x };
+                            if (alive _chef) then { _targets pushBack _chef; };
+                            if (count _targets > 0) then {
+                                private _target = selectRandom _targets;
+                                _unit doMove (getPos _target);
+                                (group _unit) reveal [_target, 4.0];
+                                _unit doFire _target;
+                            };
+                            sleep 10;
+                        };
+                    };
+                } forEach _guards;
 
                 // Attendre l'issue du combat
                 waitUntil {
@@ -421,7 +390,55 @@ if (_mode == "scenario") exitWith {
     // ── Notification QG ──────────────────────────────────────────────────────────
     ["STR_LL_Speaker_Narrator", "STR_LL_Task_01_Narrative_Meeting"] remoteExec ["LL_fnc_showSubtitle", 0];
 
-    // ── Spawn du chef de milice ──────────────────────────────────────────────────
+    // ── Spawn des gardes (secondaires avant principal — TASK_RULES §3) ─────────────────
+    private _guards    = [];
+    private _numGuards = 2 + floor (random 3); // 2 à 4 gardes
+
+    for "_i" from 0 to (_numGuards - 1) do {
+        sleep 0.7; // Délai obligatoire entre chaque spawn secondaire (TASK_RULES §3)
+        private _gPos  = _meetingPos getPos [6 + random 14, random 360];
+        private _gGrp  = createGroup [independent, true];
+        private _guard = _gGrp createUnit ["I_G_Soldier_F", [0,0,0], [], 0, "NONE"];
+
+        _guard setPosASL [
+            _gPos select 0,
+            _gPos select 1,
+            (getTerrainHeightASL _gPos) + 0.5
+        ];
+        _guard allowDamage false;
+        [_guard] spawn { sleep 3; (_this select 0) allowDamage true; };
+
+        // Appliquer le template civil/militia
+        _guard setVariable ["LL_forceTemplate", true, true];
+        if (!isNil "LL_fnc_applyCivilianTemplate") then {
+            [_guard] call LL_fnc_applyCivilianTemplate;
+        };
+
+        _guard setBehaviour "SAFE";
+        _guard setCombatMode "BLUE";
+
+        // Patrouille locale autour du lieu de rencontre (rayon 4–18 m, LIMITED/SAFE — TASK_RULES §11)
+        [_guard, _meetingPos] spawn {
+            params ["_unit", "_center"];
+            _unit setSpeedMode "LIMITED";
+            while { alive _unit && behaviour _unit != "COMBAT" } do {
+                private _dst = _center getPos [4 + random 14, random 360];
+                _unit doMove _dst;
+                waitUntil {
+                    sleep 1;
+                    !alive _unit
+                    || _unit distance2D _dst < 2
+                    || unitReady _unit
+                    || behaviour _unit == "COMBAT"
+                };
+                sleep (12 + random 20);
+            };
+        };
+
+        _guards pushBack _guard;
+    };
+
+    // ── Spawn du chef de milice (principal en dernier — TASK_RULES §3) ────────────
     private _chiefGrp = createGroup [independent, true];
     private _chief    = _chiefGrp createUnit ["I_G_officer_F", [0,0,0], [], 0, "NONE"];
 
@@ -478,53 +495,6 @@ if (_mode == "scenario") exitWith {
             };
             sleep 2;
         };
-    };
-
-    // ── Spawn des gardes ────────────────────────────────────────────────────────
-    private _guards    = [];
-    private _numGuards = 2 + floor (random 3); // 2 à 4 gardes
-
-    for "_i" from 0 to (_numGuards - 1) do {
-        private _gPos  = _meetingPos getPos [6 + random 14, random 360];
-        private _gGrp  = createGroup [independent, true];
-        private _guard = _gGrp createUnit ["I_G_Soldier_F", [0,0,0], [], 0, "NONE"];
-
-        _guard setPosASL [
-            _gPos select 0,
-            _gPos select 1,
-            (getTerrainHeightASL _gPos) + 0.5
-        ];
-        _guard allowDamage false;
-        [_guard] spawn { sleep 3; (_this select 0) allowDamage true; };
-
-        // Appliquer le template civil/militia
-        _guard setVariable ["LL_forceTemplate", true, true];
-        if (!isNil "LL_fnc_applyCivilianTemplate") then {
-            [_guard] call LL_fnc_applyCivilianTemplate;
-        };
-
-        _guard setBehaviour "SAFE";
-        _guard setCombatMode "BLUE";
-
-        // Patrouille locale autour du lieu de rencontre
-        [_guard, _meetingPos] spawn {
-            params ["_unit", "_center"];
-            _unit setSpeedMode "LIMITED";
-            while { alive _unit && behaviour _unit != "COMBAT" } do {
-                private _dst = _center getPos [4 + random 18, random 360];
-                _unit doMove _dst;
-                waitUntil {
-                    sleep 1;
-                    !alive _unit
-                    || _unit distance2D _dst < 2
-                    || unitReady _unit
-                    || behaviour _unit == "COMBAT"
-                };
-                sleep (12 + random 20);
-            };
-        };
-
-        _guards pushBack _guard;
     };
 
     // ── Marqueur de tâche carte ───────────────────────────────────────────────
@@ -620,15 +590,15 @@ if (_mode == "scenario") exitWith {
         private _alivePlayers = allPlayers select { alive _x && side _x == independent };
         if (count _alivePlayers == 0) exitWith { true };
         
-        // Tous les joueurs doivent être à plus de 800m de la position de rencontre
-        private _farFromMeeting = (_alivePlayers findIf { _x distance2D _meetingPos <= 800 }) == -1;
+        // Tous les joueurs doivent être à plus de 1500m de la position de rencontre (TASK01.md spec)
+        private _farFromMeeting = (_alivePlayers findIf { _x distance2D _meetingPos <= 1500 }) == -1;
         
-        // Et à plus de 800m de toutes les unités vivantes de la tâche (sauf celles en fuite)
+        // Et à plus de 1500m de toutes les unités vivantes de la tâche (sauf celles en fuite)
         private _aliveUnits = ([_chief] + _guards) select { alive _x && !(_x getVariable ["LL_Task01_Escaping", false]) };
         private _farFromUnits = true;
         {
             private _unit = _x;
-            if ((_alivePlayers findIf { _x distance2D _unit <= 800 }) != -1) then {
+            if ((_alivePlayers findIf { _x distance2D _unit <= 1500 }) != -1) then {
                 _farFromUnits = false;
             };
         } forEach _aliveUnits;

@@ -45,16 +45,25 @@ waitUntil {
 };
 
 // ── Fin de la mission ────────────────────────────────────────────────────────
-private _task1State = ["task_01_recon"] call BIS_fnc_taskState;
+private _task1State    = ["task_01_recon"] call BIS_fnc_taskState;
+private _task1Scenario = missionNamespace getVariable ["LL_g_task01_scenario", 0];
 
 if (DEBUG_MODE) then {
-    diag_log format ["[LL] taskManager: Tâche 01 terminée avec l'état : %1. Déclenchement de la fin de mission.", _task1State];
+    diag_log format ["[LL] taskManager: Tâche 01 terminée. État : %1 | Scénario : %2.", _task1State, _task1Scenario];
 };
 
-if (_task1State == "SUCCEEDED") then {
-    sleep 8; // Laisser le temps aux joueurs de lire les derniers sous-titres
-    ["MissionSuccess", true, true] remoteExec ["BIS_fnc_endMission", 0];
-} else {
-    sleep 8; // Laisser le temps aux joueurs de lire les derniers sous-titres
-    ["MissionFailed", false, true] remoteExec ["BIS_fnc_endMission", 0];
-};
+// ── Suite de la mission : lancement de task04a / task04b / task04c ────────────
+// La fin de mission n'est JAMAIS déclenchée ici (TASK_RULES §7).
+// L'extraction hélicoptère reste le seul déclencheur de BIS_fnc_endMission.
+// TODO : décommenter quand les fonctions task04x seront créées.
+// switch (_task1Scenario) do {
+//     case 1: { [] call LL_fnc_task02a; }; // Coopération         → Intel reçu
+//     case 2: { [] call LL_fnc_task02b; }; // Trahison            → Renseignements perdus
+//     case 3: {
+//         if (_task1State == "SUCCEEDED") then {
+//             [] call LL_fnc_task02c;      // Mutinerie (chef vivant) → Exfiltration chef
+//         } else {
+//             [] call LL_fnc_task02b;      // Mutinerie (chef mort)   → Renseignements perdus (= Trahison)
+//         };
+//     };
+// };
