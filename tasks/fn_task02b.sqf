@@ -182,8 +182,7 @@ if (!isServer) exitWith {};
                 };
             } forEach allPlayers;
             if (!isNull _nearest) then {
-                private _dir = _h directionTo _nearest;
-                _h setDir _dir;
+                _h setDir (_h getDir _nearest);
             };
             sleep 2;
         };
@@ -441,7 +440,7 @@ if (!isServer) exitWith {};
             };
         } forEach allPlayers;
         private _walkDir = if (!isNull _nearest) then {
-            (_h directionTo _nearest) + 180
+            (_h getDir _nearest) + 180
         } else { random 360 };
         private _walkPos = getPos _h getPos [150 + random 100, _walkDir];
         _h setSpeedMode "FULL";

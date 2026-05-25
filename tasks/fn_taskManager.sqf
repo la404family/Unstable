@@ -56,14 +56,14 @@ if (DEBUG_MODE) then {
 // La fin de mission n'est JAMAIS déclenchée ici (TASK_RULES §7).
 // L'extraction hélicoptère reste le seul déclencheur de BIS_fnc_endMission.
 // TODO : décommenter quand les fonctions task04x seront créées.
-// switch (_task1Scenario) do {
-//     case 1: { [] call LL_fnc_task02a; }; // Coopération         → Intel reçu
-//     case 2: { [] call LL_fnc_task02b; }; // Trahison            → Renseignements perdus
-//     case 3: {
-//         if (_task1State == "SUCCEEDED") then {
-//             [] call LL_fnc_task02c;      // Mutinerie (chef vivant) → Exfiltration chef
-//         } else {
-//             [] call LL_fnc_task02b;      // Mutinerie (chef mort)   → Renseignements perdus (= Trahison)
-//         };
-//     };
-// };
+ switch (_task1Scenario) do {
+     case 1: { [] call LL_fnc_task02a; }; // Coopération         → Intel reçu
+    case 2: { [] call LL_fnc_task02b; }; // Trahison            → Renseignements perdus
+     case 3: {
+         if (_task1State == "SUCCEEDED") then {
+             [] call LL_fnc_task02c;      // Mutinerie (chef vivant) → Exfiltration chef
+         } else {
+            [] call LL_fnc_task02b;      // Mutinerie (chef mort)   → Renseignements perdus (= Trahison)
+         };
+     };
+ };

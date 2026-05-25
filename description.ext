@@ -74,6 +74,8 @@ class CfgFunctions {
             class task02a_addAction     {};
             class task02b               {};
             class task02b_addAction     {};
+            class task02c               {};
+            class task02c_addAction     {};
             class taskManager           {};
         };
     };

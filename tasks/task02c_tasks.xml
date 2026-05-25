@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project name="UnstablePorto">
+  <Package name="Missions">
+    <Container name="Tasks">
+      <Key ID="STR_LL_Task_02c_Title">
+        <English>Capture the Intermediary</English>
+        <French>Capturer l'intermédiaire</French>
+      </Key>
+      <Key ID="STR_LL_Task_02c_Desc">
+        <English>The militia leader has revealed the location of a financial intermediary who coordinates fund transfers between local militias and cartels. Locate him, eliminate his bodyguards, and capture him alive. His death would compromise the entire intelligence chain.</English>
+        <French>Le chef de milice a révélé la position d'un intermédiaire financier qui coordonne les flux de fonds entre les milices et les cartels locaux. Localisez-le, éliminez ses gardes du corps et capturez-le vivant. Sa mort compromettrait toute la chaîne de renseignement.</French>
+      </Key>
+      <Key ID="STR_LL_Task_02c_Marker">
+        <English>Financial Intermediary</English>
+        <French>Intermédiaire financier</French>
+      </Key>
+      <Key ID="STR_LL_Task_02c_ChiefTalk">
+        <English>Debrief the militia leader</English>
+        <French>Interroger le chef de milice</French>
+      </Key>
+      <Key ID="STR_LL_Task_02c_Capture">
+        <English>Restrain the intermediary</English>
+        <French>Maîtriser l'intermédiaire</French>
+      </Key>
+    </Container>
+  </Package>
+</Project>

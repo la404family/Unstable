@@ -21,9 +21,9 @@ flowchart TD
     T01 -->|"Scénario 3 — chef survit\nMutinerie\n→ SUCCEEDED"| T02C
     T01 -->|"Scénario 3 — chef mort\nMutinerie\n→ FAILED\nRenseignements perdus"| T02B
 
-    T02A["task02a — TODO\nfn_task02a.sqf"]
-    T02B["task02b — TODO\nfn_task02b.sqf"]
-    T02C["task02c — TODO\nfn_task02c.sqf"]
+    T02A["task02a — Neutraliser les chefs / Récupérer les documents\nfn_task02a.sqf"]
+    T02B["task02b — Le Fil Rouge — Libération de l'informateur\nfn_task02b.sqf"]
+    T02C["task02c — L'Intermédiaire — Capturer le financier\nfn_task02c.sqf"]
 
     T02A --> EXFIL
     T02B --> EXFIL
@@ -40,9 +40,9 @@ flowchart TD
 |---|---|---|---|---|
 | `task00` | `fn_task00.sqf` | `fn_taskManager.sqf` au lancement | `SUCCEEDED` uniquement | `task01` |
 | `task01` | `fn_task01.sqf` | Après `task00 SUCCEEDED` | `SUCCEEDED` (S1, S2, S3-chef-vivant) / `FAILED` (S3-chef-mort) | S1→`task02a` / S2→`task02b` / S3-vivant→`task02c` / S3-mort→`task02b` |
-| `task02a` | `fn_task02a.sqf` *(à créer)* | `LL_g_task01_scenario == 1` (Coopération) | — | Extraction |
-| `task02b` | `fn_task02b.sqf` *(à créer)* | Trahison **ou** Mutinerie chef mort — renseignements perdus | — | Extraction |
-| `task02c` | `fn_task02c.sqf` *(à créer)* | `LL_g_task01_scenario == 3` + chef vivant (Mutinerie réussie) | — | Extraction |
+| `task02a` | `fn_task02a.sqf` | `LL_g_task01_scenario == 1` (Coopération) | `SUCCEEDED` (documents récupérés) | Extraction |
+| `task02b` | `fn_task02b.sqf` | Trahison **ou** Mutinerie chef mort | `SUCCEEDED` (informateur libéré) / `FAILED` (tué) | Extraction |
+| `task02c` | `fn_task02c.sqf` | `LL_g_task01_scenario == 3` + chef vivant (Mutinerie réussie) | `SUCCEEDED` (intermédiaire capturé) / `FAILED` (tué) | Extraction |
 
 ---
 

@@ -53,6 +53,6 @@ _hostage addAction [
     true,  // showWindow
     true,  // hideOnUse
     "",    // Shortcut
-    "alive _target && (_this distance _target) < 3 && !missionNamespace getVariable ['LL_Task02b_Freed', false]",
+    "alive _target && (_this distance _target) < 3 && !(missionNamespace getVariable ['LL_Task02b_Freed', false])",
     3      // Distance maximale d'interaction (TASK_RULES §5)
 ];

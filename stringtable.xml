@@ -156,6 +156,26 @@ Le Roi de Sahrani a lancé cette opération de pacification autonome pour prouve
         <English>Free the informant</English>
         <French>Libérer l'informateur</French>
       </Key>
+      <Key ID="STR_LL_Task_02c_Title">
+        <English>Capture the Intermediary</English>
+        <French>Capturer l'intermédiaire</French>
+      </Key>
+      <Key ID="STR_LL_Task_02c_Desc">
+        <English>The militia leader has revealed the location of a financial intermediary who coordinates fund transfers between local militias and cartels. Locate him, eliminate his bodyguards, and capture him alive. His death would compromise the entire intelligence chain.</English>
+        <French>Le chef de milice a révélé la position d'un intermédiaire financier qui coordonne les flux de fonds entre les milices et les cartels locaux. Localisez-le, éliminez ses gardes du corps et capturez-le vivant. Sa mort compromettrait toute la chaîne de renseignement.</French>
+      </Key>
+      <Key ID="STR_LL_Task_02c_Marker">
+        <English>Financial Intermediary</English>
+        <French>Intermédiaire financier</French>
+      </Key>
+      <Key ID="STR_LL_Task_02c_ChiefTalk">
+        <English>Debrief the militia leader</English>
+        <French>Interroger le chef de milice</French>
+      </Key>
+      <Key ID="STR_LL_Task_02c_Capture">
+        <English>Restrain the intermediary</English>
+        <French>Maîtriser l'intermédiaire</French>
+      </Key>
     </Container>
     <Container name="Dialogues">
       <Key ID="STR_LL_Speaker_Nassim">
@@ -257,6 +277,34 @@ Le Roi de Sahrani a lancé cette opération de pacification autonome pour prouve
       <Key ID="STR_LL_Task_02b_Narrative_Failed">
         <English>HQ to patrol. The informant has been killed. We have lost a critical intelligence source. The mission continues — our network is compromised. Out.</English>
         <French>QG à patrouille. L'informateur a été tué. Nous avons perdu une source de renseignement critique. La mission continue — notre réseau est compromis. Terminé.</French>
+      </Key>
+      <Key ID="STR_LL_Speaker_Intermediaire">
+        <English>Financial Intermediary</English>
+        <French>Intermédiaire financier</French>
+      </Key>
+      <Key ID="STR_LL_Task_02c_Chief_Intel">
+        <English>I know who moves the money here. An independent fixer — he coordinates fund transfers between the militias and the local cartels. He operates out of a location in this sector. He doesn't fight, but he's protected. Take him alive — he knows the names, the storage sites, the next transfers.</English>
+        <French>Je sais qui fait passer l'argent ici. Un intermédiaire indépendant — il coordonne les flux de fonds entre les milices et les cartels locaux. Il opère depuis un endroit dans ce secteur. Il ne se bat pas, mais il est protégé. Capturez-le vivant — il connaît les noms, les lieux de stockage, les prochains transferts.</French>
+      </Key>
+      <Key ID="STR_LL_Task_02c_Chief_Leaves">
+        <English>Your extraction team will handle him. I'll meet up with them myself — better if I disappear for a while. Good luck.</English>
+        <French>Votre équipe d'extraction s'occupe de lui. Je les rejoins moi-même — il vaut mieux que je me fasse discret un moment. Bonne chance.</French>
+      </Key>
+      <Key ID="STR_LL_Task_02c_Intermediaire_Captured">
+        <English>Alright, alright! I'll cooperate! I know things — important things. Just don't shoot!</English>
+        <French>D'accord, d'accord ! Je coopère ! Je sais des choses — des choses importantes. Ne tirez pas !</French>
+      </Key>
+      <Key ID="STR_LL_Task_02c_Narrative_Start">
+        <English>HQ to patrol. Objective confirmed. Locate the financial intermediary in your sector, eliminate his protection, and capture him alive. He is a critical intelligence asset. Do not kill him. Out.</English>
+        <French>QG à patrouille. Objectif confirmé. Localisez l'intermédiaire financier dans votre secteur, éliminez sa protection et capturez-le vivant. Il est un atout de renseignement critique. Ne le tuez pas. Terminé.</French>
+      </Key>
+      <Key ID="STR_LL_Task_02c_Narrative_Success">
+        <English>HQ to patrol. The financial intermediary is secured. His intelligence on cartel-militia fund transfers is being extracted. Bring him to the LZ. Well done. Out.</English>
+        <French>QG à patrouille. L'intermédiaire financier est sécurisé. Ses renseignements sur les flux financiers milice-cartel sont en cours d'extraction. Rejoignez la LZ. Bien joué. Terminé.</French>
+      </Key>
+      <Key ID="STR_LL_Task_02c_Narrative_Failed">
+        <English>HQ to patrol. The financial intermediary has been killed. The money trail has gone cold. The logistical network is compromised. The mission continues. Out.</English>
+        <French>QG à patrouille. L'intermédiaire financier a été tué. La piste financière est perdue. Le réseau logistique est compromis. La mission continue. Terminé.</French>
       </Key>
     </Container>
     <Container name="Debriefing">
