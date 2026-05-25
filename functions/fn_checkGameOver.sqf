@@ -22,8 +22,11 @@ if (!isServer) exitWith {};
     // Exclure les Headless Clients de la liste des joueurs
     private _allPlayers = allPlayers - entities "HeadlessClient_F";
 
-    // Compter les joueurs encore en vie
-    private _alivePlayers = _allPlayers select { alive _x };
+    // Compter les joueurs encore actifs :
+    // un joueur est "actif" s'il est vivant OU si son basculement vers une IA est encore en cours
+    private _alivePlayers = _allPlayers select {
+        alive _x || { _x getVariable ["LL_Switching_To_AI", false] }
+    };
 
     if (count _allPlayers > 0 && { count _alivePlayers == 0 }) then {
         if (DEBUG_MODE) then {
