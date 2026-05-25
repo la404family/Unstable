@@ -108,8 +108,64 @@ Le Roi de Sahrani a lancé cette opération de pacification autonome pour prouve
         <English>ERROR: No valid game logic M_Dans_Bat_XXX found!</English>
         <French>ERREUR : Aucun game logic M_Dans_Bat_XXX valide trouvé !</French>
       </Key>
+      <Key ID="STR_LL_Task_02a_Title">
+        <English>Intel Hunt</English>
+        <French>Chasse aux renseignements</French>
+      </Key>
+      <Key ID="STR_LL_Task_02a_Desc">
+        <English>Three militia groups are operating in the sector. Neutralize their leaders and recover the intelligence documents held by one of them.</English>
+        <French>Trois groupes de miliciens opèrent dans le secteur. Neutralisez leurs chefs et récupérez les documents de renseignement détenus par l'un d'eux.</French>
+      </Key>
+      <Key ID="STR_LL_Task_02a_Marker">
+        <English>Sector</English>
+        <French>Secteur</French>
+      </Key>
+      <Key ID="STR_LL_Task_02a_Target">
+        <English>Chief %1</English>
+        <French>Chef %1</French>
+      </Key>
+      <Key ID="STR_LL_Task_02a_Doc">
+        <English>Intel Documents</English>
+        <French>Documents de renseignement</French>
+      </Key>
+      <Key ID="STR_LL_Task_02a_Pickup">
+        <English>Pick up intel documents</English>
+        <French>Récupérer les documents de renseignement</French>
+      </Key>
+      <Key ID="STR_LL_Task_02b_Title">
+        <English>Extract the Informant</English>
+        <French>Exfiltrer l'informateur</French>
+      </Key>
+      <Key ID="STR_LL_Task_02b_Desc">
+        <English>Nassim, our informant in Porto, has been captured by the militia. Locate him in one of the search zones, neutralize his guards, and free him.</English>
+        <French>Nassim, notre informateur à Porto, a été capturé par la milice. Localisez-le dans l'une des zones de recherche, neutralisez ses gardiens et libérez-le.</French>
+      </Key>
+      <Key ID="STR_LL_Task_02b_Marker">
+        <English>Search Area</English>
+        <French>Zone de recherche</French>
+      </Key>
+      <Key ID="STR_LL_Task_02b_ZoneMarker">
+        <English>Search Zone</English>
+        <French>Zone de fouille</French>
+      </Key>
+      <Key ID="STR_LL_Task_02b_MarkerHostage">
+        <English>Informant</English>
+        <French>Informateur</French>
+      </Key>
+      <Key ID="STR_LL_Task_02b_Free">
+        <English>Free the informant</English>
+        <French>Libérer l'informateur</French>
+      </Key>
     </Container>
     <Container name="Dialogues">
+      <Key ID="STR_LL_Speaker_Nassim">
+        <English>Nassim</English>
+        <French>Nassim</French>
+      </Key>
+      <Key ID="STR_LL_Task_02b_Nassim_Freed">
+        <English>They… they were going to execute me. The militia chief — Al-Amin — he has a meeting point in the medina. I can give you coordinates. Get me out of here first.</English>
+        <French>Ils… ils allaient m'exécuter. Le chef de la milice — Al-Amin — il a un point de rendez-vous dans la médina. Je peux vous donner les coordonnées. Sortez-moi d'ici d'abord.</French>
+      </Key>
       <Key ID="STR_LL_Speaker_Narrator">
         <English>HQ</English>
         <French>QG</French>
@@ -169,6 +225,38 @@ Le Roi de Sahrani a lancé cette opération de pacification autonome pour prouve
       <Key ID="STR_LL_Task_01_Narrative_S3_Failed">
         <English>HQ to patrol. The militia leader has been killed. The intel is lost. Out.</English>
         <French>QG à patrouille. Le chef de milice a été tué. Les renseignements sont perdus. Terminé.</French>
+      </Key>
+      <Key ID="STR_LL_Task_02a_Narrative_Start">
+        <English>HQ to patrol. Three militia cells are active in your sector. Intel suggests one of their leaders is carrying sensitive documents. Neutralize all three commanders and recover that intelligence. Out.</English>
+        <French>QG à patrouille. Trois cellules de milice sont actives dans votre secteur. Nos renseignements indiquent que l'un de leurs chefs transporte des documents sensibles. Neutralisez les trois commandants et récupérez ces informations. Terminé.</French>
+      </Key>
+      <Key ID="STR_LL_Task_02a_Narrative_DocFound">
+        <English>HQ to patrol. Target down. Documents located on the body. Secure that intel immediately. Out.</English>
+        <French>QG à patrouille. Cible neutralisée. Documents localisés sur le corps. Sécurisez ces renseignements immédiatement. Terminé.</French>
+      </Key>
+      <Key ID="STR_LL_Task_02a_Narrative_Success">
+        <English>HQ to patrol. Documents secured. Intel is en route to command. Well done. Out.</English>
+        <French>QG à patrouille. Documents sécurisés. Les renseignements sont acheminés vers le commandement. Bien joué. Terminé.</French>
+      </Key>
+      <Key ID="STR_LL_Speaker_Informateur">
+        <English>Informant</English>
+        <French>Informateur</French>
+      </Key>
+      <Key ID="STR_LL_Task_02b_Narrative_Start">
+        <English>HQ to patrol. Our informant has been taken by the militia. He's somewhere in the sector — locate him, eliminate his captors, and bring him out. He is critical to our intelligence network. Out.</English>
+        <French>QG à patrouille. Notre informateur a été enlevé par la milice. Il se trouve quelque part dans le secteur — localisez-le, éliminez ses gardiens et exfiltrez-le. Il est crucial pour notre réseau de renseignement. Terminé.</French>
+      </Key>
+      <Key ID="STR_LL_Task_02b_Informateur_Freed">
+        <English>They… they were going to execute me... Get me out of here.</English>
+        <French>Ils… ils allaient m'exécuter... Sortez-moi d'ici.</French>
+      </Key>
+      <Key ID="STR_LL_Task_02b_Narrative_Success">
+        <English>HQ to patrol. The informant is secure. Intel from him is being transmitted to command. Well done. Out.</English>
+        <French>QG à patrouille. L'informateur est en sécurité. Les renseignements qu'il transmet sont acheminés vers le commandement. Bien joué. Terminé.</French>
+      </Key>
+      <Key ID="STR_LL_Task_02b_Narrative_Failed">
+        <English>HQ to patrol. The informant has been killed. We have lost a critical intelligence source. The mission continues — our network is compromised. Out.</English>
+        <French>QG à patrouille. L'informateur a été tué. Nous avons perdu une source de renseignement critique. La mission continue — notre réseau est compromis. Terminé.</French>
       </Key>
     </Container>
     <Container name="Debriefing">

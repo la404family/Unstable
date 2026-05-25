@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project name="UnstablePorto">
+  <Package name="Missions">
+    <Container name="Tasks">
+      <Key ID="STR_LL_Task_02a_Title">
+        <English>Intel Hunt</English>
+        <French>Chasse aux renseignements</French>
+      </Key>
+      <Key ID="STR_LL_Task_02a_Desc">
+        <English>Three militia groups are operating in the sector. Neutralize their leaders and recover the intelligence documents held by one of them.</English>
+        <French>Trois groupes de miliciens opèrent dans le secteur. Neutralisez leurs chefs et récupérez les documents de renseignement détenus par l'un d'eux.</French>
+      </Key>
+      <Key ID="STR_LL_Task_02a_Marker">
+        <English>Sector</English>
+        <French>Secteur</French>
+      </Key>
+      <Key ID="STR_LL_Task_02a_Target">
+        <English>Chief %1</English>
+        <French>Chef %1</French>
+      </Key>
+      <Key ID="STR_LL_Task_02a_Doc">
+        <English>Intel Documents</English>
+        <French>Documents de renseignement</French>
+      </Key>
+      <Key ID="STR_LL_Task_02a_Pickup">
+        <English>Pick up intel documents</English>
+        <French>Récupérer les documents de renseignement</French>
+      </Key>
+    </Container>
+  </Package>
+</Project>

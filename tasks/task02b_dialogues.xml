@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project name="UnstablePorto">
+  <Package name="Missions">
+    <Container name="Dialogues">
+      <Key ID="STR_LL_Speaker_Informateur">
+        <English>Informant</English>
+        <French>Informateur</French>
+      </Key>
+      <Key ID="STR_LL_Task_02b_Narrative_Start">
+        <English>HQ to patrol. Our informant has been taken by the militia. He's somewhere in the sector — locate him, eliminate his captors, and bring him out. He is critical to our intelligence network. Out.</English>
+        <French>QG à patrouille. Notre informateur a été enlevé par la milice. Il se trouve quelque part dans le secteur — localisez-le, éliminez ses gardiens et exfiltrez-le. Il est crucial pour notre réseau de renseignement. Terminé.</French>
+      </Key>
+      <Key ID="STR_LL_Task_02b_Informateur_Freed">
+        <English>They… they were going to execute me... Get me out of here.</English>
+        <French>Ils… ils allaient m'exécuter... Sortez-moi d'ici.</French>
+      </Key>
+      <Key ID="STR_LL_Task_02b_Narrative_Success">
+        <English>HQ to patrol. The informant is secure. Intel from him is being transmitted to command. Well done. Out.</English>
+        <French>QG à patrouille. L'informateur est en sécurité. Les renseignements qu'il transmet sont acheminés vers le commandement. Bien joué. Terminé.</French>
+      </Key>
+      <Key ID="STR_LL_Task_02b_Narrative_Failed">
+        <English>HQ to patrol. The informant has been killed. We have lost a critical intelligence source. The mission continues — our network is compromised. Out.</English>
+        <French>QG à patrouille. L'informateur a été tué. Nous avons perdu une source de renseignement critique. La mission continue — notre réseau est compromis. Terminé.</French>
+      </Key>
+    </Container>
+  </Package>
+</Project>

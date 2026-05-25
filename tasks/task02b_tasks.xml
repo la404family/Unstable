@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project name="UnstablePorto">
+  <Package name="Missions">
+    <Container name="Tasks">
+      <Key ID="STR_LL_Task_02b_Title">
+        <English>Extract the Informant</English>
+        <French>Exfiltrer l'informateur</French>
+      </Key>
+      <Key ID="STR_LL_Task_02b_Desc">
+        <English>Nassim, our informant in Porto, has been captured by the militia. Locate him in one of the search zones, neutralize his guards, and free him.</English>
+        <French>Nassim, notre informateur à Porto, a été capturé par la milice. Localisez-le dans l'une des zones de recherche, neutralisez ses gardiens et libérez-le.</French>
+      </Key>
+      <Key ID="STR_LL_Task_02b_Marker">
+        <English>Search Area</English>
+        <French>Zone de recherche</French>
+      </Key>
+      <Key ID="STR_LL_Task_02b_ZoneMarker">
+        <English>Search Zone</English>
+        <French>Zone de fouille</French>
+      </Key>
+      <Key ID="STR_LL_Task_02b_MarkerHostage">
+        <English>Informant</English>
+        <French>Informateur</French>
+      </Key>
+      <Key ID="STR_LL_Task_02b_Free">
+        <English>Free the informant</English>
+        <French>Libérer l'informateur</French>
+      </Key>
+    </Container>
+  </Package>
+</Project>

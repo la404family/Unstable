@@ -70,6 +70,10 @@ class CfgFunctions {
             class task00                {};
             class task01                {};
             class task01_addAction      {};
+            class task02a               {};
+            class task02a_addAction     {};
+            class task02b               {};
+            class task02b_addAction     {};
             class taskManager           {};
         };
     };

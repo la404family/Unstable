@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project name="UnstablePorto">
+  <Package name="Missions">
+    <Container name="Dialogues">
+      <Key ID="STR_LL_Task_02a_Narrative_Start">
+        <English>HQ to patrol. Three militia cells are active in your sector. Intel suggests one of their leaders is carrying sensitive documents. Neutralize all three commanders and recover that intelligence. Out.</English>
+        <French>QG à patrouille. Trois cellules de milice sont actives dans votre secteur. Nos renseignements indiquent que l'un de leurs chefs transporte des documents sensibles. Neutralisez les trois commandants et récupérez ces informations. Terminé.</French>
+      </Key>
+      <Key ID="STR_LL_Task_02a_Narrative_DocFound">
+        <English>HQ to patrol. Target down. Documents located on the body. Secure that intel immediately. Out.</English>
+        <French>QG à patrouille. Cible neutralisée. Documents localisés sur le corps. Sécurisez ces renseignements immédiatement. Terminé.</French>
+      </Key>
+      <Key ID="STR_LL_Task_02a_Narrative_Success">
+        <English>HQ to patrol. Documents secured. Intel is en route to command. Well done. Out.</English>
+        <French>QG à patrouille. Documents sécurisés. Les renseignements sont acheminés vers le commandement. Bien joué. Terminé.</French>
+      </Key>
+    </Container>
+  </Package>
+</Project>
