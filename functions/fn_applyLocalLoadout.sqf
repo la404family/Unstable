@@ -68,6 +68,9 @@ if (_sWeapon != "") then {
 // 6. FUMIGÈNES BLANCS (toutes les unités passant par ici sont des joueurs)
 for "_i" from 1 to 3 do { _unit addMagazine "SmokeShellWhite"; };
 
+// 6b. TROUSSES DE PREMIERS SECOURS
+for "_i" from 1 to 3 do { _unit addItem "FirstAidKit"; };
+
 // 7. GRENADES M67 (cette fonction n'est appelée que pour les joueurs humains)
 for "_i" from 1 to 2 do { _unit addMagazine "HandGrenade"; };
 

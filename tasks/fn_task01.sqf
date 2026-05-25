@@ -88,50 +88,62 @@ if (_mode == "scenario") exitWith {
                     _x setVariable ["LL_Task01_Escaping", true, true];
                 } forEach ([_chief] + _guards);
 
-                // Rechercher toutes les logiques M_Dans_Bat_ à minimum 200m des joueurs
-                private _allLogics = [];
-                {
-                    if (_x select [0, 11] == "M_Dans_Bat_") then {
-                        private _val = missionNamespace getVariable [_x, objNull];
-                        if (!isNull _val) then { _allLogics pushBack _val; };
+                // Dissolution hors de vue (TASK_RULES §14)
+                // Le groupe marche vers un point >150m des joueurs, vérifie à l'arrivée,
+                // et recommence si un joueur s'est rapproché entre-temps.
+                [[_chief] + _guards, _escapeGrp] spawn {
+                    params ["_units", "_grp"];
+                    private _alive = _units select { alive _x };
+                    if (count _alive == 0) exitWith {};
+
+                    private _running = true;
+                    while { _running && ({ alive _x } count _alive) > 0 } do {
+
+                        // Chercher un point de dissolution valide (>150m de tous les joueurs)
+                        private _refPos      = getPos (leader _grp);
+                        private _dissolvePos = [];
+                        private _attempts    = 0;
+
+                        while { count _dissolvePos == 0 && _attempts < 30 } do {
+                            _attempts = _attempts + 1;
+                            private _candidate = _refPos getPos [200 + random 300, random 360];
+                            private _valid = true;
+                            { if (_x distance2D _candidate <= 150) exitWith { _valid = false; }; }
+                                forEach (allPlayers select { alive _x });
+                            if (_valid) then { _dissolvePos = _candidate; };
+                        };
+                        if (count _dissolvePos == 0) then {
+                            _dissolvePos = _refPos getPos [400, random 360];
+                        };
+
+                        // Waypoint vers le point de dissolution
+                        while { count waypoints _grp > 0 } do { deleteWaypoint [_grp, 0]; };
+                        private _wp = _grp addWaypoint [_dissolvePos, 5];
+                        _wp setWaypointType "MOVE";
+                        _wp setWaypointSpeed "FULL";
+                        _wp setWaypointBehaviour "SAFE";
+
+                        // Attendre l'arrivée à 5m du point
+                        waitUntil {
+                            sleep 1;
+                            ({ alive _x } count _alive) == 0
+                            || (leader _grp distance2D _dissolvePos <= 5)
+                        };
+
+                        if (({ alive _x } count _alive) == 0) exitWith { _running = false; };
+
+                        // Re-vérifier que les joueurs sont toujours à >150m
+                        private _allFar = true;
+                        { if (_x distance2D _dissolvePos <= 150) exitWith { _allFar = false; }; }
+                            forEach (allPlayers select { alive _x });
+
+                        if (_allFar) then {
+                            { if (!isNull _x && alive _x) then { deleteVehicle _x; }; } forEach _alive;
+                            if (!isNull _grp) then { deleteGroup _grp; };
+                            _running = false;
+                        };
+                        // Sinon : nouvelle itération avec un nouveau point
                     };
-                } forEach (allVariables missionNamespace);
-
-                private _players = allPlayers select { alive _x };
-                private _validLogics = [];
-                {
-                    private _logic = _x;
-                    private _tooClose = false;
-                    { if (_x distance2D _logic <= 200) exitWith { _tooClose = true; }; } forEach _players;
-                    if (!_tooClose) then { _validLogics pushBack _logic; };
-                } forEach _allLogics;
-
-                private _destPos = [0, 0, 0];
-                if (count _validLogics > 0) then {
-                    _destPos = getPosASL (selectRandom _validLogics);
-                } else {
-                    // Fallback : 300m dans une direction aléatoire
-                    _destPos = (getPos _chief) getPos [300, random 360];
-                };
-
-                // Waypoint vers la destination
-                while { count waypoints _escapeGrp > 0 } do { deleteWaypoint [_escapeGrp, 0]; };
-                private _wp = _escapeGrp addWaypoint [_destPos, 0];
-                _wp setWaypointType "MOVE";
-                _wp setWaypointSpeed "FULL";
-                _wp setWaypointBehaviour "SAFE";
-
-                // Disparition immersive dès l'arrivée à 3m de la destination (=seuil du bâtiment)
-                [_escapeGrp, [_chief] + _guards, _destPos] spawn {
-                    params ["_grp", "_units", "_dest"];
-                    waitUntil {
-                        sleep 1;
-                        private _ldr = leader _grp;
-                        ({ alive _x } count _units) == 0
-                        || (!isNull _ldr && { alive _ldr } && { _ldr distance2D _dest <= 3 })
-                    };
-                    { if (!isNull _x) then { deleteVehicle _x; }; } forEach _units;
-                    deleteGroup _grp;
                 };
             };
 
@@ -421,7 +433,7 @@ if (_mode == "scenario") exitWith {
         [_guard, _meetingPos] spawn {
             params ["_unit", "_center"];
             _unit setSpeedMode "LIMITED";
-            while { alive _unit && behaviour _unit != "COMBAT" } do {
+            while { alive _unit && behaviour _unit != "COMBAT" && !(_unit getVariable ["LL_Task01_Escaping", false]) } do {
                 private _dst = _center getPos [4 + random 14, random 360];
                 _unit doMove _dst;
                 waitUntil {

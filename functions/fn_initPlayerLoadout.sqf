@@ -135,6 +135,7 @@ private _fnc_applyVisuals = {
         };
         for "_i" from 1 to 3 do { _unit addMagazine "SmokeShellWhite"; };
         // Pas de M67 pour les I.A
+        for "_i" from 1 to 3 do { _unit addItem "FirstAidKit"; };
         { _unit linkItem _x; } forEach _assigned;
         _unit linkItem "NVGogglesB_blk_F";
         _unit selectWeapon _pWeapon;
