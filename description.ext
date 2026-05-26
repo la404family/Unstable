@@ -56,6 +56,9 @@ class CfgFunctions {
             // Cinématique d'introduction
             class intro                 {};
 
+            // Météo et heure aléatoires
+            class randomWeather         {};
+
             // Ambiance & Mécaniques de jeu
             class doorSecurity          {};
             class playEzan              {};

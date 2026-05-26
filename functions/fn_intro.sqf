@@ -98,17 +98,15 @@ if (hasInterface) then {
         private _lzPos = MISSION_intro_lz;
 
         // Collecte des bâtiments mission : M_Dans_Bat_000 → M_Dans_Bat_XXX
+        // CORRECTIF : scan complet 0–99 sans exitWith — un gap ne bloque plus la collecte
         private _buildingTargets = [];
         for "_i" from 0 to 99 do {
             private _s = str _i;
             while { count _s < 3 } do { _s = "0" + _s };
             private _varName = format ["M_Dans_Bat_%1", _s];
-            if (isNil _varName) exitWith {};
             private _obj = missionNamespace getVariable [_varName, objNull];
             if (!isNull _obj) then { _buildingTargets pushBack _obj; };
         };
-
-        _buildingTargets = _buildingTargets call BIS_fnc_arrayShuffle;
         if (count _buildingTargets == 0) then { _buildingTargets = [vehicule_team]; };
 
         // ==========================================================================================
@@ -119,27 +117,46 @@ if (hasInterface) then {
         3 fadeSound 1;
 
         // ##########################################################################################
-        // PLAN 1 : SURVOL DE PORTO — bâtiments mission (15s)
+        // PLAN 1 : SURVOL DE PORTO — bâtiments mission aléatoires (15s)
+        // CORRECTIF : selectRandom + angle polaire aléatoire — offset fixe (+180/-180) donnait
+        //             toujours la même direction de survol quel que soit le bâtiment cible.
         // ##########################################################################################
-        private _tgt1 = _buildingTargets select 0;
-        private _tgt2 = if (count _buildingTargets > 1) then { _buildingTargets select 1 } else { _tgt1 };
+        private _tgt1 = selectRandom _buildingTargets;
+        private _pool2 = _buildingTargets - [_tgt1];
+        private _tgt2 = if (count _pool2 > 0) then { selectRandom _pool2 } else { _tgt1 };
 
         private _pos1 = getPos _tgt1;
         private _pos2 = getPos _tgt2;
 
-        private _cam = "camera" camCreate [_pos1 select 0, _pos1 select 1, (_pos1 select 2) + 120];
+        // Angles et distances aléatoires — clé de la diversité visuelle
+        private _ang1 = random 360;
+        private _ang2 = random 360;
+        private _dist1 = 140 + (random 90);
+        private _dist2 = 100 + (random 80);
+        private _h1 = 110 + (random 60);
+        private _h2 = 90  + (random 60);
+
+        private _camStartX = (_pos1 select 0) + _dist1 * sin _ang1;
+        private _camStartY = (_pos1 select 1) + _dist1 * cos _ang1;
+        private _camStartZ = (_pos1 select 2) + _h1;
+
+        private _cam = "camera" camCreate [_camStartX, _camStartY, _camStartZ];
         _cam cameraEffect ["INTERNAL", "BACK"];
 
-        _cam camSetPos [(_pos1 select 0) + 180, (_pos1 select 1) - 180, (_pos1 select 2) + 130];
+        _cam camSetPos [_camStartX, _camStartY, _camStartZ];
         _cam camSetTarget _tgt1;
-        _cam camSetFov 0.60;
+        _cam camSetFov 0.50 + (random 0.15);
         _cam camCommit 0;
         waitUntil { camCommitted _cam };
 
         cutText ["", "BLACK IN", 2.5];
 
         // Glisse vers le second bâtiment sur la durée totale du plan
-        _cam camSetPos [(_pos2 select 0) + 60, (_pos2 select 1) + 60, (_pos2 select 2) + 100];
+        _cam camSetPos [
+            (_pos2 select 0) + _dist2 * sin _ang2,
+            (_pos2 select 1) + _dist2 * cos _ang2,
+            (_pos2 select 2) + _h2
+        ];
         _cam camSetTarget _tgt2;
         _cam camCommit 15;
 
@@ -213,22 +230,13 @@ if (hasInterface) then {
         sleep 0.8;
         cutText ["", "BLACK IN", 1.2];
 
-        // Caméra fond de cargo — CH-47F : Y=-6 (fond), Z=- 0.8 (hauteur siège parfait)
-        _cam attachTo [_camHeli, [0, -6, -0.8]];
+        // Caméra fond de cargo — CH-47F : Y=-6 (fond), Z=- 0.9 (hauteur siège parfait)
+        _cam attachTo [_camHeli, [0, -6, -0.9]];
         _cam setVectorDirAndUp [[0, 1, 0], [0, 0, 1]];
         _cam camSetFov 0.80;
         _cam camCommit 0;
 
-        sleep 2;
-        // Sous-titre narratif après 2s
-        [
-            format ["<t size='1.05' color='#cccccc' font='PuristaLight' align='center'>%1</t>", localize "STR_LL_Intro_Subtitle"],
-            -1,
-            safeZoneY + safeZoneH - 0.14,
-            7, 1, 0, 791
-        ] spawn BIS_fnc_dynamicText;
-
-        sleep 13;  // 2 + 13 = 15s total Plan 3
+        sleep 15;  
 
         // ##########################################################################################
         // PLAN 4 : ORBITE EXTÉRIEURE AUTOUR DU CHINOOK (14s)

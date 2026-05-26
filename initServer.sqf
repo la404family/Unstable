@@ -49,6 +49,10 @@ diag_log "[LL][initServer] Démarrage de l'initialisation serveur...";
 // Boucle de contrôle des portes de bâtiments proches des IA non-BLUFOR
 [] spawn LL_fnc_doorSecurity;
 
+// --- 3.5 Météo et heure de mission aléatoires ---
+// Appelé avant l'introduction pour que la cinématique reflète les conditions réelles
+[] call LL_fnc_randomWeather;
+
 // --- 4. Lancement de la cinématique d'introduction (partie serveur) ---
 // Appelé AVANT le taskManager : l'intro crée l'hélico, embarque les joueurs et
 // publie MISSION_intro_finished. Le taskManager attend ce signal pour démarrer.

@@ -56,17 +56,21 @@ if (_mode == "scenario") exitWith {
         _chief setVariable ["LL_Task01_Status", "ACTION", true];
         _chief enableAI "ANIM";
         _chief enableAI "MOVE";
-        _chief switchMove "";
 
         // Supprimer le marqueur Eden
         deleteMarker _markerID;
+
+        // Dégaîner avec animation native 0.3s après l'interaction — tension immédiate (TASK_ANIM)
+        sleep 0.3;
+        _chief action ["SwitchWeapon", _chief, _chief, 0];
+        sleep 0.2; // Laisser l'animation de dégaînage démarrer
 
         switch (_scenario) do {
             // ── Scénario 1 : Coopération ──────────────────────────────────────
             case 1: {
                 if (DEBUG_MODE) then { diag_log "[LL] task01: Scénario 1 — Coopération."; };
 
-                // Dialogue bilingue via sous-titres
+                // Chef armé mais coopératif — parle arme à la main, ne menace pas
                 ["STR_LL_Speaker_Chief", "STR_LL_Task_01_S1_Chief"] remoteExec ["LL_fnc_showSubtitle", 0];
                 sleep 5;
 
@@ -74,6 +78,10 @@ if (_mode == "scenario") exitWith {
                 
                 // Succès immédiat
                 ["task_01_recon", "SUCCEEDED", true] call BIS_fnc_taskSetState;
+
+                // Il range son arme avant de partir — tension retombée, il n'est plus menaçant
+                _chief action ["SwitchWeapon", _chief, _chief, -1];
+                sleep 0.5;
 
                 // Le groupe se dirige vers un M_Dans_Bat_XXX à minimum 200m
                 // et disparaît dès qu'il arrive à 3m (immersif : entrent dans le bâtiment)
@@ -151,8 +159,13 @@ if (_mode == "scenario") exitWith {
             case 2: {
                 if (DEBUG_MODE) then { diag_log "[LL] task01: Scénario 2 — Trahison."; };
 
+                // Animation de dialogue avant la trahison (TASK_ANIM — playMove = transition propre)
+                _chief disableAI "ANIM";
+                _chief playMove "Acts_CivilTalking_1";
                 ["STR_LL_Speaker_Chief", "STR_LL_Task_01_S2_Chief"] remoteExec ["LL_fnc_showSubtitle", 0];
                 sleep 5;
+                // enableAI "ANIM" différé au moment du passage en COMBAT
+                // pour éviter la transition holster → draw (TASK_ANIM)
 
                 ["STR_LL_Speaker_Narrator", "STR_LL_Task_01_Narrative_S2_Start"] remoteExec ["LL_fnc_showSubtitle", 0];
 
@@ -160,8 +173,10 @@ if (_mode == "scenario") exitWith {
                 private _hostiles = [_chief] + _guards;
                 private _opforGrp = createGroup [east, true];
                 _hostiles joinSilent _opforGrp;
-                
+
                 {
+                    _x enableAI "ANIM";      // Activer simultanément avec COMBAT — pas de flash holster
+                    _x enableAI "WEAPONAIM"; // Ré-activer la visée IA pour le combat
                     _x setBehaviour "COMBAT";
                     _x setCombatMode "RED";
                 } forEach _hostiles;
@@ -199,8 +214,10 @@ if (_mode == "scenario") exitWith {
             case 3: {
                 if (DEBUG_MODE) then { diag_log "[LL] task01: Scénario 3 — Mutinerie."; };
 
+                // Chef déjà armé — il parle, les gardes écoutent puis se retournent
                 ["STR_LL_Speaker_Chief", "STR_LL_Task_01_S3_Chief"] remoteExec ["LL_fnc_showSubtitle", 0];
                 sleep 5;
+                // enableAI "ANIM" du chef différé au passage en combat (TASK_ANIM)
 
                 ["STR_LL_Speaker_Guards", "STR_LL_Task_01_S3_Guards"] remoteExec ["LL_fnc_showSubtitle", 0];
                 sleep 5;
@@ -212,6 +229,7 @@ if (_mode == "scenario") exitWith {
                 _guards joinSilent _opforGrp;
                 
                 {
+                    _x enableAI "WEAPONAIM"; // Ré-activer la visée IA pour le combat
                     _x setBehaviour "COMBAT";
                     _x setCombatMode "RED";
                     _x doFire _chief;
@@ -220,6 +238,7 @@ if (_mode == "scenario") exitWith {
                 // Le chef quitte sa position et traque activement les mutins
                 private _allyGrp = createGroup [independent, true];
                 [_chief] joinSilent _allyGrp;
+                _chief enableAI "ANIM";   // Activer simultanément avec COMBAT — pas de flash holster
                 _chief enableAI "MOVE";
                 _chief setBehaviour "COMBAT";
                 _chief setCombatMode "RED";
@@ -418,7 +437,13 @@ if (_mode == "scenario") exitWith {
             (getTerrainHeightASL _gPos) + 0.5
         ];
         _guard allowDamage false;
-        [_guard] spawn { sleep 3; (_this select 0) allowDamage true; };
+        [_guard] spawn {
+            sleep 3;
+            private _u = _this select 0;
+            _u allowDamage true;
+            // Arme au repos — le garde patrouille détendu sans arme brandisée (TASK_ANIM)
+            _u action ["SwitchWeapon", _u, _u, -1];
+        };
 
         // Appliquer le template civil/militia
         _guard setVariable ["LL_forceTemplate", true, true];
@@ -426,14 +451,16 @@ if (_mode == "scenario") exitWith {
             [_guard] call LL_fnc_applyCivilianTemplate;
         };
 
-        _guard setBehaviour "SAFE";
+        _guard setBehaviour "CARELESS";  // Patrouille détendue — TASK_ANIM
         _guard setCombatMode "BLUE";
+        _guard disableAI "WEAPONAIM";      // Pas d'arme brandisée — TASK_ANIM
 
-        // Patrouille locale autour du lieu de rencontre (rayon 4–18 m, LIMITED/SAFE — TASK_RULES §11)
+        // Patrouille locale autour du lieu de rencontre (rayon 4–18 m, CARELESS — TASK_ANIM)
         [_guard, _meetingPos] spawn {
             params ["_unit", "_center"];
             _unit setSpeedMode "LIMITED";
             while { alive _unit && behaviour _unit != "COMBAT" && !(_unit getVariable ["LL_Task01_Escaping", false]) } do {
+                _unit setBehaviour "CARELESS"; // Maintenir l'état détendu à chaque itération
                 private _dst = _center getPos [4 + random 14, random 360];
                 _unit doMove _dst;
                 waitUntil {
@@ -459,7 +486,12 @@ if (_mode == "scenario") exitWith {
     
     // Protection temporaire contre les collisions au spawn
     _chief allowDamage false;
-    [_chief] spawn { sleep 3; (_this select 0) allowDamage true; };
+    [_chief] spawn {
+        sleep 3;
+        private _u = _this select 0;
+        _u allowDamage true;
+        _u action ["SwitchWeapon", _u, _u, -1]; // Arme rangée au spawn — il attend sans arme brandisée
+    };
 
     // Appliquer le template civil/militia
     _chief setVariable ["LL_forceTemplate", true, true];
@@ -467,21 +499,15 @@ if (_mode == "scenario") exitWith {
         [_chief] call LL_fnc_applyCivilianTemplate;
     };
 
-    // Comportement d'attente initial
+    // Comportement d'attente initial — chef statique et silencieux (TASK_ANIM)
+    // Pas d'animation de dialogue forcée : le chef attend debout, immobile.
+    // playMove "Acts_CivilTalking_1" sera déclenché lors de l'interaction uniquement.
     _chief disableAI "MOVE";
     _chief disableAI "ANIM";
     _chief setUnitPos "UP";
-    _chief switchMove "Acts_CivilTalking_1";
     _chief setBehaviour "SAFE";
     _chief setCombatMode "BLUE";
     _chief setVariable ["LL_Task01_Status", "WAIT", true];
-
-    _chief addEventHandler ["AnimDone", {
-        params ["_unit"];
-        if (alive _unit && (_unit getVariable ["LL_Task01_Status", "WAIT"] == "WAIT")) then {
-            _unit switchMove "Acts_CivilTalking_1";
-        };
-    }];
 
     // Le Chef de milice doit se tourner toutes les 2 secondes vers la position du joueur du serveur le plus proche
     [_chief] spawn {
