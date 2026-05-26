@@ -88,11 +88,12 @@ if (count _livingAI > 0) then {
     // Empêcher le respawn natif Arma 3 (le mettre à un temps infini)
     setPlayerRespawnTime 999999;
 
-    // Activer le mode spectateur (Standard Arma 3)
-    ["Initialize", [player, [], true]] call BIS_fnc_EGSpectator;
-
-    // Déclencher une vérification de fin de partie côté serveur
+    // Déclencher une vérification de fin de partie immédiate ou différée côté serveur
     [] remoteExec ["LL_fnc_checkGameOver", 2];
+
+    // Activer le mode spectateur (Standard Arma 3) sans détruire le HUD ni bloquer l'accès au menu système d'Arma
+    // Le 3e paramètre [] (allowedModes) et les flags par défaut de BIS_fnc_EGSpectator masquent parfois définitivement la GUI et l'UI d'Arma
+    ["Initialize", [player, [], true, true, true, true, true, true, true, true]] call BIS_fnc_EGSpectator;
 
     if (DEBUG_MODE) then {
         diag_log "[LL] switchToAI: Aucune IA disponible. Spectateur activé. Surveillance du groupe démarrée.";

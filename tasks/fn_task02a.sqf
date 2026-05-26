@@ -176,7 +176,7 @@ if (!isServer) exitWith {};
             localize "STR_LL_Task_02a_Title",
             localize "STR_LL_Task_02a_Marker"
         ],
-        [0,0,0],  // Pas de marqueur 3D initial — 3 lieux, découverte progressive (carte seule)
+        objNull,  // Pas de marqueur de destination — marqueurs carte seuls (TASK_RULES §7)
         "AUTOASSIGNED",
         5,
         true,
@@ -224,14 +224,11 @@ if (!isServer) exitWith {};
         [], 0, "CAN_COLLIDE"
     ];
 
-    // Marqueur blanc sur le document
+    // Marqueur blanc sur le document (carte uniquement — pas de marqueur 3D, TASK_RULES §7)
     createMarker ["LL_mkr_t02a_doc", getPos _docHolder];
     "LL_mkr_t02a_doc" setMarkerType "mil_objective";
     "LL_mkr_t02a_doc" setMarkerColor "ColorWhite";
     "LL_mkr_t02a_doc" setMarkerText localize "STR_LL_Task_02a_Doc";
-
-    // Mise à jour de la destination de la tâche sur le corps
-    ["task_02a_cache", getPos _docHolder] call BIS_fnc_taskSetDestination;
 
     ["STR_LL_Speaker_Narrator", "STR_LL_Task_02a_Narrative_DocFound"] remoteExec ["LL_fnc_showSubtitle", 0];
 

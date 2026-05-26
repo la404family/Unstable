@@ -60,15 +60,14 @@ if (_mode == "scenario") exitWith {
         // Supprimer le marqueur Eden
         deleteMarker _markerID;
 
-        // Dégaîner avec animation native 0.3s après l'interaction — tension immédiate (TASK_ANIM)
-        sleep 0.3;
-        _chief action ["SwitchWeapon", _chief, _chief, 0];
-        sleep 0.2; // Laisser l'animation de dégaînage démarrer
-
         switch (_scenario) do {
             // ── Scénario 1 : Coopération ──────────────────────────────────────
             case 1: {
                 if (DEBUG_MODE) then { diag_log "[LL] task01: Scénario 1 — Coopération."; };
+
+                // Dégaîner avec animation native — tension immédiate
+                _chief action ["SwitchWeapon", _chief, _chief, 0];
+                sleep 0.2;
 
                 // Chef armé mais coopératif — parle arme à la main, ne menace pas
                 ["STR_LL_Speaker_Chief", "STR_LL_Task_01_S1_Chief"] remoteExec ["LL_fnc_showSubtitle", 0];
@@ -176,9 +175,11 @@ if (_mode == "scenario") exitWith {
 
                 {
                     _x enableAI "ANIM";      // Activer simultanément avec COMBAT — pas de flash holster
+                    _x enableAI "MOVE";      // Assure que le déplacement est actif (peut être reseté par joinSilent)
                     _x enableAI "WEAPONAIM"; // Ré-activer la visée IA pour le combat
                     _x setBehaviour "COMBAT";
                     _x setCombatMode "RED";
+                    _x action ["SwitchWeapon", _x, _x, 0]; // Dégaîner explicitement — évite le blocage post-animation civile (chef)
                 } forEach _hostiles;
 
                 // Chaque traître : debout, cible alliée aléatoire toutes les 10s (simulation de recherche)
@@ -187,12 +188,14 @@ if (_mode == "scenario") exitWith {
                         params ["_unit"];
                         _unit setUnitPos "UP";  // Force la position debout
                         _unit allowFleeing 0;   // Empêche la fuite
+                        sleep 1; // Laisser l'IA s'initialiser en pose combat avant les premiers ordres
                         while { alive _unit } do {
                             private _targets = allPlayers select { side _x == independent && alive _x };
                             if (count _targets > 0) then {
                                 private _target = selectRandom _targets;
                                 _unit doMove (getPos _target);
                                 (group _unit) reveal [_target, 4.0];
+                                _unit doTarget _target;  // Orienter vers la cible avant l'ordre de tir
                                 _unit doFire _target;
                             };
                             sleep 10;
@@ -213,6 +216,10 @@ if (_mode == "scenario") exitWith {
             // ── Scénario 3 : Mutinerie ────────────────────────────────────────
             case 3: {
                 if (DEBUG_MODE) then { diag_log "[LL] task01: Scénario 3 — Mutinerie."; };
+
+                // Dégaîner avec animation native — tension immédiate
+                _chief action ["SwitchWeapon", _chief, _chief, 0];
+                sleep 0.2;
 
                 // Chef déjà armé — il parle, les gardes écoutent puis se retournent
                 ["STR_LL_Speaker_Chief", "STR_LL_Task_01_S3_Chief"] remoteExec ["LL_fnc_showSubtitle", 0];
@@ -490,7 +497,9 @@ if (_mode == "scenario") exitWith {
         sleep 3;
         private _u = _this select 0;
         _u allowDamage true;
-        _u action ["SwitchWeapon", _u, _u, -1]; // Arme rangée au spawn — il attend sans arme brandisée
+        _u action ["SwitchWeapon", _u, _u, -1]; // Ranger l'arme avant de geler l'animation
+        sleep 0.5;                               // Laisser l'état de rangement s'appliquer au moteur
+        _u disableAI "ANIM";                     // Geler en pose désarmée — évite la pose de combat au spawn
     };
 
     // Appliquer le template civil/militia
@@ -501,9 +510,9 @@ if (_mode == "scenario") exitWith {
 
     // Comportement d'attente initial — chef statique et silencieux (TASK_ANIM)
     // Pas d'animation de dialogue forcée : le chef attend debout, immobile.
-    // playMove "Acts_CivilTalking_1" sera déclenché lors de l'interaction uniquement.
+    // disableAI "ANIM" est différé dans le spawn ci-dessus — appliqué APRÈS le rangement de l'arme.
     _chief disableAI "MOVE";
-    _chief disableAI "ANIM";
+    _chief disableAI "WEAPONAIM"; // Ne vise jamais les joueurs pendant le rendez-vous — arme baissée
     _chief setUnitPos "UP";
     _chief setBehaviour "SAFE";
     _chief setCombatMode "BLUE";

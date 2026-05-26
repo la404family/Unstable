@@ -283,8 +283,8 @@ if (hasInterface) then {
         sleep 0.8;
         cutText ["", "BLACK IN", 1.2];
 
-        // Caméra fond de cargo — CH-47F : Y=-6 (fond), Z=-1.1 (hauteur siège parfait)
-        _cam attachTo [_camHeli, [0, -6, -1.1]];
+        // Caméra fond de cargo — CH-47F : Y=-2(fond), Z=-1.1 (hauteur siège parfait)
+        _cam attachTo [_camHeli, [0, -2, -1.1]]; 
         _cam setVectorDirAndUp [[0, 1, 0], [0, 0, 1]];
         _cam camSetFov 0.80;
         _cam camCommit 0;

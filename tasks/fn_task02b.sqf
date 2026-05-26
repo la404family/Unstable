@@ -199,7 +199,9 @@ if (!isServer) exitWith {};
                 };
             } forEach allPlayers;
             if (!isNull _nearest) then {
-                _h setDir (_h getDir _nearest);
+                _h setDir     (_h getDir _nearest);
+                _h setFormDir (_h getDir _nearest); // Empêche l'IA de formation de re-pivoter
+                _h setPosATL  (getPosATL _h);       // Ancre la position — empêche la dérive de l'animation
             };
             sleep 2;
         };
@@ -249,7 +251,7 @@ if (!isServer) exitWith {};
         "LL_mkr_t02b_hostage" setMarkerType "mil_objective";
         "LL_mkr_t02b_hostage" setMarkerColor "ColorWhite";
         "LL_mkr_t02b_hostage" setMarkerText localize "STR_LL_Task_02b_MarkerHostage";
-        ["task_02b_informateur", getPos _h] call BIS_fnc_taskSetDestination;
+        // Pas de BIS_fnc_taskSetDestination — interdit par TASK_RULES §7 (marqueur 3D, tâche créée avec [0,0,0])
 
         if (DEBUG_MODE) then {
             diag_log "[LL][task02b] Informateur localisé par les joueurs.";
@@ -339,27 +341,42 @@ if (!isServer) exitWith {};
     // Supprimer l'addAction sur tous les clients (action devenue obsolète)
     [_hostage] remoteExec ["removeAllActions", 0];
 
-    // Réactiver l'IA pour que l'informateur puisse marcher — il reste captif (setCaptive true)
-    // pour éviter les tirs ennemis pendant la séquence de dissolution
+    // Animation de libération — transition propre (TASK_ANIM §4.2)
+    _hostage removeAllEventHandlers "AnimDone";
+    [_hostage, "Acts_ExecutionVictim_Unbow"] remoteExec ["switchMove", 0];
+    sleep 8; // Durée de l'animation de relèvement (~8s)
     _hostage enableAI "ANIM";
+
+    // Réactiver le mouvement, l'informateur se relève
     _hostage enableAI "MOVE";
     _hostage setUnitPos "UP";
     _hostage setBehaviour "CARELESS";
     _hostage setSpeedMode "LIMITED";
+    _hostage setCaptive false;
 
-    // L'informateur suit le joueur le plus proche
+    // Identifier le leader du groupe joueur et rejoindre son groupe
+    private _alivePlayers = allPlayers select { alive _x };
+    private _playerLeader = if (count _alivePlayers > 0) then {
+        leader (group (_alivePlayers select 0))
+    } else { objNull };
+
+    if (!isNull _playerLeader) then {
+        [_hostage] joinSilent (group _playerLeader);
+        _hostage doFollow _playerLeader;
+    };
+
+    // Boucle de suivi actif du leader (mise à jour toutes les 5s)
     [_hostage] spawn {
         params ["_h"];
-        while { alive _h && (_h getVariable ["LL_Task02b_Status", "ACTION"]) == "ACTION" } do {
-            private _nearest = objNull;
-            private _minDist = 99999;
-            {
-                if (alive _x) then {
-                    private _d = _h distance _x;
-                    if (_d < _minDist) then { _minDist = _d; _nearest = _x; };
-                };
-            } forEach allPlayers;
-            if (!isNull _nearest) then { _h doMove getPos _nearest; };
+        while {
+            alive _h
+            && !(_h getVariable ["LL_Task02b_InHeli", false])
+        } do {
+            private _players = allPlayers select { alive _x };
+            if (count _players > 0) then {
+                private _ldr = leader (group (_players select 0));
+                if (!isNull _ldr && { _ldr != _h }) then { _h doFollow _ldr; };
+            };
             sleep 5;
         };
     };
@@ -372,15 +389,74 @@ if (!isServer) exitWith {};
     ["STR_LL_Speaker_Narrator", "STR_LL_Task_02b_Narrative_Success"] remoteExec ["LL_fnc_showSubtitle", 0];
 
     // ══════════════════════════════════════════════════════════════════════
+    // SURVEILLANCE EMBARQUEMENT — l'informateur rejoint l'hélico de mission
+    // dès qu'il atterrit (TAKS_HELI — variable LL_HELI_obj)
+    // ══════════════════════════════════════════════════════════════════════
+    [_hostage] spawn {
+        params ["_h"];
+
+        // Attendre que l'hélico de mission soit actif et posé au sol
+        waitUntil {
+            sleep 3;
+            if (!alive _h) exitWith { true };
+            private _heli = missionNamespace getVariable ["LL_HELI_obj", objNull];
+            !isNull _heli && { alive _heli } && { isTouchingGround _heli }
+        };
+        if (!alive _h) exitWith {};
+
+        private _heli = missionNamespace getVariable ["LL_HELI_obj", objNull];
+        if (isNull _heli || !alive _heli) exitWith {};
+
+        // Désactiver le suivi du leader, basculer en mode embarquement
+        _h setVariable ["LL_Task02b_InHeli", true, true];
+        _h setUnitPos "UP";
+        _h setBehaviour "CARELESS";
+
+        // Rejoindre le groupe de l'hélicoptère pour que les ordres de véhicule fonctionnent
+        private _heliGrp = group (driver _heli);
+        if (!isNull _heliGrp) then { [_h] joinSilent _heliGrp; };
+
+        // Assigner et ordonner l'embarquement
+        _h assignAsCargo _heli;
+        [_h] orderGetIn true;
+
+        // Déclencher l'action manuelle si très proche et unité disponible
+        private _lastGetIn = 0;
+        waitUntil {
+            sleep 2;
+            if (!alive _h || !alive _heli) exitWith { true };
+            if (_h distance2D _heli < 8 && { unitReady _h } && { time - _lastGetIn > 4 }) then {
+                _h action ["GetInCargo", _heli];
+                _lastGetIn = time;
+            };
+            vehicle _h == _heli
+        };
+    };
+
+    // ══════════════════════════════════════════════════════════════════════
+    // ATTENTE DE L'EMBARQUEMENT (ou mort de l'informateur)
+    // ══════════════════════════════════════════════════════════════════════
+    waitUntil {
+        sleep 3;
+        private _heliRef = missionNamespace getVariable ["LL_HELI_obj", objNull];
+        !alive _hostage
+        || (!isNull _heliRef && { vehicle _hostage == _heliRef })
+    };
+
+    // ══════════════════════════════════════════════════════════════════════
     // COMPLÉTION DE LA TÂCHE
     // ══════════════════════════════════════════════════════════════════════
-    ["task_02b_informateur", "SUCCEEDED", true] call BIS_fnc_taskSetState;
+    if (!alive _hostage) then {
+        if (DEBUG_MODE) then { diag_log "[LL][task02b] Informateur tué avant embarquement — tâche FAILED."; };
+        ["task_02b_informateur", "FAILED", true] call BIS_fnc_taskSetState;
+    } else {
+        ["task_02b_informateur", "SUCCEEDED", true] call BIS_fnc_taskSetState;
+        if (DEBUG_MODE) then { diag_log "[LL][task02b] Informateur embarqué — tâche SUCCEEDED."; };
+    };
 
     // Nettoyage des marqueurs
     deleteMarker "LL_mkr_t02b_hostage";
     for "_i" from 0 to 2 do { deleteMarker format ["LL_mkr_t02b_zone_%1", _i]; };
-
-    if (DEBUG_MODE) then { diag_log "[LL][task02b] Informateur libéré — tâche SUCCEEDED."; };
 
     // ══════════════════════════════════════════════════════════════════════
     // DISSOLUTION DES GARDES SURVIVANTS (TASK_RULES §14)
@@ -436,34 +512,4 @@ if (!isServer) exitWith {};
         };
 
     } forEach _allGroups;
-
-    // ══════════════════════════════════════════════════════════════════════
-    // SUPPRESSION DE L'INFORMATEUR — s'éloigne et disparaît après un délai
-    // ══════════════════════════════════════════════════════════════════════
-    [_hostage, _hostageGrp] spawn {
-        params ["_h", "_grp"];
-        _h setVariable ["LL_Task02b_Status", "DONE", true];
-        sleep 40;
-        if (!alive _h) exitWith {
-            if (!isNull _grp) then { deleteGroup _grp; };
-        };
-        // L'informateur part dans une direction opposée aux joueurs
-        private _nearest = objNull;
-        private _minDist = 99999;
-        {
-            if (alive _x) then {
-                private _d = _h distance _x;
-                if (_d < _minDist) then { _minDist = _d; _nearest = _x; };
-            };
-        } forEach allPlayers;
-        private _walkDir = if (!isNull _nearest) then {
-            (_h getDir _nearest) + 180
-        } else { random 360 };
-        private _walkPos = getPos _h getPos [150 + random 100, _walkDir];
-        _h setSpeedMode "FULL";
-        _h doMove _walkPos;
-        waitUntil { sleep 1; !alive _h || _h distance2D _walkPos < 15; };
-        if (!isNull _h) then { deleteVehicle _h; };
-        if (!isNull _grp) then { deleteGroup _grp; };
-    };
 };
