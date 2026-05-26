@@ -106,6 +106,13 @@ class CfgSounds {
         sound[] = {"music\ezan.ogg", 2.0, 1.0, 2500}; // Fichier, volume, pitch, distance max (mètres)
         titles[] = {};
     };
+    // Bip typewriter — Plan 2 intro (fn_intro.sqf)
+    // Alarm vanilla Arma 3 garanti (à pitch 3.5, volume 0.03 = bip court imperceptible)
+    class LL_typewriter_bip {
+        name    = "LL_typewriter_bip";
+        sound[] = {"\A3\sounds_F\sfx\alarm_independent.wss", 0.03, 3.5};
+        titles[] = {};
+    };
 };
 
 // --- Écrans de fin de mission ---

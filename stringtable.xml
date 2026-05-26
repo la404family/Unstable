@@ -631,6 +631,11 @@ Le Roi de Sahrani a lancé cette opération de pacification autonome pour prouve
         <French>OPÉRATION ROYAL ALLIANCE</French>
         <Turkish>ROYAL ALLIANCE HAREKÂTI</Turkish>
       </Key>
+      <Key ID="STR_LL_Intro_Location">
+        <English>Porto Island</English>
+        <French>Île de Porto</French>
+        <Turkish>Porto Adası</Turkish>
+      </Key>
       <Key ID="STR_LL_Intro_Subtitle">
         <English>Porto Island (June 24, 2025) — The Crown of Sahrani deploys its volunteers for a decisive stabilization operation...</English>
         <French>Île de Porto (24 Juin 2025) — La Couronne de Sahrani déploie ses volontaires pour une opération de stabilisation décisif...</French>

@@ -188,20 +188,49 @@ if (hasInterface) then {
         titleText ["", "PLAIN", 0.5];
 
         // ##########################################################################################
-        // PLAN 2 : CARTE DE CONTEXTE — lieu et année (6s sur fond noir)
+        // PLAN 2 : CARTE DE CONTEXTE — lieu (en dur) + heure dynamique (~7s sur fond noir)
+        // Typewriter : caractère par caractère, bip par lettre, texte blanc
         // ##########################################################################################
         cutText ["", "BLACK FADED", 1];
         sleep 1.5;
 
-        titleText [
-            format [
-                "<t size='1.1' color='#aaaaaa' font='PuristaLight' align='center' letterSpacing='0.2'>%1</t>",
-                localize "STR_LL_Intro_Subtitle"
-            ],
-            "PLAIN", 0.8, true, true
+        // Heure de mission (définie par fn_randomWeather via setDate)
+        private _p2h = date select 3;
+        private _p2m = date select 4;
+        private _p2time = format ["%1:%2",
+            if (_p2h < 10) then {"0" + str _p2h} else {str _p2h},
+            if (_p2m < 10) then {"0" + str _p2m} else {str _p2m}
         ];
-        sleep 4;
-        titleText ["", "PLAIN", 0.5];
+
+        private _p2chars1 = toArray (localize "STR_LL_Intro_Location");
+        private _p2chars2 = toArray (" - " + _p2time);
+        private _p2built  = "";
+
+        // Typewriter lettre par lettre — titleText avec isSmart=true (parse le HTML)
+        // speed=0 → instantané, pas de fade entre appels → pas de clignotement
+        {
+            _p2built = _p2built + toString [_x];
+            titleText [
+                format ["<t size='1.2' color='#ffffff' font='PuristaLight' align='center'>%1</t>", _p2built],
+                "PLAIN", 0, false, true
+            ];
+            playSound "LL_typewriter_bip";
+            sleep 0.08;
+        } forEach _p2chars1;
+
+        // " - HH:MM" — chiffres plus lents
+        {
+            _p2built = _p2built + toString [_x];
+            titleText [
+                format ["<t size='1.2' color='#ffffff' font='PuristaLight' align='center'>%1</t>", _p2built],
+                "PLAIN", 0, false, true
+            ];
+            playSound "LL_typewriter_bip";
+            sleep 0.12;
+        } forEach _p2chars2;
+
+        sleep 2.5;
+        titleFadeOut 0.5;
         sleep 0.5;
 
         // ##########################################################################################
