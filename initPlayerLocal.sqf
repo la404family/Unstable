@@ -2,6 +2,10 @@
 // initPlayerLocal.sqf — Initialisation client (exécuté sur chaque client avec interface)
 // ============================================================================
 
+// --- Cinématique d'introduction (partie client) ---
+// Doit être le premier appel pour bloquer les contrôles joueur dès le départ.
+[] spawn LL_fnc_intro;
+
 // Lancement de l'initialisation de l'identité joueur (JIP-safe).
 // Attend la diffusion des données de l'identité par le serveur et l'applique
 // localement sur le personnage pour forcer le nom, le visage et la voix.

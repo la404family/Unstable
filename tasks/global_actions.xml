@@ -258,6 +258,10 @@
         <English>[SUPPORT] Squad is resupplying from the crate.</English>
         <French>[SUPPORT] L'escouade se réapprovisionne depuis la caisse.</French>
       </Key>
+      <Key ID="STR_LL_Heli_Msg_CargoAborted">
+        <English>[SUPPORT] Delivery aborted — redirected to priority mission. Supply crate cancelled.</English>
+        <French>[SUPPORT] Livraison annulée — redirigé vers mission prioritaire. Caisse de ravitaillement annulée.</French>
+      </Key>
       <Key ID="STR_LL_Msg_Resupply_Done">
         <English>[SUPPORT] Resupply complete. Squad regrouping.</English>
         <French>[SUPPORT] Réapprovisionnement terminé. Regroupement.</French>

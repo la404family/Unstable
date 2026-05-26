@@ -19,6 +19,16 @@
 
 if (!isServer) exitWith {};
 
+// Attendre la fin de la cinématique d'introduction avant de créer les tâches
+waitUntil {
+    sleep 2;
+    !isNil "MISSION_intro_finished"
+};
+
+if (DEBUG_MODE) then {
+    diag_log "[LL] taskManager: Cinématique terminée — démarrage des tâches.";
+};
+
 // Définir le propriétaire des tâches sur la faction indépendante (les joueurs)
 private _owner = independent;
 

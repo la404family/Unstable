@@ -602,6 +602,10 @@ Le Roi de Sahrani a lancé cette opération de pacification autonome pour prouve
         <English>[SUPPORT] Squad is resupplying from the crate.</English>
         <French>[SUPPORT] L'escouade se réapprovisionne depuis la caisse.</French>
       </Key>
+      <Key ID="STR_LL_Heli_Msg_CargoAborted">
+        <English>[SUPPORT] Delivery aborted — redirected to priority mission. Supply crate cancelled.</English>
+        <French>[SUPPORT] Livraison annulée — redirigé vers mission prioritaire. Caisse de ravitaillement annulée.</French>
+      </Key>
       <Key ID="STR_LL_Msg_Resupply_Done">
         <English>[SUPPORT] Resupply complete. Squad regrouping.</English>
         <French>[SUPPORT] Réapprovisionnement terminé. Regroupement.</French>
@@ -609,6 +613,38 @@ Le Roi de Sahrani a lancé cette opération de pacification autonome pour prouve
       <Key ID="STR_LL_Msg_Resupply_NoAI">
         <English>[SUPPORT] No squad members available to resupply.</English>
         <French>[SUPPORT] Aucun membre d'escouade disponible pour le reapprovisionnement.</French>
+      </Key>
+    </Container>
+    <Container name="Intro">
+      <Key ID="STR_LL_Intro_Author">
+        <English>RACS — Multinational Expeditionary Corps</English>
+        <French>RACS — Corps Expéditionnaire Multinational</French>
+        <Turkish>RACS — Çok Uluslu Müdahale Kolordusu</Turkish>
+      </Key>
+      <Key ID="STR_LL_Intro_Presents">
+        <English>A pacification operation in Sahrani post-conflict</English>
+        <French>Une opération de pacification post-conflit à Sahrani</French>
+        <Turkish>Sahrani çatışma sonrası bir barış harekatı</Turkish>
+      </Key>
+      <Key ID="STR_LL_Intro_Title">
+        <English>OPERATION ROYAL ALLIANCE</English>
+        <French>OPÉRATION ROYAL ALLIANCE</French>
+        <Turkish>ROYAL ALLIANCE HAREKÂTI</Turkish>
+      </Key>
+      <Key ID="STR_LL_Intro_Subtitle">
+        <English>Porto Island (June 24, 2025) — The Crown of Sahrani deploys its volunteers for a decisive stabilization operation...</English>
+        <French>Île de Porto (24 Juin 2025) — La Couronne de Sahrani déploie ses volontaires pour une opération de stabilisation décisif...</French>
+        <Turkish>Porto Adası (24 Haziran 2025) — Sahrani Krallığı, kararlı bir istikrar operasyonu için gönüllülerini konuşlandırıyor...</Turkish>
+      </Key>
+      <Key ID="STR_LL_Intro_MissionStart">
+        <English>FIRE TEAM</English>
+        <French>Équipe de feu</French>
+        <Turkish>ATEŞ TİMİ</Turkish>
+      </Key>
+      <Key ID="STR_LL_Intro_MissionStartSubtitle">
+        <English>Porto, Southern Sahrani Coast — Restore Order</English>
+        <French>Porto, Côte Sud de Sahrani — Restaurez l'Ordre</French>
+        <Turkish>Porto, Güney Sahrani Kıyısı — Düzeni Yeniden Sağlayın</Turkish>
       </Key>
     </Container>
   </Package>

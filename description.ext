@@ -53,12 +53,17 @@ class CfgFunctions {
             class spawnCivilianPresence {};
             class applyCivilianTemplate {};
             
+            // Cinématique d'introduction
+            class intro                 {};
+
             // Ambiance & Mécaniques de jeu
             class doorSecurity          {};
             class playEzan              {};
             class manageSkills          {};
             class showSubtitle          {};
             class requestHelicopter     {};
+            class heliManager           {};
+            class heliDispatch          {};
             class addHelicopterActions  {};
             class addResupplyAction     {};
             class addRallyAction        {};
@@ -78,6 +83,15 @@ class CfgFunctions {
             class task02c_addAction     {};
             class taskManager           {};
         };
+    };
+};
+
+// --- Musique de mission ---
+class CfgMusic {
+    tracks[] = {"Music_Intro"};
+    class Music_Intro {
+        name    = "Music_Intro";
+        sound[] = {"music\intro.ogg", db+10, 1.0};
     };
 };
 

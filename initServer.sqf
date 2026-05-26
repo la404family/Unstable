@@ -49,7 +49,21 @@ diag_log "[LL][initServer] Démarrage de l'initialisation serveur...";
 // Boucle de contrôle des portes de bâtiments proches des IA non-BLUFOR
 [] spawn LL_fnc_doorSecurity;
 
-// --- 4. Démarrage du gestionnaire de tâches (Task Manager) ---
+// --- 4. Lancement de la cinématique d'introduction (partie serveur) ---
+// Appelé AVANT le taskManager : l'intro crée l'hélico, embarque les joueurs et
+// publie MISSION_intro_finished. Le taskManager attend ce signal pour démarrer.
+// Appelé APRÈS initPlayerLoadout pour que les joueurs soient équipés à bord.
+[] spawn LL_fnc_intro;
+
+// --- 4.5 Gestionnaire hélicoptère de support ---
+// Boucle permanente lancée après la fin de l'intro (évite conflit avec l'hélico cinématique).
+[] spawn {
+    waitUntil { !isNil "MISSION_intro_finished" };
+    [] spawn LL_fnc_heliManager;
+};
+
+// --- 5. Démarrage du gestionnaire de tâches (Task Manager) ---
+// Bloqué en interne par waitUntil { !isNil "MISSION_intro_finished" }.
 [] spawn LL_fnc_taskManager;
 
 diag_log "[LL][initServer] Initialisation serveur terminée.";
