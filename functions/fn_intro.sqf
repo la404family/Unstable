@@ -206,32 +206,56 @@ if (hasInterface) then {
         private _p2chars2 = toArray (" - " + _p2time);
         private _p2built  = "";
 
-        // Typewriter lettre par lettre — titleText avec isSmart=true (parse le HTML)
-        // speed=0 → instantané, pas de fade entre appels → pas de clignotement
+        // ====================== TYPEWRITER CENTRÉ SANS CLIGNOTEMENT ======================
+
+        _p2built = "";
+
+        // Première partie
         {
             _p2built = _p2built + toString [_x];
-            titleText [
-                format ["<t size='1.2' color='#ffffff' font='PuristaLight' align='center'>%1</t>", _p2built],
-                "PLAIN", 0, false, true
-            ];
-            playSound "LL_typewriter_bip";
+
+            [
+                format ["<t size='1.3' color='#ffffff' font='PuristaLight' align='center' shadow='2'>%1</t>", _p2built],
+                -1,              // Position X (-1 = Centré horizontalement)
+                0.35,            // Position Y
+                5,               // Durée d'affichage (écrasée par chaque nouvel appel)
+                0,               // Pas de Fade-In (effet machine à écrire net)
+                0,               // Pas d'effet de glissement (Delta-Y)
+                793              // Layer fixe pour éviter le clignotement / superposition
+            ] spawn BIS_fnc_dynamicText;
+
+            // Bip discret vanilla uniquement sur les caractères visibles (pas les espaces)
+            if (_x != 32) then {
+                playSound "readoutClick";
+            };
             sleep 0.08;
         } forEach _p2chars1;
 
-        // " - HH:MM" — chiffres plus lents
+
+        // Deuxième partie (" - HH:MM" plus lent)
         {
             _p2built = _p2built + toString [_x];
-            titleText [
-                format ["<t size='1.2' color='#ffffff' font='PuristaLight' align='center'>%1</t>", _p2built],
-                "PLAIN", 0, false, true
-            ];
-            playSound "LL_typewriter_bip";
+
+            [
+                format ["<t size='1.3' color='#ffffff' font='PuristaLight' align='center' shadow='2'>%1</t>", _p2built],
+                -1,              // Position X
+                0.35,            // Position Y
+                5,               // Durée d'affichage
+                0,               // Pas de Fade-In
+                0,               // Pas de glissement
+                793              // Même Layer fixe
+            ] spawn BIS_fnc_dynamicText;
+
+            if (_x != 32) then {
+                playSound "readoutClick";
+            };
             sleep 0.12;
         } forEach _p2chars2;
 
+
+        // Fin de l'effet
         sleep 2.5;
-        titleFadeOut 0.5;
-        sleep 0.5;
+        ["", -1, 0.35, 1, 0.5, 0, 793] spawn BIS_fnc_dynamicText;
 
         // ##########################################################################################
         // PLAN 3 : INTÉRIEUR DU CH-47F CHINOOK (15s)
@@ -259,8 +283,8 @@ if (hasInterface) then {
         sleep 0.8;
         cutText ["", "BLACK IN", 1.2];
 
-        // Caméra fond de cargo — CH-47F : Y=-6 (fond), Z=- 0.9 (hauteur siège parfait)
-        _cam attachTo [_camHeli, [0, -6, -0.9]];
+        // Caméra fond de cargo — CH-47F : Y=-6 (fond), Z=-1.1 (hauteur siège parfait)
+        _cam attachTo [_camHeli, [0, -6, -1.1]];
         _cam setVectorDirAndUp [[0, 1, 0], [0, 0, 1]];
         _cam camSetFov 0.80;
         _cam camCommit 0;
