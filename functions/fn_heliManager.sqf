@@ -698,6 +698,20 @@ private _fnExecExtract = {
     params ["_heli", "_group", "_crew", "_caller", "_targetPos", "_homeBase", "_flyHeight"];
     ["EXTRACTING"] call _fnSetState;
 
+    // Si la tâche 02b est active, on met à jour sa destination pour guider les joueurs vers le point d'extraction
+    private _hostaged = missionNamespace getVariable ["LL_Task02b_Hostage", objNull];
+    private _isTask02bActive = !isNull _hostaged && { alive _hostaged } && { !(missionNamespace getVariable ["LL_Task02b_Freed_Done", false]) };
+    if (_isTask02bActive) then {
+        ["task_02b_informateur", _targetPos] call BIS_fnc_taskSetDestination;
+
+        // Créer un marqueur visible spécifique pour l'extraction de l'informateur
+        deleteMarker "LL_mkr_t02b_extraction"; // Sécurité si un marqueur précédent existe
+        private _extMkr = createMarker ["LL_mkr_t02b_extraction", _targetPos];
+        _extMkr setMarkerType "mil_pickup";
+        _extMkr setMarkerColor "ColorYellow";
+        _extMkr setMarkerText (localize "STR_TAG_Marker_Heli_Extract");
+    };
+
     // Approche basse altitude vers la LZ
     _heli flyInHeight 15;
     _heli flyInHeightASL [15, 15, 15];
@@ -756,12 +770,55 @@ private _fnExecExtract = {
         sleep 3;
         private _allHumans      = allPlayers select { alive _x };
         private _playersInHeli  = { isPlayer _x && { alive _x } } count (crew _heli);
-        (format [localize "STR_LL_Heli_Msg_Extract_Counter", _playersInHeli, count _allHumans])
-            remoteExec ["hintSilent", 0];
-        if (_playersInHeli >= count _allHumans && { _playersInHeli > 0 }) then {
-            _shouldLeave = true;
+        
+        // Custom check for Task02b Hostage if active and not already succeeded
+        private _hostage = missionNamespace getVariable ["LL_Task02b_Hostage", objNull];
+        private _isTask02bActive = !isNull _hostage && { alive _hostage } && { !(missionNamespace getVariable ["LL_Task02b_Freed_Done", false]) };
+
+        if (_isTask02bActive) then {
+            // Sécurité : éjecter tout joueur qui monterait à bord (interdit dans cette tâche)
+            {
+                if (isPlayer _x && { alive _x }) then {
+                    [_x] remoteExec ["moveOut", _x];
+                    (localize "STR_LL_Heli_Msg_Extract_Players_Exit_Warning") remoteExec ["systemChat", _x];
+                };
+            } forEach (crew _heli);
+
+            // Recalculer le nombre de joueurs à bord après éjection
+            _playersInHeli = { isPlayer _x && { alive _x } } count (crew _heli);
+
+            private _hostageInHeli = (vehicle _hostage == _heli);
+            if (_hostageInHeli) then {
+                // If hostage is inside, we can leave once all players are OUT of the helicopter (as players should not extract in task02b)
+                if (_playersInHeli == 0) then {
+                    _shouldLeave = true;
+                };
+            } else {
+                // Hostage is not yet inside, so we don't leave even if the timeout occurs
+                if (time > _timeout) then { _shouldLeave = true; };
+            };
+            
+            // Log/hint progress of hostage Boarding
+            if (!_hostageInHeli) then {
+                (format [localize "STR_LL_Heli_Msg_Extract_Waiting_Hostage", round (_hostage distance2D _heli)])
+                    remoteExec ["hintSilent", 0];
+            } else {
+                if (_playersInHeli > 0) then {
+                    (localize "STR_LL_Heli_Msg_Extract_Players_Exit_Warning") remoteExec ["hint", 0];
+                } else {
+                    "" remoteExec ["hintSilent", 0];
+                };
+            };
+        } else {
+            // Standard players-only extraction
+            (format [localize "STR_LL_Heli_Msg_Extract_Counter", _playersInHeli, count _allHumans])
+                remoteExec ["hintSilent", 0];
+            if (_playersInHeli >= count _allHumans && { _playersInHeli > 0 }) then {
+                _shouldLeave = true;
+            };
+            if (time > _timeout && { _playersInHeli == 0 }) then { _shouldLeave = true; };
         };
-        if (time > _timeout && { _playersInHeli == 0 }) then { _shouldLeave = true; };
+
         !alive _heli || _shouldLeave
     };
 

@@ -181,7 +181,13 @@ if (_mode == "scenario") exitWith {
                     _x enableAI "WEAPONAIM"; // Ré-activer la visée IA pour le combat
                     _x setBehaviour "COMBAT";
                     _x setCombatMode "RED";
-                    _x action ["SwitchWeapon", _x, _x, 0]; // Dégaîner explicitement — évite le blocage post-animation civile (chef)
+                    
+                    // Réinitialisation globale de l'état d'animation pour sortir proprement d'Acts_CivilTalking_1
+                    [_x, ""] remoteExec ["switchMove", 0];
+                    
+                    // Forcer l'I.A. à sortir son arme principale et à la pointer (évite qu'ils se baladent désarmés)
+                    _x selectWeapon (primaryWeapon _x);
+                    _x action ["SwitchWeapon", _x, _x, 0];
                 } forEach _hostiles;
 
                 // Chaque traître : debout, cible alliée aléatoire toutes les 10s (simulation de recherche)
@@ -253,10 +259,16 @@ if (_mode == "scenario") exitWith {
                 [_chief] joinSilent _allyGrp;
                 _chief enableAI "ANIM";
                 _chief enableAI "MOVE";
+                _chief enableAI "WEAPONAIM"; // Ré-activer l'acquisition de visée de combat
                 _chief setBehaviour "COMBAT";
                 _chief setCombatMode "RED";
                 _chief setUnitPos "UP";
                 _chief allowFleeing 0;
+                
+                // Réinitialiser proprement l'animation du chef et forcer la mise en garde de combat
+                [_chief, ""] remoteExec ["switchMove", 0];
+                _chief selectWeapon (primaryWeapon _chief);
+                _chief action ["SwitchWeapon", _chief, _chief, 0];
 
                 // Narrateur en parallèle — les tirs ont déjà commencé (CORRECTIF #1)
                 sleep 1;

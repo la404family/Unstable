@@ -76,15 +76,24 @@ switch (_mode) do {
                 if (missionNamespace getVariable ["LL_Task02c_Captured", false]) exitWith {};
                 _target removeAction _id;
 
-                // CORRECTIF #8 : Animation de capture sur l'intermédiaire (TASK_ANIM §4.3)
+                // Animation de capture - Mains derrière la tête menotté (Kneel, look around, switch to custom arrested walk)
                 [_target] spawn {
                     params ["_h"];
-                    _h disableAI "ANIM";
-                    _h playMove "Acts_SurrenderingStand_1"; // Mains en l'air — soumission
+                    
+                    // Désactiver l'EventHandler d'attente
+                    _h setVariable ["LL_Task02c_Status", "ACTION", true];
+                    _h removeAllEventHandlers "AnimDone";
+
+                    // Étape 1 : Le forcer à s'agenouiller mains sur la tête
+                    [_h, "Acts_ExecutionVictim_Loop"] remoteExec ["switchMove", 0];
+                    _h setUnitPos "MIDDLE";
                     sleep 3;
+
+                    // Transition de menottage confirmée sur le serveur
                     missionNamespace setVariable ["LL_Task02c_Captured", true, true];
+
                     if (DEBUG_MODE) then {
-                        diag_log "[LL][task02c_addAction] Capture confirmée — LL_Task02c_Captured = true.";
+                        diag_log "[LL][task02c_addAction] Capture confirmée (Kneel loop) — LL_Task02c_Captured = true.";
                     };
                 };
             },

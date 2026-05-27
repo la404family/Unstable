@@ -159,6 +159,10 @@ if (!isServer) exitWith {};
 
     private _hostageGrp = createGroup [civilian, true];
     private _hostage    = _hostageGrp createUnit ["C_Man_1_1_F", [0,0,0], [], 0, "NONE"];
+
+    // CORRECTIF : Empêcher le chargement automatique de l'équipement joueur
+    _hostage setVariable ["LL_LoadoutSet", true, true];
+
     _hostage setPosASL _spawnOffsetPos;
     _hostage allowDamage false;
     [_hostage] spawn { sleep 3; (_this select 0) allowDamage true; };
@@ -220,7 +224,7 @@ if (!isServer) exitWith {};
             localize "STR_LL_Task_02b_Title",
             localize "STR_LL_Task_02b_Marker"
         ],
-        [0,0,0],  // Pas de marqueur 3D initial — 3 zones de recherche, découverte progressive (carte seule)
+        objNull,  // Pas de marqueur 3D/carte initial — 3 zones de recherche, découverte progressive (carte seule)
         "AUTOASSIGNED",
         5,
         true,
@@ -343,7 +347,8 @@ if (!isServer) exitWith {};
 
     // Animation de libération — transition propre (TASK_ANIM §4.2)
     _hostage removeAllEventHandlers "AnimDone";
-    [_hostage, "Acts_ExecutionVictim_Unbow"] remoteExec ["playMove", 0]; // CORRECTIF #2 : playMove pour one-shot (TASK_ANIM §1)
+    // CORRECTIF : L'animation playMove a déjà été lancée par le client ayant cliqué sur l'action pour une réaction instantanée.
+    // Le serveur se contente d'attendre la fin de l'animation pour synchroniser la suite de la libération.
     sleep 8; // Durée de l'animation de relèvement (~8s)
     _hostage enableAI "ANIM";
 
@@ -392,47 +397,112 @@ if (!isServer) exitWith {};
     ["STR_LL_Speaker_Informateur", "STR_LL_Task_02b_Informateur_Freed"] remoteExec ["LL_fnc_showSubtitle", 0];
     sleep 6;
     ["STR_LL_Speaker_Narrator", "STR_LL_Task_02b_Narrative_Success"] remoteExec ["LL_fnc_showSubtitle", 0];
+    sleep 3;
+
+    // ══════════════════════════════════════════════════════════════════════
+    // DEMANDE D'EXTRACTION DE L'INFORMATEUR (TAKS_HELI)
+    // ══════════════════════════════════════════════════════════════════════
+    private _players = allPlayers select { alive _x };
+    private _caller = if (count _players > 0) then { _players select 0 } else { objNull };
+    if (!isNull _caller) then {
+        // Enregistrer l'otage globalement pour le gestionnaire d'hélicoptère
+        missionNamespace setVariable ["LL_Task02b_Hostage", _hostage, true];
+        missionNamespace setVariable ["LL_Task02b_Freed_Done", false, true];
+
+        if (DEBUG_MODE) then {
+            diag_log "[LL][task02b] Envoi d'une requête d'hélicoptère 'EMBARQUEMENT' pour l'informateur.";
+        };
+        // Appel centralisé au dispatcher (hélicoptère CUP_I_CH47F_RACS)
+        ["EMBARQUEMENT", getPos _hostage, _caller, 2] call LL_fnc_heliDispatch;
+    };
 
     // ══════════════════════════════════════════════════════════════════════
     // SURVEILLANCE EMBARQUEMENT — l'informateur rejoint l'hélico de mission
-    // dès qu'il atterrit (TAKS_HELI — variable LL_HELI_obj)
+    // dès qu'il s'en approche
     // ══════════════════════════════════════════════════════════════════════
     [_hostage] spawn {
         params ["_h"];
 
-        // Attendre que l'hélico de mission soit actif et posé au sol
+        // Attendre que l'hélico de mission soit actif
+        private _heli = objNull;
         waitUntil {
-            sleep 3;
+            sleep 2;
             if (!alive _h) exitWith { true };
-            private _heli = missionNamespace getVariable ["LL_HELI_obj", objNull];
-            !isNull _heli && { alive _heli } && { isTouchingGround _heli }
+            _heli = missionNamespace getVariable ["LL_HELI_obj", objNull];
+            !isNull _heli && { alive _heli }
         };
-        if (!alive _h) exitWith {};
+        if (!alive _h || isNull _heli) exitWith {};
 
-        private _heli = missionNamespace getVariable ["LL_HELI_obj", objNull];
-        if (isNull _heli || !alive _heli) exitWith {};
+        // Attendre que l'hélico soit proche (100m) ou au sol
+        waitUntil {
+            sleep 1;
+            if (!alive _h || !alive _heli) exitWith { true };
+            (_h distance2D _heli < 100) || isTouchingGround _heli
+        };
+        if (!alive _h || !alive _heli) exitWith {};
 
-        // Désactiver le suivi du leader, basculer en mode embarquement
-        _h setVariable ["LL_Task02b_InHeli", true, true];
+        if (DEBUG_MODE) then {
+            diag_log "[LL][task02b] L'informateur est proche de l'hélicoptère. Séparation du groupe.";
+        };
+
+        // --- SORTIE DE VÉHICULE ---
+        if (vehicle _h != _h) then {
+            if (DEBUG_MODE) then { diag_log "[LL][task02b] L'informateur sort de son véhicule."; };
+            _h action ["GetOut", vehicle _h];
+            unassignVehicle _h;
+            moveOut _h;
+            sleep 1;
+        };
+
+        // --- SÉPARATION DU GROUPE DES JOUEURS ---
+        _h setVariable ["LL_Task02b_InHeli", true, true]; // Arrête le doFollow
         _h setUnitPos "UP";
         _h setBehaviour "CARELESS";
 
-        // Rejoindre le groupe de l'hélicoptère pour que les ordres de véhicule fonctionnent
+        // Rejoindre le groupe de l'hélicoptère pour améliorer le GetIn
         private _heliGrp = group (driver _heli);
-        if (!isNull _heliGrp) then { [_h] joinSilent _heliGrp; };
+        if (!isNull _heliGrp) then {
+            [_h] joinSilent _heliGrp;
+        } else {
+            [_h] joinSilent grpNull;
+        };
 
-        // Assigner et ordonner l'embarquement
+        _h setCaptive false;
         _h assignAsCargo _heli;
         [_h] orderGetIn true;
 
-        // Déclencher l'action manuelle si très proche et unité disponible
-        private _lastGetIn = 0;
+        // Aide active au pathfinding d'embarquement
+        private _lastGetInActionTime = 0;
         waitUntil {
-            sleep 2;
+            sleep 1.5;
             if (!alive _h || !alive _heli) exitWith { true };
-            if (_h distance2D _heli < 8 && { unitReady _h } && { time - _lastGetIn > 4 }) then {
-                _h action ["GetInCargo", _heli];
-                _lastGetIn = time;
+
+            // Anti-blocage si l'informateur remonte dans un mauvais véhicule
+            if (vehicle _h != _h && vehicle _h != _heli) then {
+                _h action ["GetOut", vehicle _h];
+                unassignVehicle _h;
+                moveOut _h;
+                sleep 0.5;
+            };
+
+            private _dist = _h distance2D _heli;
+            if (_dist < 40) then {
+                _h setUnitPos "UP";
+                _h setBehaviour "CARELESS";
+
+                if (assignedVehicle _h != _heli) then {
+                    _h assignAsCargo _heli;
+                };
+                [_h] orderGetIn true;
+
+                if (_dist < 10) then {
+                    if (time - _lastGetInActionTime > 4) then {
+                        if (unitReady _h) then {
+                            _h action ["GetInCargo", _heli];
+                            _lastGetInActionTime = time;
+                        };
+                    };
+                };
             };
             vehicle _h == _heli
         };
@@ -457,10 +527,13 @@ if (!isServer) exitWith {};
     } else {
         ["task_02b_informateur", "SUCCEEDED", true] call BIS_fnc_taskSetState;
         if (DEBUG_MODE) then { diag_log "[LL][task02b] Informateur embarqué — tâche SUCCEEDED."; };
+        // Marquer comme terminé pour libérer la surveillance de l'hélicoptère
+        missionNamespace setVariable ["LL_Task02b_Freed_Done", true, true];
     };
 
     // Nettoyage des marqueurs
     deleteMarker "LL_mkr_t02b_hostage";
+    deleteMarker "LL_mkr_t02b_extraction";
     for "_i" from 0 to 2 do { deleteMarker format ["LL_mkr_t02b_zone_%1", _i]; };
 
     // ══════════════════════════════════════════════════════════════════════

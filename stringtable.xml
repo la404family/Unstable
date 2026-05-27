@@ -278,6 +278,14 @@ Le Roi de Sahrani a lancé cette opération de pacification autonome pour prouve
         <English>HQ to patrol. The informant has been killed. We have lost a critical intelligence source. The mission continues — our network is compromised. Out.</English>
         <French>QG à patrouille. L'informateur a été tué. Nous avons perdu une source de renseignement critique. La mission continue — notre réseau est compromis. Terminé.</French>
       </Key>
+      <Key ID="STR_LL_Heli_Msg_Extract_Waiting_Hostage">
+        <English>Waiting for informant to embark (%1m)...</English>
+        <French>Attente embarquement de l'informateur (%1m)...</French>
+      </Key>
+      <Key ID="STR_LL_Heli_Msg_Extract_Players_Exit_Warning">
+        <English>WARNING: Helicopter will not depart while players are on board! Get out!</English>
+        <French>ATTENTION : L'hélicoptère ne partira pas tant qu'un joueur est à bord ! Sortez !</French>
+      </Key>
       <Key ID="STR_LL_Speaker_Intermediaire">
         <English>Financial Intermediary</English>
         <French>Intermédiaire financier</French>

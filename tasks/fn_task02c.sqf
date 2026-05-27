@@ -53,6 +53,12 @@ if (_mode == "chief_talk") exitWith {
         // Signal : le chef a parlé
         missionNamespace setVariable ["LL_Task02c_ChiefTalked", true, true];
 
+        // CORRECTIF : Libérer le chef de sa boucle d'animation
+        [_chief, ""] remoteExec ["switchMove", 0];
+        _chief enableAI "MOVE";
+        _chief enableAI "ANIM";
+        _chief setVariable ["LL_Task02c_Status", "DONE", true];
+
         if (DEBUG_MODE) then {
             diag_log "[LL][task02c] Dialogue chef terminé — LL_Task02c_ChiefTalked = true.";
         };
@@ -140,8 +146,45 @@ if (_mode == "chief_talk") exitWith {
     // Déployer l'addAction "Interroger le chef" sur tous les clients
     ["chief", _chief] remoteExec ["LL_fnc_task02c_addAction", 0];
 
+    // ══════════════════════════════════════════════════════════════════════
+    // INTERMÉDIAIRE : CRÉATION DU MARQUEUR ET DE LA TÂCHE DE TRANSITION "PARLER"
+    // ══════════════════════════════════════════════════════════════════════
+    createMarker ["LL_mkr_t02c_chief", getPos _chief];
+    "LL_mkr_t02c_chief" setMarkerType "mil_join";
+    "LL_mkr_t02c_chief" setMarkerColor "ColorBlue";
+    "LL_mkr_t02c_chief" setMarkerText localize "STR_LL_Task_01_Action";
+
+    [
+        independent,
+        ["task_02c_talk_chief"],
+        [
+            localize "STR_LL_Task_01_Action",
+            localize "STR_LL_Task_01_Action",
+            ""
+        ],
+        _chief, // Associer directement la tâche à l'unité (suit automatiquement l'objet sans spam de notification)
+        "AUTOASSIGNED",
+        5,
+        true,
+        "meet"
+    ] call BIS_fnc_taskCreate;
+
+    // Mettre à jour uniquement le marqueur carte sur le mouvement du chef (le chef est statique mais peut pivoter)
+    [_chief] spawn {
+        params ["_c"];
+        private _lastPos = [0,0,0];
+        while { alive _c && !(missionNamespace getVariable ["LL_Task02c_ChiefTalked", false]) } do {
+            private _curPos = getPos _c;
+            if (_curPos distance2D _lastPos > 1) then {
+                "LL_mkr_t02c_chief" setMarkerPos _curPos;
+                _lastPos = _curPos;
+            };
+            sleep 4;
+        };
+    };
+
     if (DEBUG_MODE) then {
-        diag_log "[LL][task02c] Chef stoppé en attente — addAction 'chief' déployée sur tous les clients.";
+        diag_log "[LL][task02c] Chef stoppé en attente — addAction et tâche intermédiaire 'Parler au chef' créées.";
     };
 
     // ══════════════════════════════════════════════════════════════════════
@@ -150,6 +193,15 @@ if (_mode == "chief_talk") exitWith {
     waitUntil {
         sleep 1;
         (missionNamespace getVariable ["LL_Task02c_ChiefTalked", false]) || !alive _chief
+    };
+
+    deleteMarker "LL_mkr_t02c_chief";
+    if ("task_02c_talk_chief" call BIS_fnc_taskExists) then {
+        if (alive _chief) then {
+            ["task_02c_talk_chief", "SUCCEEDED", true] call BIS_fnc_taskSetState;
+        } else {
+            ["task_02c_talk_chief", "CANCELED", true] call BIS_fnc_taskSetState;
+        };
     };
 
     if (!alive _chief) exitWith {
@@ -261,6 +313,9 @@ if (_mode == "chief_talk") exitWith {
 
     private _civGrp = createGroup [civilian, true];
     private _h      = _civGrp createUnit ["C_Man_1_1_F", [0,0,0], [], 0, "NONE"];
+
+    // CORRECTIF : Empêcher le chargement automatique de l'équipement joueur
+    _h setVariable ["LL_LoadoutSet", true, true];
 
     _h setPosASL _spawnPos;
     _h allowDamage false;
@@ -387,9 +442,22 @@ if (_mode == "chief_talk") exitWith {
     _h setVariable ["LL_Task02c_Status", "DONE", true];
     _h enableAI "MOVE";
     _h enableAI "ANIM";
-    _h setUnitPos "MIDDLE";
+
+    // Application d'une démarche d'otage ou de prisonnier restreint mains liées
+    [_h, "Acts_SurrenderingWalk_1"] remoteExec ["switchMove", 0];
+    _h setUnitPos "UP";
     _h setSpeedMode "NORMAL";
+    _h setBehaviour "CARELESS"; // Comportement passif d'otage/prisonnier sous garde
+    _h setCaptive true;         // Reste captif/neutre pour éviter de se faire cibler
     _h allowFleeing 0;
+
+    // EH pour s'assurer qu'il garde l'animation de déplacement les mains sur la tête ou liées
+    _h addEventHandler ["AnimDone", {
+        params ["_unit"];
+        if (alive _unit && (_unit getVariable ["LL_Task02c_Status", "DONE"]) == "DONE") then {
+            [_unit, "Acts_SurrenderingWalk_1"] remoteExec ["switchMove", 0];
+        };
+    }];
 
     // CORRECTIF #11 : Rejoindre le groupe joueur + nettoyage du groupe civil vide
     private _aliveIndep = allPlayers select { side _x == independent && alive _x };
@@ -425,6 +493,8 @@ if (_mode == "chief_talk") exitWith {
         ["STR_LL_Speaker_Chief", "STR_LL_Task_02c_Chief_Leaves"] remoteExec ["LL_fnc_showSubtitle", 0];
         sleep 5;
 
+        // CORRECTIF : Libérer de toute animation résiduelle avant sa fuite
+        [_chief, ""] remoteExec ["switchMove", 0];
         _chief enableAI "MOVE";
         _chief enableAI "ANIM";
         _chief setBehaviour "SAFE";

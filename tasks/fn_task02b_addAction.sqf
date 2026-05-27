@@ -35,17 +35,14 @@ _hostage addAction [
         // Supprimer l'action immédiatement sur ce client
         _target removeAction _actionId;
 
-        // Jouer l'animation de libération sur toutes les machines
-        [_target, "Acts_ExecutionVictim_Unbow"] remoteExec ["playMove", 0]; // CORRECTIF #2 : playMove pour one-shot (TASK_ANIM §1)
+        // Jouer l'animation de libération sur toutes les machines immédiatement
+        [_target, "Acts_ExecutionVictim_Unbow"] remoteExec ["playMove", 0];
 
-        // Délai animation (~8s) puis notification globale
-        [_target] spawn {
-            params ["_h"];
-            sleep 8;
-            missionNamespace setVariable ["LL_Task02b_Freed", true, true];
-            if (DEBUG_MODE) then {
-                diag_log "[LL][task02b_addAction] Informateur libéré — variable globale définie.";
-            };
+        // Définir la variable de libération immédiatement sur le réseau pour que le serveur prenne le relais
+        missionNamespace setVariable ["LL_Task02b_Freed", true, true];
+
+        if (DEBUG_MODE) then {
+            diag_log "[LL][task02b_addAction] Informateur libéré — variable globale définie immédiatement.";
         };
     },
     [],
