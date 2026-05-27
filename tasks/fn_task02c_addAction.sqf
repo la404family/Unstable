@@ -76,9 +76,11 @@ switch (_mode) do {
                 if (missionNamespace getVariable ["LL_Task02c_Captured", false]) exitWith {};
                 _target removeAction _id;
 
-                // Bref délai d'interaction (3s) puis confirmation de capture
+                // CORRECTIF #8 : Animation de capture sur l'intermédiaire (TASK_ANIM §4.3)
                 [_target] spawn {
                     params ["_h"];
+                    _h disableAI "ANIM";
+                    _h playMove "Acts_SurrenderingStand_1"; // Mains en l'air — soumission
                     sleep 3;
                     missionNamespace setVariable ["LL_Task02c_Captured", true, true];
                     if (DEBUG_MODE) then {

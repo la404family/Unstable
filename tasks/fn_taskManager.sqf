@@ -62,10 +62,9 @@ if (DEBUG_MODE) then {
     diag_log format ["[LL] taskManager: Tâche 01 terminée. État : %1 | Scénario : %2.", _task1State, _task1Scenario];
 };
 
-// ── Suite de la mission : lancement de task04a / task04b / task04c ────────────
+// ── Suite de la mission : lancement de task02a / task02b / task02c ────────────
 // La fin de mission n'est JAMAIS déclenchée ici (TASK_RULES §7).
 // L'extraction hélicoptère reste le seul déclencheur de BIS_fnc_endMission.
-// TODO : décommenter quand les fonctions task04x seront créées.
  switch (_task1Scenario) do {
      case 1: { [] call LL_fnc_task02a; }; // Coopération         → Intel reçu
     case 2: { [] call LL_fnc_task02b; }; // Trahison            → Renseignements perdus

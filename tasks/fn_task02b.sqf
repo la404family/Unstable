@@ -338,12 +338,12 @@ if (!isServer) exitWith {};
     // ══════════════════════════════════════════════════════════════════════
     _hostage setVariable ["LL_Task02b_Status", "ACTION", true];
 
-    // Supprimer l'addAction sur tous les clients (action devenue obsolète)
-    [_hostage] remoteExec ["removeAllActions", 0];
+    // CORRECTIF #7 : l'addAction se masque via sa condition (LL_Task02b_Freed = true)
+    // Ne plus utiliser removeAllActions (trop large, conflit potentiel avec d'autres mods)
 
     // Animation de libération — transition propre (TASK_ANIM §4.2)
     _hostage removeAllEventHandlers "AnimDone";
-    [_hostage, "Acts_ExecutionVictim_Unbow"] remoteExec ["switchMove", 0];
+    [_hostage, "Acts_ExecutionVictim_Unbow"] remoteExec ["playMove", 0]; // CORRECTIF #2 : playMove pour one-shot (TASK_ANIM §1)
     sleep 8; // Durée de l'animation de relèvement (~8s)
     _hostage enableAI "ANIM";
 
@@ -363,6 +363,11 @@ if (!isServer) exitWith {};
     if (!isNull _playerLeader) then {
         [_hostage] joinSilent (group _playerLeader);
         _hostage doFollow _playerLeader;
+    };
+
+    // CORRECTIF #11 : Supprimer le groupe civil vide de l'otage
+    if (!isNull _hostageGrp && {count units _hostageGrp == 0}) then {
+        deleteGroup _hostageGrp;
     };
 
     // Boucle de suivi actif du leader (mise à jour toutes les 5s)

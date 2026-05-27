@@ -69,4 +69,4 @@ La fin de mission est exclusivement initiée par le joueur via l'action `[Hélic
 
 | Date | Modification |
 |---|---|
-| 2026-05-25 | Création — task00 + task01 documentées, placeholders task04a/b/c |
+| 2026-05-25 | Création — task00 + task01 documentées, placeholders task04a/b/c |\r\n| 2026-05-27 | Renommage task04→task02 — correctifs #1–14 appliqués sur task01/02a/02b/02c |

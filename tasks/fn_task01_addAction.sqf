@@ -43,9 +43,8 @@ _chief addAction [
 
         _target removeAction _id;
 
-        // Choix aléatoire d'un scénario (1, 2 ou 3) et exécution sécurisée sur le serveur
-        private _scen = 1 + floor (random 3);
-        ["scenario", [_scen, _target, _guards, _markerID]] remoteExec ["LL_fnc_task01", 2];
+        // Signal au serveur — le choix aléatoire est fait côté serveur (CORRECTIF #6 — MP-safe)
+        ["scenario", [_target, _guards, _markerID]] remoteExec ["LL_fnc_task01", 2];
     },
     [_guards, _markerID], // Arguments passés au callback
     10,                   // Priorité

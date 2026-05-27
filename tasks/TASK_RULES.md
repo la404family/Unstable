@@ -187,6 +187,8 @@ Chaque scénario doit avoir :
 | `STR_LL_Speaker_Narrator` | Voix off / QG — encadre les événements |
 | `STR_LL_Speaker_Chief` | Chef de milice PNJ |
 | `STR_LL_Speaker_Guards` | Gardes / Miliciens |
+| `STR_LL_Speaker_Informateur` | Informateur RACS (task02b) |
+| `STR_LL_Speaker_Intermediaire` | Intermédiaire financier (task02c) |
 
 ---
 
@@ -278,7 +280,7 @@ Créer d'abord les sections secondaires (contexte, factions), puis la section pr
 ### Scénarios sous formes d'arbre aléatoire 
 
 La task00 amene vers la task01 qui comporte 3 issues possibles il y a donc un arbre de mission a respecter : 
-task04a - task04b - task04c 
+task02a - task02b - task02c 
 
 Toujours mettre à jour le fichier TASK_TREE.md
 

@@ -38,7 +38,6 @@ if (!isServer) exitWith {};
 if (_mode == "scenario") exitWith {
     _args spawn {
         params [
-            ["_scenario", 1,      [0]],
             ["_chief",    objNull, [objNull]],
             ["_guards",   [],      [[]]],
             ["_markerID", "",      [""]]
@@ -46,7 +45,10 @@ if (_mode == "scenario") exitWith {
 
         if (isNull _chief) exitWith {};
 
-        // Enregistrer le scénario globalement pour fn_taskManager (branchement task04a/b/c)
+        // Choix aléatoire du scénario côté serveur (CORRECTIF #6 — MP-safe)
+        private _scenario = 1 + floor (random 3);
+
+        // Enregistrer le scénario globalement pour fn_taskManager (branchement task02a/b/c)
         missionNamespace setVariable ["LL_g_task01_scenario", _scenario, true];
 
         // S'assurer que le camp OPFOR (East) et les Indépendants se considèrent hostiles
@@ -211,9 +213,14 @@ if (_mode == "scenario") exitWith {
 
                 ["STR_LL_Speaker_Narrator", "STR_LL_Task_01_Narrative_S2_Success"] remoteExec ["LL_fnc_showSubtitle", 0];
                 ["task_01_recon", "SUCCEEDED", true] call BIS_fnc_taskSetState;
+
+                // Nettoyage du groupe OPFOR vide (CORRECTIF #3.2)
+                if (!isNull _opforGrp && {count units _opforGrp == 0}) then {
+                    deleteGroup _opforGrp;
+                };
             };
 
-            // ── Scénario 3 : Mutinerie ────────────────────────────────────────
+            // ── Scénario 3 : Mutinerie (CORRECTIF #1 — timing accéléré) ──────
             case 3: {
                 if (DEBUG_MODE) then { diag_log "[LL] task01: Scénario 3 — Mutinerie."; };
 
@@ -221,46 +228,55 @@ if (_mode == "scenario") exitWith {
                 _chief action ["SwitchWeapon", _chief, _chief, 0];
                 sleep 0.2;
 
-                // Chef déjà armé — il parle, les gardes écoutent puis se retournent
+                // Chef avertit — durée réduite à 3s (phrase courte)
                 ["STR_LL_Speaker_Chief", "STR_LL_Task_01_S3_Chief"] remoteExec ["LL_fnc_showSubtitle", 0];
-                sleep 5;
-                // enableAI "ANIM" du chef différé au passage en combat (TASK_ANIM)
+                sleep 3; // CORRECTIF #1 : réduit de 5 → 3s
 
+                // Gardes mutins — réponse immédiate, le combat démarre PENDANT l'affichage
                 ["STR_LL_Speaker_Guards", "STR_LL_Task_01_S3_Guards"] remoteExec ["LL_fnc_showSubtitle", 0];
-                sleep 5;
 
-                ["STR_LL_Speaker_Narrator", "STR_LL_Task_01_Narrative_S3_Start"] remoteExec ["LL_fnc_showSubtitle", 0];
-
-                // Les gardes deviennent mutins (OPFOR) et rejoignent le même groupe
+                // CHANGEMENT DE CAMP IMMÉDIAT — plus d'attente (CORRECTIF #1)
                 private _opforGrp = createGroup [east, true];
                 _guards joinSilent _opforGrp;
-                
+
                 {
-                    _x enableAI "WEAPONAIM"; // Ré-activer la visée IA pour le combat
+                    _x enableAI "ANIM";      // CORRECTIF #5 : manquant — obligatoire (TASK_ANIM §6)
+                    _x enableAI "MOVE";
+                    _x enableAI "WEAPONAIM";
                     _x setBehaviour "COMBAT";
                     _x setCombatMode "RED";
                     _x doFire _chief;
                 } forEach _guards;
 
-                // Le chef quitte sa position et traque activement les mutins
+                // Le chef réagit immédiatement
                 private _allyGrp = createGroup [independent, true];
                 [_chief] joinSilent _allyGrp;
-                _chief enableAI "ANIM";   // Activer simultanément avec COMBAT — pas de flash holster
+                _chief enableAI "ANIM";
                 _chief enableAI "MOVE";
                 _chief setBehaviour "COMBAT";
                 _chief setCombatMode "RED";
                 _chief setUnitPos "UP";
                 _chief allowFleeing 0;
 
+                // Narrateur en parallèle — les tirs ont déjà commencé (CORRECTIF #1)
+                sleep 1;
+                ["STR_LL_Speaker_Narrator", "STR_LL_Task_01_Narrative_S3_Start"] remoteExec ["LL_fnc_showSubtitle", 0];
+
                 // Boucle du chef : cible un mutin aléatoire vivant toutes les 10s
+                // Condition d'arrêt via LL_Task01_ChiefCombatDone (CORRECTIF #3.1)
                 [_chief, _guards] spawn {
                     params ["_unit", "_mutins"];
-                    while { alive _unit && ({ alive _x } count _mutins) > 0 } do {
+                    while {
+                        alive _unit
+                        && ({ alive _x } count _mutins) > 0
+                        && !(_unit getVariable ["LL_Task01_ChiefCombatDone", false])
+                    } do {
                         private _aliveMutins = _mutins select { alive _x };
                         if (count _aliveMutins > 0) then {
                             private _target = selectRandom _aliveMutins;
                             _unit doMove (getPos _target);
                             (group _unit) reveal [_target, 4.0];
+                            _unit doTarget _target;
                             _unit doFire _target;
                         };
                         sleep 10;
@@ -273,6 +289,7 @@ if (_mode == "scenario") exitWith {
                         params ["_unit", "_chef"];
                         _unit setUnitPos "UP";
                         _unit allowFleeing 0;
+                        sleep 1; // Laisser l'IA s'initialiser en pose combat
                         while { alive _unit } do {
                             private _targets = allPlayers select { side _x == independent && alive _x };
                             if (alive _chef) then { _targets pushBack _chef; };
@@ -280,6 +297,7 @@ if (_mode == "scenario") exitWith {
                                 private _target = selectRandom _targets;
                                 _unit doMove (getPos _target);
                                 (group _unit) reveal [_target, 4.0];
+                                _unit doTarget _target;
                                 _unit doFire _target;
                             };
                             sleep 10;
@@ -297,10 +315,22 @@ if (_mode == "scenario") exitWith {
                     // Succès : le chef a survécu
                     ["STR_LL_Speaker_Narrator", "STR_LL_Task_01_Narrative_S3_Success"] remoteExec ["LL_fnc_showSubtitle", 0];
                     ["task_01_recon", "SUCCEEDED", true] call BIS_fnc_taskSetState;
+
+                    // CORRECTIF #3.1 : Préparer le chef pour task02c
+                    _chief setVariable ["LL_Task01_ChiefCombatDone", true, true];
+                    _chief setBehaviour "SAFE";
+                    _chief setCombatMode "BLUE";
+                    _chief setUnitPos "UP";
+                    _chief disableAI "MOVE";
                 } else {
                     // Échec : le chef a été tué
                     ["STR_LL_Speaker_Narrator", "STR_LL_Task_01_Narrative_S3_Failed"] remoteExec ["LL_fnc_showSubtitle", 0];
                     ["task_01_recon", "FAILED", true] call BIS_fnc_taskSetState;
+                };
+
+                // Nettoyage du groupe OPFOR vide
+                if (!isNull _opforGrp && {count units _opforGrp == 0}) then {
+                    deleteGroup _opforGrp;
                 };
             };
         };
@@ -517,6 +547,7 @@ if (_mode == "scenario") exitWith {
     _chief setBehaviour "SAFE";
     _chief setCombatMode "BLUE";
     _chief setVariable ["LL_Task01_Status", "WAIT", true];
+    _chief setVariable ["LL_Task01_Chief", true, true]; // Marqueur pour identification par task02c (CORRECTIF #4)
 
     // Le Chef de milice doit se tourner toutes les 2 secondes vers la position du joueur du serveur le plus proche
     [_chief] spawn {

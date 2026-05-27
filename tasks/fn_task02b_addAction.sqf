@@ -36,7 +36,7 @@ _hostage addAction [
         _target removeAction _actionId;
 
         // Jouer l'animation de libération sur toutes les machines
-        [_target, "Acts_ExecutionVictim_Unbow"] remoteExec ["switchMove", 0];
+        [_target, "Acts_ExecutionVictim_Unbow"] remoteExec ["playMove", 0]; // CORRECTIF #2 : playMove pour one-shot (TASK_ANIM §1)
 
         // Délai animation (~8s) puis notification globale
         [_target] spawn {

@@ -56,6 +56,6 @@ _body addAction [
     true,       // showWindow
     true,       // hideOnUse
     "",         // Shortcut
-    "(_this distance _target) < 4", // Distance d'interaction — TASK_RULES §5
+    "(_this distance _target) < 4 && !(missionNamespace getVariable ['LL_Task02a_DocPickedUp', false])", // CORRECTIF #12 : masquer après ramassage
     4
 ];

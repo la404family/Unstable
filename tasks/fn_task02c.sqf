@@ -74,9 +74,10 @@ if (_mode == "chief_talk") exitWith {
     // LOCALISER LE CHEF DE MILICE
     // Survivant de task01 scénario 3 — I_G_officer_F, côté independent, non-joueur
     // ══════════════════════════════════════════════════════════════════════
+    // CORRECTIF #4 : Recherche par variable dédiée au lieu de typeOf (plus robuste)
     private _chief = objNull;
     {
-        if (!isPlayer _x && side _x == independent && typeOf _x == "I_G_officer_F" && alive _x) exitWith {
+        if (!isPlayer _x && (_x getVariable ["LL_Task01_Chief", false]) && alive _x) exitWith {
             _chief = _x;
         };
     } forEach allUnits;
@@ -97,6 +98,11 @@ if (_mode == "chief_talk") exitWith {
     // ══════════════════════════════════════════════════════════════════════
     // METTRE LE CHEF EN ATTENTE D'INTERACTION (TASK_RULES §4)
     // ══════════════════════════════════════════════════════════════════════
+    // CORRECTIF #7.2 : Transition douce depuis le mode COMBAT de task01 S3
+    _chief setBehaviour "SAFE";
+    sleep 1;
+    _chief action ["SwitchWeapon", _chief, _chief, -1]; // Ranger l'arme
+    sleep 1;
     _chief disableAI "MOVE";
     _chief disableAI "ANIM";
     _chief setUnitPos "UP";
@@ -123,7 +129,9 @@ if (_mode == "chief_talk") exitWith {
                 };
             } forEach allPlayers;
             if (!isNull _nearest) then {
-                _u setDir (_u getDir _nearest);
+                private _dir = _u getDir _nearest;
+                _u setDir _dir;
+                _u setFormDir _dir; // CORRECTIF #9 : empêche l'IA de re-pivoter
             };
             sleep 2;
         };
@@ -295,7 +303,9 @@ if (_mode == "chief_talk") exitWith {
                 };
             } forEach allPlayers;
             if (!isNull _nearest) then {
-                _u setDir (_u getDir _nearest);
+                private _dir = _u getDir _nearest;
+                _u setDir _dir;
+                _u setFormDir _dir; // CORRECTIF #9 : empêche l'IA de re-pivoter
             };
             sleep 2;
         };
@@ -381,6 +391,18 @@ if (_mode == "chief_talk") exitWith {
     _h setSpeedMode "NORMAL";
     _h allowFleeing 0;
 
+    // CORRECTIF #11 : Rejoindre le groupe joueur + nettoyage du groupe civil vide
+    private _aliveIndep = allPlayers select { side _x == independent && alive _x };
+    if (count _aliveIndep > 0) then {
+        private _playerLeader = leader (group (_aliveIndep select 0));
+        [_h] joinSilent (group _playerLeader);
+        _h doFollow _playerLeader;
+    };
+    if (!isNull _civGrp && {count units _civGrp == 0}) then {
+        deleteGroup _civGrp;
+    };
+
+    // Boucle de suivi actif (mise à jour régulière)
     [_h] spawn {
         params ["_unit"];
         while { alive _unit } do {
