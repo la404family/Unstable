@@ -472,32 +472,10 @@ if (!isServer) exitWith {};
 
     } forEach _allGroups;
 
-    // Ajouter l'action "Demander l'extraction" sur tous les clients avec interface
-    [] remoteExec ["LL_fnc_task03a_addAction", 0];
+    // Lancer les rappels d'extraction sur tous les clients
+    [] remoteExec ["LL_fnc_task04", 0];
 
     if (DEBUG_MODE) then {
-        diag_log "[LL][task03a] Survivants activs en mode assaut — en attente de la demande d'extraction joueur.";
+        diag_log "[LL][task03a] Survivants actifs en mode assaut — rappels d'extraction envoyés.";
     };
-
-    // Attendre que n'importe quel joueur demande l'extraction
-    waitUntil {
-        sleep 3;
-        missionNamespace getVariable ["LL_Task03a_ExtractionCalled", false]
-    };
-
-    // ── Sous-tâche réussie — extraction confirmée ──────────────────────
-    ["task_03a_surv", "SUCCEEDED", true] call BIS_fnc_taskSetState;
-    ["STR_LL_Speaker_Narrator", "STR_LL_Task_03a_Narrative_Surv_Success"] remoteExec ["LL_fnc_showSubtitle", 0];
-
-    if (DEBUG_MODE) then {
-        diag_log "[LL][task03a] Extraction demandée par les joueurs — nettoyage des survivants ennemis.";
-    };
-
-    // Nettoyage immédiat des survivants ennemis (l'extraction arrive, ils sont éliminés)
-    {
-        private _grp   = _x;
-        private _alive = (units _grp) select { alive _x };
-        { if (!isNull _x && alive _x) then { deleteVehicle _x; }; } forEach _alive;
-        if (!isNull _grp && { count units _grp == 0 }) then { deleteGroup _grp; };
-    } forEach _allGroups;
 };

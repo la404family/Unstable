@@ -270,6 +270,12 @@
         <English>[SUPPORT] No squad members available to resupply.</English>
         <French>[SUPPORT] Aucun membre d'escouade disponible pour le réapprovisionnement.</French>
       </Key>
+
+      
+      <Key ID="STR_LL_Task04_Remind">
+        <English>[EXTRACTION] Request helicopter extraction via your radio action menu.</English>
+        <French>[EXTRACTION] Demandez votre extraction hélicoptère via le menu d'actions radio.</French>
+      </Key>
     </Container>
   </Package>
 </Project>

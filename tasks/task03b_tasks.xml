@@ -7,8 +7,8 @@
         <French>Opération Bouclier — Désamorcer les bombes</French>
       </Key>
       <Key ID="STR_LL_Task_03b_Desc">
-        <English>FLASH INTELLIGENCE — The MJ (Justice Movement) has planted 2 improvised explosive devices in Porto. Each site is guarded by a heavily armed MJ cell. Civilians in the area may be MJ sympathizers armed and ready to turn against you. Locate both devices and defuse them before the countdown expires. You have 15 minutes.</English>
-        <French>RENSEIGNEMENT FLASH — Le Mouvement pour la Justice (MJ) a dissimulé 2 dispositifs explosifs improvisés dans Porto. Chaque site est protégé par une cellule MJ lourdement armée. Des civils dans la zone peuvent être des sympathisants prêts à se retourner contre vous. Localisez les deux engins et désamorcez-les avant l'expiration du compte à rebours. Il vous reste 15 minutes.</French>
+        <English>FLASH INTELLIGENCE — The MJ (Justice Movement) has planted 2 improvised explosive devices in Porto. Each site is guarded by a heavily armed MJ cell. Locate both devices and defuse them before the countdown expires. You have between 25 and 45 minutes.</English>
+        <French>RENSEIGNEMENT FLASH — Le Mouvement pour la Justice (MJ) a dissimulé 2 dispositifs explosifs improvisés dans Porto. Chaque site est protégé par une cellule MJ lourdement armée. Localisez les deux engins et désamorcez-les avant l'expiration du compte à rebours. Vous avez entre 25 et 45 minutes.</French>
       </Key>
       <Key ID="STR_LL_Task_03b_Marker">
         <English>MJ Bomb Site</English>
@@ -25,10 +25,6 @@
       <Key ID="STR_LL_Task_03b_Bomb_Defused_2">
         <English>SUPPORT — Second device neutralized. 2 / 2 bombs defused!</English>
         <French>SUPPORT — Second engin neutralisé. 2 / 2 bombes désamorcées !</French>
-      </Key>
-      <Key ID="STR_LL_Task_03b_Traitor_Warning">
-        <English>QG — CONTACT! Civilian traitors have revealed themselves — watch your flanks!</English>
-        <French>QG — CONTACT ! Des traîtres civils se sont révélés — surveillez vos flancs !</French>
       </Key>
       <Key ID="STR_LL_Task_03b_Timer_Label">
         <English>BOMB: %1:%2</English>

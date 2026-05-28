@@ -9,8 +9,7 @@
       Après la libération de l'informateur (task02b), les renseignements révèlent
       que le Mouvement pour la Justice a planté 2 bombes artisanales dans Porto pour
       déclencher un attentat de masse. Des cellules MJ de 8 à 12 gardes protègent
-      chaque site. Des civils apparemment innocents sont en réalité des sympathisants
-      armés qui se révèlent quand les joueurs s'approchent à moins de 15 mètres.
+      chaque site.
 
       Victoire : désamorcer les 2 bombes avant l'expiration du compte à rebours (25 à 45 min, aléatoire).
       Échec    : les bombes explosent. Les survivants MJ attaquent. Tenir jusqu'à
@@ -156,8 +155,6 @@ if (!isServer) exitWith {};
     private _bombCharges    = [];  // charges rattachées aux caisses
     private _markersList    = [];  // marqueurs de carte par site
     private _allGuardGroups = [];  // tous les groupes de gardes pour la dissolution
-    private _allTraitors    = [];  // civils traîtres (non armés au départ)
-    private _traitorGroup   = createGroup [east, true]; // groupe pour les traîtres activés
 
     {
         private _siteIndex = _forEachIndex;
@@ -220,29 +217,7 @@ if (!isServer) exitWith {};
             };
         };
 
-        // ── 2. Civils traîtres (2 à 4 par site) — armés au contact des joueurs ──
-        // Groupe civilian temporaire — deleteWhenEmpty:true, auto-supprimé quand les
-        // traîtres rejoignent _traitorGroup via joinSilent
-        private _traitorCivGrp = createGroup [civilian, true];
-        private _numTraitors = 2 + floor (random 3); // 2, 3 ou 4
-        for "_t" from 1 to _numTraitors do {
-            sleep 0.5;
-            private _tPos   = _pos getPos [15 + random 35, random 360];
-            private _traitor = _traitorCivGrp createUnit ["C_Man_1", _tPos, [], 0, "NONE"];
-            _traitor setPos [_tPos select 0, _tPos select 1, getTerrainHeightASL _tPos];
-            _traitor allowDamage false;
-            [_traitor] spawn { sleep 3; (_this select 0) allowDamage true; };
-            _traitor setVariable ["LL_forceTemplate",  true,  true];
-            _traitor setVariable ["isTraitor",         true,  true];
-            _traitor setVariable ["traitorArmed",      false, true];
-            if (!isNil "LL_fnc_applyCivilianTemplate") then { [_traitor] call LL_fnc_applyCivilianTemplate; };
-            // Ennemi caché — immobile, debout, pas d'animation forcée (les gardes ne discutent pas)
-            _traitor disableAI "MOVE";
-            _traitor setUnitPos "UP";
-            _allTraitors pushBack _traitor;
-        };
-
-        // ── 3. Bombe — valise piégée + charge + lumières rouges (PRINCIPAL en dernier) ──
+        // ── 2. Bombe — valise piégée + charge + lumières rouges (PRINCIPAL en dernier) ──
         // Land_Suitcase_F : objet statique non-container → aucun inventaire accessible
         private _crate  = createVehicle ["Land_Suitcase_F", _pos, [], 0, "CAN_COLLIDE"];
         _crate setDir (random 360);
@@ -263,7 +238,7 @@ if (!isServer) exitWith {};
         _bombCrates  pushBack _crate;
         _bombCharges pushBack _charge;
 
-        // ── 4. Marqueur de carte ────────────────────────────────────────────
+        // ── 3. Marqueur de carte ────────────────────────────────────────────
         private _mkrName = format ["LL_mkr_t03b_bomb_%1", _siteIndex];
         createMarker [_mkrName, _pos];
         _mkrName setMarkerType  "mil_warning";
@@ -271,7 +246,7 @@ if (!isServer) exitWith {};
         _mkrName setMarkerText  (localize "STR_LL_Task_03b_Marker");
         _markersList pushBack _mkrName;
 
-        // ── 5. Son de bip — bombe active ────────────────────────────────────
+        // ── 4. Son de bip — bombe active ────────────────────────────────────
         [_crate, format ["LL_Task03b_Bomb%1_Defused", _siteIndex]] spawn {
             params ["_obj", "_defuseVar"];
             while { alive _obj && { !(missionNamespace getVariable [_defuseVar, false]) } } do {
@@ -295,7 +270,7 @@ if (!isServer) exitWith {};
     ["STR_LL_Speaker_Narrator", "STR_LL_Task_03b_Narrative_Start"] remoteExec ["LL_fnc_showSubtitle", 0];
 
     if (DEBUG_MODE) then {
-        diag_log format ["[LL][task03b] 2 sites armés. %1 gardes + traîtres déployés. Chrono 15 min.", count _allTraitors + (count _allGuardGroups * 5)];
+        diag_log format ["[LL][task03b] 2 sites armés. %1 gardes déployés.", (count _allGuardGroups * 5)];
     };
 
     // ══════════════════════════════════════════════════════════════════════
@@ -308,48 +283,6 @@ if (!isServer) exitWith {};
 
     waitUntil {
         sleep 3;
-
-        // ── Traîtres : s'armer si joueur < 15 mètres ──────────────────────
-        private _livePlayers = allPlayers select { alive _x };
-        {
-            private _civ = _x;
-            if (alive _civ
-                && { _civ getVariable ["isTraitor",    false] }
-                && { !(_civ getVariable ["traitorArmed", false]) }
-            ) then {
-                private _nearDist   = 999999;
-                private _nearPlayer = objNull;
-                {
-                    if (alive _x) then {
-                        private _d = _civ distance _x;
-                        if (_d < _nearDist) then { _nearDist = _d; _nearPlayer = _x; };
-                    };
-                } forEach _livePlayers;
-
-                if (_nearDist < 15 && { !isNull _nearPlayer }) then {
-                    _civ setVariable ["traitorArmed", true, true];
-                    _civ enableAI "MOVE";
-                    _civ enableAI "ANIM";
-                    [_civ] joinSilent _traitorGroup;
-                    _civ enableAI "TARGET";
-                    _civ enableAI "AUTOTARGET";
-                    _civ enableAI "WEAPONAIM";
-                    _civ enableAI "SUPPRESSION";
-                    _civ setBehaviour  "COMBAT";
-                    _civ setCombatMode "RED";
-                    _civ addMagazine "16Rnd_9x21_Mag";
-                    _civ addMagazine "16Rnd_9x21_Mag";
-                    _civ addWeapon   "hgun_P07_F";
-                    _civ selectWeapon "hgun_P07_F";
-                    _civ setSkill 0.5;
-                    _civ doTarget _nearPlayer;
-                    _civ doFire   _nearPlayer;
-                    _civ doMove   (getPos _nearPlayer);
-                    (localize "STR_LL_Task_03b_Traitor_Warning") remoteExec ["systemChat", 0];
-                    if (DEBUG_MODE) then { diag_log "[LL][task03b] Traître armé — attaque en cours."; };
-                };
-            };
-        } forEach _allTraitors;
 
         // ── Suivi désamorçage bombe 0 ──────────────────────────────────────
         if (missionNamespace getVariable ["LL_Task03b_Bomb0_Defused", false] && { !_bomb0Notified }) then {
@@ -429,7 +362,7 @@ if (!isServer) exitWith {};
         ["STR_LL_Speaker_Narrator", "STR_LL_Task_03b_Narrative_All_Defused"] remoteExec ["LL_fnc_showSubtitle", 0];
 
         // Dissolution propre des gardes survivants (TASK_RULES §14)
-        private _dissolveTargets = _allGuardGroups + [_traitorGroup];
+        private _dissolveTargets = _allGuardGroups;
         {
             private _grp   = _x;
             private _alive = (units _grp) select { alive _x };
@@ -480,6 +413,7 @@ if (!isServer) exitWith {};
         } forEach _dissolveTargets;
 
         if (DEBUG_MODE) then { diag_log "[LL][task03b] SUCCÈS — dissolution des unités ennemies."; };
+        [] remoteExec ["LL_fnc_task04", 0];
     };
 
     // ══════════════════════════════════════════════════════════════════════
@@ -522,7 +456,7 @@ if (!isServer) exitWith {};
         ] call BIS_fnc_taskCreate;
 
         // Activer tous les survivants MJ en mode assaut direct sur les joueurs
-        private _allEnemy = _allGuardGroups + [_traitorGroup];
+        private _allEnemy = _allGuardGroups;
         {
             private _grp  = _x;
             private _alive = (units _grp) select { alive _x };
@@ -550,6 +484,7 @@ if (!isServer) exitWith {};
             };
         } forEach _allEnemy;
 
+        [] remoteExec ["LL_fnc_task04", 0];
         if (DEBUG_MODE) then { diag_log "[LL][task03b] ÉCHEC — bombes explosées, assaut MJ en cours."; };
     };
 

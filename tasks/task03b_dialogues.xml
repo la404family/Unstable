@@ -3,7 +3,7 @@
   <Package name="Missions">
     <Container name="Dialogues">
       <Key ID="STR_LL_Task_03b_Narrative_Start">
-        <English>HQ to all units. Flash intelligence from our informant: the MJ has planted two improvised explosive devices in the city. Each site is secured by an armed cell — between 8 and 12 fighters. Be advised: some civilians in the area are MJ sympathizers. They will arm themselves and open fire if you approach. Find the devices, defuse them. You have between 25 and 45 minutes — exact countdown is on your HUD. Failure is not an option — Porto cannot absorb another atrocity. Out.</English>
+        <English>HQ to all units. Flash intelligence from our informant: the MJ has planted two improvised explosive devices in the city. Each site is secured by an armed cell — between 8 and 12 fighters. Find the devices, defuse them. You have between 25 and 45 minutes — exact countdown is on your HUD. Failure is not an option — Porto cannot absorb another atrocity. Out.</English>
         <French>QG à toutes les unités. Renseignement flash de notre informateur : le MJ a planté deux engins explosifs dans la ville. Chaque site est sécurisé par une cellule armée — entre 8 et 12 combattants. Attention : certains civils dans la zone sont des sympathisants du MJ. Ils s'armeront et ouvriront le feu si vous approchez. Trouvez les engins, désamorcez-les. Vous avez entre 25 et 45 minutes — le chrono exact est sur votre HUD. L'échec n'est pas une option — Porto ne peut pas absorber une nouvelle atrocité. Terminé.</French>
       </Key>
       <Key ID="STR_LL_Task_03b_Narrative_All_Defused">

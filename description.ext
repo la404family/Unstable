@@ -88,6 +88,7 @@ class CfgFunctions {
             class task03a_addAction     {};
             class task03b               {};
             class task03b_addAction     {};
+            class task04                {};
             class taskManager           {};
         };
     };
@@ -115,6 +116,12 @@ class CfgSounds {
     class LL_typewriter_bip {
         name    = "LL_typewriter_bip";
         sound[] = {"\A3\sounds_F\sfx\alarm_independent.wss", 0.03, 3.5};
+        titles[] = {};
+    };
+    // Bip de rappel d'extraction — fn_task04.sqf
+    class LL_extraction_bip {
+        name    = "LL_extraction_bip";
+        sound[] = {"\A3\sounds_F\sfx\alarm_independent.wss", 0.6, 1.8};
         titles[] = {};
     };
 };
