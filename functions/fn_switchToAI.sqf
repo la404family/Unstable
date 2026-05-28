@@ -94,16 +94,34 @@ if (count _livingAI > 0) then {
     // ── MODE SOLO : fin de mission directe ──────────────────────────────────
     // BIS_fnc_EGSpectator avec une liste de caméras vide [] cause un gel complet
     // de l'interface en partie solo (HUD perdu, clavier bloqué, aucune issue).
-    // En solo il n'y a qu'un seul joueur : aucune raison d'afficher un spectateur,
-    // on déclenche directement la fin de mission (DÉFAITE).
+    // En solo il n'y a qu'un seul joueur : on crée une caméra vue de haut au-dessus
+    // du cadavre (clavier accessible, ESC fonctionnel), puis on déclenche la fin de mission.
     if (!isMultiplayer) exitWith {
         _deadUnit setVariable ["LL_Spectating", false, true];
-        titleText [localize "STR_LL_Msg_GameOver", "BLACK FADED", 2];
-        sleep 3;
+
+        // Caméra vue de haut — 15 m au-dessus du cadavre
+        // Créée AVANT le titleText pour éviter l'écran noir bloquant ("BLACK FADED")
+        private _cam = "camera" camCreate (getPos _deadUnit vectorAdd [0, 0, 15]);
+        _cam camSetTarget _deadUnit;
+        _cam cameraEffect ["INTERNAL", "BACK"];
+        _cam camCommit 0;
+        showCinemaBars false;
+
+        // Message en bas d'écran — style PLAIN pour ne pas superposer de fond noir
+        titleText [localize "STR_LL_Msg_GameOver", "PLAIN DOWN", 2];
+
+        // Laisser le joueur voir la scène et accéder au menu (ESC) pendant 8 s
+        sleep 8;
+
+        // Nettoyage caméra avant l'écran de débrief
+        _cam cameraEffect ["TERMINATE", "BACK"];
+        camDestroy _cam;
+        titleText ["", "PLAIN", 0];
+
         ["MissionFailed", false, 0] call BIS_fnc_endMission;
 
         if (DEBUG_MODE) then {
-            diag_log "[LL] switchToAI: Mode solo — fin de mission directe (aucune IA disponible).";
+            diag_log "[LL] switchToAI: Mode solo — caméra overhead + fin de mission (aucune IA disponible).";
         };
     };
 
