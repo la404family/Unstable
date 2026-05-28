@@ -221,11 +221,14 @@ if (!isServer) exitWith {};
         };
 
         // ── 2. Civils traîtres (2 à 4 par site) — armés au contact des joueurs ──
+        // Groupe civilian temporaire — deleteWhenEmpty:true, auto-supprimé quand les
+        // traîtres rejoignent _traitorGroup via joinSilent
+        private _traitorCivGrp = createGroup [civilian, true];
         private _numTraitors = 2 + floor (random 3); // 2, 3 ou 4
         for "_t" from 1 to _numTraitors do {
             sleep 0.5;
             private _tPos   = _pos getPos [15 + random 35, random 360];
-            private _traitor = createUnit ["C_Man_1", _tPos, [], 0, "NONE"];
+            private _traitor = _traitorCivGrp createUnit ["C_Man_1", _tPos, [], 0, "NONE"];
             _traitor setPos [_tPos select 0, _tPos select 1, getTerrainHeightASL _tPos];
             _traitor allowDamage false;
             [_traitor] spawn { sleep 3; (_this select 0) allowDamage true; };
@@ -248,7 +251,6 @@ if (!isServer) exitWith {};
         };
 
         // ── 3. Bombe — caisse + charge + lumières rouges (PRINCIPAL en dernier) ──
-        private _posASL = getPosASL (createObject ["Land_HelipadEmpty_F", _pos]); // référence sol
         private _crate  = createVehicle ["Box_East_Ammo_F", _pos, [], 0, "CAN_COLLIDE"];
         _crate setDir (random 360);
         private _charge = createVehicle ["DemoCharge_F", _pos vectorAdd [0, 0, 0.65], [], 0, "CAN_COLLIDE"];

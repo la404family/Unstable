@@ -335,10 +335,12 @@ if (!isServer) exitWith {};
 
     // Animation de libération — transition propre (TASK_ANIM §4.2)
     _hostage removeAllEventHandlers "AnimDone";
-    // CORRECTIF : L'animation playMove a déjà été lancée par le client ayant cliqué sur l'action pour une réaction instantanée.
-    // Le serveur se contente d'attendre la fin de l'animation pour synchroniser la suite de la libération.
-    sleep 8; // Durée de l'animation de relèvement (~8s)
+    // CORRECTIF : enableAI "ANIM" doit être appelé AVANT playMove.
+    // disableAI "ANIM" bloque toute commande playMove/switchMove — l'animation de
+    // libération ne jouait jamais et l'otage restait bloqué à genoux.
     _hostage enableAI "ANIM";
+    [_hostage, "Acts_ExecutionVictim_Unbow"] remoteExec ["playMove", 0];
+    sleep 8; // Durée de l'animation de relèvement (~8s)
 
     // Réactiver le mouvement, l'informateur se relève
     _hostage enableAI "MOVE";

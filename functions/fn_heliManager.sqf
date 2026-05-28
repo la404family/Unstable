@@ -804,6 +804,12 @@ private _fnExecExtract = {
                 };
             } forEach (crew _heli);
 
+            // Informateur mort → départ immédiat (tâche FAILED gérée par fn_task02b)
+            if (!isNull _hostage && { !alive _hostage }) then {
+                _shouldLeave = true;
+                "" remoteExec ["hintSilent", 0];
+            };
+
             // Dès que l'informateur est à bord → départ immédiat
             if (!isNull _hostage && { vehicle _hostage == _heli }) then { _shouldLeave = true; };
 
