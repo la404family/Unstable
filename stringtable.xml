@@ -176,6 +176,30 @@ Le Roi de Sahrani a lancé cette opération de pacification autonome pour prouve
         <English>Restrain the intermediary</English>
         <French>Maîtriser l'intermédiaire</French>
       </Key>
+      <Key ID="STR_LL_Task_03a_Title">
+        <English>Neutralize Armed Technicals</English>
+        <French>Neutraliser les véhicules armés</French>
+      </Key>
+      <Key ID="STR_LL_Task_03a_Desc">
+        <English>Our noisy operations on the island have caused the FL rebels to ally with the local cartel. They are deploying 3 UAZ technicals equipped with AGS-30 grenade launchers to hunt us down. Call in the MQ-9 drone support to spot and eliminate these highly dangerous threats.</English>
+        <French>Nos opérations bruyantes sur l'île ont poussé les rebelles du FL à se rallier au cartel de Porto. Ils déploient 3 véhicules blindés légers UAZ équipés de lances-grenades AGS-30 pour nous traquer. Appelez le drone MQ-9 en soutien pour localiser et éliminer ces menaces extrêmement dangereuses.</French>
+      </Key>
+      <Key ID="STR_LL_Task_03a_Marker">
+        <English>Enemy Armed Vehicle</English>
+        <French>Véhicule armé ennemi</French>
+      </Key>
+      <Key ID="STR_LL_Task_03a_Surv_Title">
+        <English>Hold Your Ground</English>
+        <French>Tenir la position</French>
+      </Key>
+      <Key ID="STR_LL_Task_03a_Surv_Desc">
+        <English>Surviving enemy combatants are regrouping and moving toward your position. Hold your ground and eliminate the remaining threats. When the situation is under control, request extraction via your radio options.</English>
+        <French>Les combattants ennemis survivants se regroupent et convergent vers votre position. Tenez la position et éliminez les menaces restantes. Lorsque la situation est maîtrisée, demandez l'extraction via vos options radio.</French>
+      </Key>
+      <Key ID="STR_LL_Task_03a_Surv_Marker">
+        <English>Hold Position</English>
+        <French>Tenir la position</French>
+      </Key>
     </Container>
     <Container name="Dialogues">
       <Key ID="STR_LL_Speaker_Nassim">
@@ -307,12 +331,36 @@ Le Roi de Sahrani a lancé cette opération de pacification autonome pour prouve
         <French>QG à patrouille. Objectif confirmé. Localisez l'intermédiaire financier dans votre secteur, éliminez sa protection et capturez-le vivant. Il est un atout de renseignement critique. Ne le tuez pas. Terminé.</French>
       </Key>
       <Key ID="STR_LL_Task_02c_Narrative_Success">
-        <English>HQ to patrol. The financial intermediary is secured. His intelligence on cartel-militia fund transfers is being extracted. Bring him to the LZ. Well done. Out.</English>
-        <French>QG à patrouille. L'intermédiaire financier est sécurisé. Ses renseignements sur les flux financiers milice-cartel sont en cours d'extraction. Rejoignez la LZ. Bien joué. Terminé.</French>
+        <English>HQ to patrol. The financial intermediary is secured. His intelligence on cartel-militia fund transfers is being extracted. Well done. Out.</English>
+        <French>QG à patrouille. L'intermédiaire financier est sécurisé. Ses renseignements sur les flux financiers milice-cartel sont en cours d'extraction. Bien joué. Terminé.</French>
+      </Key>
+      <Key ID="STR_LL_Task_02c_Narrative_Extraction_Team">
+        <English>HQ to patrol. A recovery team has been dispatched to your position. They will collect the prisoner discretely. Move at least 500 meters away to allow them to operate undetected. Do NOT remain near the target. Out.</English>
+        <French>QG à patrouille. Une équipe de récupération a été envoyée à votre position. Elle prendra en charge le prisonnier discrètement. Éloignez-vous à plus de 500 mètres pour permettre leur intervention sans être repérés. Ne restez PAS à proximité du prisonnier. Terminé.</French>
       </Key>
       <Key ID="STR_LL_Task_02c_Narrative_Failed">
         <English>HQ to patrol. The financial intermediary has been killed. The money trail has gone cold. The logistical network is compromised. The mission continues. Out.</English>
         <French>QG à patrouille. L'intermédiaire financier a été tué. La piste financière est perdue. Le réseau logistique est compromis. La mission continue. Terminé.</French>
+      </Key>
+      <Key ID="STR_LL_Task_03a_Narrative_Start">
+        <English>HQ to patrol. The noise from our actions has triggered an emergency response: the FL extremists have allied with the cartel! They have mobilized three armed UAZ technicals to search your sector. Request MQ-9 drone support in your communications list to neutralize these targets. Out.</English>
+        <French>QG à patrouille. Le bruit de nos opérations a déclenché une réaction d'urgence : les extrémistes du FL se sont alliés au cartel ! Ils ont mobilisé trois véhicules d'assaut armés UAZ pour ratisser votre secteur. Faites appel au drone MQ-9 depuis vos options radio pour neutraliser ces menaces. Terminé.</French>
+      </Key>
+      <Key ID="STR_LL_Task_03a_Narrative_Success">
+        <English>HQ to patrol. All armed technicals destroyed. But surviving hostiles are breaking formation and moving toward your position. Expect contact. Hold your ground and call for extraction when ready. Out.</English>
+        <French>QG à patrouille. Tous les véhicules armés détruits. Mais les combattants survivants rompent les rangs et convergent sur votre position. Attendez-vous à un contact. Tenez la position et demandez l'extraction quand vous êtes prêts. Terminé.</French>
+      </Key>
+      <Key ID="STR_LL_Task_03a_Narrative_Surv_Success">
+        <English>HQ to patrol. Extraction confirmed. Outstanding work. Regroup and proceed to the extraction point. Mission accomplished. Out.</English>
+        <French>QG à patrouille. Extraction confirmée. Travail exceptionnel. Regroupez-vous et rejoignez le point d'extraction. Mission accomplie. Terminé.</French>
+      </Key>
+      <Key ID="STR_LL_Task_03a_Extraction_Request">
+        <English>Request extraction [RADIO]</English>
+        <French>Demander l'extraction [RADIO]</French>
+      </Key>
+      <Key ID="STR_LL_Task_03a_Extraction_Called">
+        <English>Extraction requested — consolidate positions!</English>
+        <French>Extraction demandée — consolidez vos positions !</French>
       </Key>
     </Container>
     <Container name="Debriefing">

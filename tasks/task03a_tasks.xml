@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project name="UnstablePorto">
+  <Package name="Missions">
+    <Container name="Tasks">
+      <Key ID="STR_LL_Task_03a_Title">
+        <English>Neutralize Armed Technicals</English>
+        <French>Neutraliser les véhicules armés</French>
+      </Key>
+      <Key ID="STR_LL_Task_03a_Desc">
+        <English>Our noisy operations on the island have caused the FL rebels to ally with the local cartel. They are deploying 3 UAZ technicals equipped with AGS-30 grenade launchers to hunt us down. Call in the MQ-9 drone support to spot and eliminate these highly dangerous threats.</English>
+        <French>Nos opérations bruyantes sur l'île ont poussé les rebelles du FL à se rallier au cartel de Porto. Ils déploient 3 véhicules blindés légers UAZ équipés de lances-grenades AGS-30 pour nous traquer. Appelez le drone MQ-9 en soutien pour localiser et éliminer ces menaces extrêmement dangereuses.</French>
+      </Key>
+      <Key ID="STR_LL_Task_03a_Marker">
+        <English>Enemy Armed Vehicle</English>
+        <French>Véhicule armé ennemi</French>
+      </Key>
+      <Key ID="STR_LL_Task_03a_Surv_Title">
+        <English>Hold Your Ground</English>
+        <French>Tenir la position</French>
+      </Key>
+      <Key ID="STR_LL_Task_03a_Surv_Desc">
+        <English>Surviving enemy combatants are regrouping and moving toward your position. Hold your ground and eliminate the remaining threats. When the situation is under control, request extraction via your radio options.</English>
+        <French>Les combattants ennemis survivants se regroupent et convergent vers votre position. Tenez la position et éliminez les menaces restantes. Lorsque la situation est maîtrisée, demandez l'extraction via vos options radio.</French>
+      </Key>
+      <Key ID="STR_LL_Task_03a_Surv_Marker">
+        <English>Hold Position</English>
+        <French>Tenir la position</French>
+      </Key>
+    </Container>
+  </Package>
+</Project>

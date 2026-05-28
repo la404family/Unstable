@@ -35,6 +35,44 @@ if (!isServer) exitWith {};
 // ══════════════════════════════════════════════════════════════════════════════
 // MODE "chief_talk" — déclenché par le client après interaction avec le chef
 // ══════════════════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════════════
+// MODE "capture_anim" — déclenché par le client après interaction de capture
+// Gère l'animation d'arrestation server-side (bonne locality de l'unité)
+// ══════════════════════════════════════════════════════════════════════════════
+if (_mode == "capture_anim") exitWith {
+    _args spawn {
+        params [["_h", objNull, [objNull]]];
+        if (isNull _h || !alive _h) exitWith {};
+        if (missionNamespace getVariable ["LL_Task02c_Captured", false]) exitWith {};
+
+        // Stopper la boucle d'attente (TASK_RULES §4)
+        _h setVariable ["LL_Task02c_Status", "ACTION", true];
+        _h removeAllEventHandlers "AnimDone";
+
+        // Animation d'arrestation — exécutée sur le serveur (locality correcte)
+        // Pas de setUnitPos qui briserait la pose de l'animation
+        _h disableAI "MOVE";
+        _h disableAI "ANIM";
+        _h switchMove "Acts_ExecutionVictim_Loop";
+        sleep 0.3;
+
+        // Boucle persistante de l'état d'arrestation via AnimDone EH
+        _h addEventHandler ["AnimDone", {
+            params ["_unit"];
+            // Loop l'animation tant que le statut est "ACTION" (captif en attente de récupération)
+            if (alive _unit && (_unit getVariable ["LL_Task02c_Status", ""]) == "ACTION") then {
+                _unit switchMove "Acts_ExecutionVictim_Loop";
+            };
+        }];
+
+        missionNamespace setVariable ["LL_Task02c_Captured", true, true];
+
+        if (DEBUG_MODE) then {
+            diag_log "[LL][task02c] capture_anim : animation d'arrestation déclenchée (server-side) — LL_Task02c_Captured = true.";
+        };
+    };
+};
+
 if (_mode == "chief_talk") exitWith {
     _args spawn {
         params [["_chief", objNull, [objNull]]];
@@ -438,48 +476,47 @@ if (_mode == "chief_talk") exitWith {
         diag_log "[LL][task02c] Intermédiaire capturé — tâche SUCCEEDED.";
     };
 
-    // ── L'intermédiaire suit le groupe joueur (prisonnier escorté) ────────
-    _h setVariable ["LL_Task02c_Status", "DONE", true];
-    _h enableAI "MOVE";
-    _h enableAI "ANIM";
-
-    // Application d'une démarche d'otage ou de prisonnier restreint mains liées
-    [_h, "Acts_SurrenderingWalk_1"] remoteExec ["switchMove", 0];
-    _h setUnitPos "UP";
-    _h setSpeedMode "NORMAL";
-    _h setBehaviour "CARELESS"; // Comportement passif d'otage/prisonnier sous garde
-    _h setCaptive true;         // Reste captif/neutre pour éviter de se faire cibler
+    // ── L'intermédiaire reste sur place en état d'arrestation ────────────
+    // L'animation Acts_ExecutionVictim_Loop est déjà active et loopée
+    // via le AnimDone EH posé par le mode capture_anim
+    _h setCaptive true;   // Neutre — ne se fait pas cibler
     _h allowFleeing 0;
+    _h disableAI "MOVE"; // Immobile sur place
 
-    // EH pour s'assurer qu'il garde l'animation de déplacement les mains sur la tête ou liées
-    _h addEventHandler ["AnimDone", {
-        params ["_unit"];
-        if (alive _unit && (_unit getVariable ["LL_Task02c_Status", "DONE"]) == "DONE") then {
-            [_unit, "Acts_SurrenderingWalk_1"] remoteExec ["switchMove", 0];
-        };
-    }];
-
-    // CORRECTIF #11 : Rejoindre le groupe joueur + nettoyage du groupe civil vide
-    private _aliveIndep = allPlayers select { side _x == independent && alive _x };
-    if (count _aliveIndep > 0) then {
-        private _playerLeader = leader (group (_aliveIndep select 0));
-        [_h] joinSilent (group _playerLeader);
-        _h doFollow _playerLeader;
-    };
-    if (!isNull _civGrp && {count units _civGrp == 0}) then {
+    // Nettoyage du groupe civil vide
+    if (!isNull _civGrp && { count units _civGrp == 0 }) then {
         deleteGroup _civGrp;
     };
 
-    // Boucle de suivi actif (mise à jour régulière)
+    // ── Information joueurs : équipe de récupération dépêchée ─────────────
+    sleep 3;
+    ["STR_LL_Speaker_Narrator", "STR_LL_Task_02c_Narrative_Extraction_Team"] remoteExec ["LL_fnc_showSubtitle", 0];
+    sleep 6;
+
+    // ══════════════════════════════════════════════════════════════════════
+    // DISPARITION DE L'INTERMÉDIAIRE
+    // Dès que TOUS les joueurs vivants sont à plus de 500m — «récupéré»
+    // ══════════════════════════════════════════════════════════════════════
     [_h] spawn {
         params ["_unit"];
-        while { alive _unit } do {
-            private _aliveIndep = allPlayers select { side _x == independent && alive _x };
-            if (count _aliveIndep > 0) then {
-                private _leader = leader (group (_aliveIndep select 0));
-                _unit doFollow _leader;
+        waitUntil {
+            sleep 5;
+            !alive _unit
+            || {
+                private _alivePlayers = allPlayers select { alive _x };
+                (count _alivePlayers > 0)
+                && { ({ _x distance2D _unit <= 500 } count _alivePlayers) == 0 }
+            }
+        };
+        if (alive _unit) then {
+            if (DEBUG_MODE) then {
+                diag_log "[LL][task02c] Tous joueurs à > 500m — intermédiaire récupéré par l'équipe d'extraction.";
             };
-            sleep 3;
+            private _grpPrisoner = group _unit;
+            deleteVehicle _unit;
+            if (!isNull _grpPrisoner && { count units _grpPrisoner == 0 }) then {
+                deleteGroup _grpPrisoner;
+            };
         };
     };
 

@@ -76,26 +76,9 @@ switch (_mode) do {
                 if (missionNamespace getVariable ["LL_Task02c_Captured", false]) exitWith {};
                 _target removeAction _id;
 
-                // Animation de capture - Mains derrière la tête menotté (Kneel, look around, switch to custom arrested walk)
-                [_target] spawn {
-                    params ["_h"];
-                    
-                    // Désactiver l'EventHandler d'attente
-                    _h setVariable ["LL_Task02c_Status", "ACTION", true];
-                    _h removeAllEventHandlers "AnimDone";
-
-                    // Étape 1 : Le forcer à s'agenouiller mains sur la tête
-                    [_h, "Acts_ExecutionVictim_Loop"] remoteExec ["switchMove", 0];
-                    _h setUnitPos "MIDDLE";
-                    sleep 3;
-
-                    // Transition de menottage confirmée sur le serveur
-                    missionNamespace setVariable ["LL_Task02c_Captured", true, true];
-
-                    if (DEBUG_MODE) then {
-                        diag_log "[LL][task02c_addAction] Capture confirmée (Kneel loop) — LL_Task02c_Captured = true.";
-                    };
-                };
+                // Déléguer l'animation et le changement d'état au serveur
+                // (le serveur a la locality de l'unité — switchMove fiable)
+                ["capture_anim", [_target]] remoteExec ["LL_fnc_task02c", 2];
             },
             [],
             10,   // Priorité

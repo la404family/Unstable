@@ -23,8 +23,12 @@
         <French>QG à patrouille. Objectif confirmé. Localisez l'intermédiaire financier dans votre secteur, éliminez sa protection et capturez-le vivant. Il est un atout de renseignement critique. Ne le tuez pas. Terminé.</French>
       </Key>
       <Key ID="STR_LL_Task_02c_Narrative_Success">
-        <English>HQ to patrol. The financial intermediary is secured. His intelligence on cartel-militia fund transfers is being extracted. Bring him to the LZ. Well done. Out.</English>
-        <French>QG à patrouille. L'intermédiaire financier est sécurisé. Ses renseignements sur les flux financiers milice-cartel sont en cours d'extraction. Rejoignez la LZ. Bien joué. Terminé.</French>
+        <English>HQ to patrol. The financial intermediary is secured. His intelligence on cartel-militia fund transfers is being extracted. Well done. Out.</English>
+        <French>QG à patrouille. L'intermédiaire financier est sécurisé. Ses renseignements sur les flux financiers milice-cartel sont en cours d'extraction. Bien joué. Terminé.</French>
+      </Key>
+      <Key ID="STR_LL_Task_02c_Narrative_Extraction_Team">
+        <English>HQ to patrol. A recovery team has been dispatched to your position. They will collect the prisoner discretely. Move at least 500 meters away to allow them to operate undetected. Do NOT remain near the target. Out.</English>
+        <French>QG à patrouille. Une équipe de récupération a été envoyée à votre position. Elle prendra en charge le prisonnier discrètement. Éloignez-vous à plus de 500 mètres pour permettre leur intervention sans être repérés. Ne restez PAS à proximité du prisonnier. Terminé.</French>
       </Key>
       <Key ID="STR_LL_Task_02c_Narrative_Failed">
         <English>HQ to patrol. The financial intermediary has been killed. The money trail has gone cold. The logistical network is compromised. The mission continues. Out.</English>

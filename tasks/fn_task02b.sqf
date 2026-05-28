@@ -455,20 +455,28 @@ if (!isServer) exitWith {};
         };
 
         // --- SÉPARATION DU GROUPE DES JOUEURS ---
-        _h setVariable ["LL_Task02b_InHeli", true, true]; // Arrête le doFollow
+        _h setVariable ["LL_Task02b_InHeli", true, true]; // Arrête la boucle doFollow
+
+        // Annuler explicitement le doFollow en cours avant de changer de groupe
+        doStop _h;
+        _h doFollow _h; // Auto-suivi = annule le suivi du leader joueur
+
         _h setUnitPos "UP";
         _h setBehaviour "CARELESS";
 
-        // Rejoindre le groupe de l'hélicoptère pour améliorer le GetIn
+        // Rejoindre le groupe de l'hélicoptère (ou un groupe solo) pour permettre le GetIn
         private _heliGrp = group (driver _heli);
-        if (!isNull _heliGrp) then {
+        if (!isNull _heliGrp && { _heliGrp != grpNull }) then {
             [_h] joinSilent _heliGrp;
         } else {
-            [_h] joinSilent grpNull;
+            [_h] joinSilent grpNull; // Crée un groupe solo pour l'informateur
         };
+
+        sleep 0.5; // Laisser l'IA traiter le changement de groupe
 
         _h setCaptive false;
         _h assignAsCargo _heli;
+        _h doMove (getPos _heli); // Ordre de marche explicite vers l'hélicoptère
         [_h] orderGetIn true;
 
         // Aide active au pathfinding d'embarquement

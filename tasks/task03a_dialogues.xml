@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project name="UnstablePorto">
+  <Package name="Missions">
+    <Container name="Dialogues">
+      <Key ID="STR_LL_Task_03a_Narrative_Start">
+        <English>HQ to patrol. The noise from our actions has triggered an emergency response: the FL extremists have allied with the cartel! They have mobilized three armed UAZ technicals to search your sector. Request MQ-9 drone support in your communications list to neutralize these targets. Out.</English>
+        <French>QG à patrouille. Le bruit de nos opérations a déclenché une réaction d'urgence : les extrémistes du FL se sont alliés au cartel ! Ils ont mobilisé trois véhicules d'assaut armés UAZ pour ratisser votre secteur. Faites appel au drone MQ-9 depuis vos options radio pour neutraliser ces menaces. Terminé.</French>
+      </Key>
+      <Key ID="STR_LL_Task_03a_Narrative_Success">
+        <English>HQ to patrol. All armed technicals destroyed. But surviving hostiles are breaking formation and moving toward your position. Expect contact. Hold your ground and call for extraction when ready. Out.</English>
+        <French>QG à patrouille. Tous les véhicules armés détruits. Mais les combattants survivants rompent les rangs et convergent sur votre position. Attendez-vous à un contact. Tenez la position et demandez l'extraction quand vous êtes prêts. Terminé.</French>
+      </Key>
+      <Key ID="STR_LL_Task_03a_Narrative_Surv_Success">
+        <English>HQ to patrol. Extraction confirmed. Outstanding work. Regroup and proceed to the extraction point. Mission accomplished. Out.</English>
+        <French>QG à patrouille. Extraction confirmée. Travail exceptionnel. Regroupez-vous et rejoignez le point d'extraction. Mission accomplie. Terminé.</French>
+      </Key>
+      <Key ID="STR_LL_Task_03a_Extraction_Request">
+        <English>Request extraction [RADIO]</English>
+        <French>Demander l'extraction [RADIO]</French>
+      </Key>
+      <Key ID="STR_LL_Task_03a_Extraction_Called">
+        <English>Extraction requested — consolidate positions!</English>
+        <French>Extraction demandée — consolidez vos positions !</French>
+      </Key>
+    </Container>
+  </Package>
+</Project>
