@@ -179,36 +179,66 @@ if (!isServer) exitWith {};
         _gunner setBehaviour "AWARE";
         _gunner setCombatMode "RED";
 
-        // 3. Spawner les gardes de protection (Deux équipes de deux)
+        // 3. Spawner les gardes de protection (Quatre équipes de deux = 8 gardes par véhicule)
         private _guardsGroup1 = createGroup [east, true];
         private _guardsGroup2 = createGroup [east, true];
+        private _guardsGroup3 = createGroup [east, true];
+        private _guardsGroup4 = createGroup [east, true];
         _allGroups pushBack _guardsGroup1;
         _allGroups pushBack _guardsGroup2;
+        _allGroups pushBack _guardsGroup3;
+        _allGroups pushBack _guardsGroup4;
 
-        // Équipe 1
+        // Équipe 1 — périmètre proche (5–15 m)
         for "_i" from 1 to 2 do {
             sleep 0.5;
-            private _gPos = _pos getPos [6 + random 8, random 360];
+            private _gPos = _pos getPos [5 + random 10, random 360];
             private _guard = _guardsGroup1 createUnit ["O_G_Soldier_F", _gPos, [], 0, "NONE"];
             _guard setPos [ _gPos select 0, _gPos select 1, (getTerrainHeightASL _gPos) ];
             _guard allowDamage false;
             [_guard] spawn { sleep 3; (_this select 0) allowDamage true; };
-            
             _guard setVariable ["LL_forceTemplate", true, true];
             if (!isNil "LL_fnc_applyCivilianTemplate") then { [_guard] call LL_fnc_applyCivilianTemplate; };
             _guard setBehaviour "AWARE";
             _guard setCombatMode "RED";
         };
 
-        // Équipe 2
+        // Équipe 2 — périmètre proche (5–15 m)
         for "_i" from 1 to 2 do {
             sleep 0.5;
-            private _gPos = _pos getPos [6 + random 8, random 360];
+            private _gPos = _pos getPos [5 + random 10, random 360];
             private _guard = _guardsGroup2 createUnit ["O_G_Soldier_F", _gPos, [], 0, "NONE"];
             _guard setPos [ _gPos select 0, _gPos select 1, (getTerrainHeightASL _gPos) ];
             _guard allowDamage false;
             [_guard] spawn { sleep 3; (_this select 0) allowDamage true; };
+            _guard setVariable ["LL_forceTemplate", true, true];
+            if (!isNil "LL_fnc_applyCivilianTemplate") then { [_guard] call LL_fnc_applyCivilianTemplate; };
+            _guard setBehaviour "AWARE";
+            _guard setCombatMode "RED";
+        };
 
+        // Équipe 3 — périmètre élargi (20–45 m)
+        for "_i" from 1 to 2 do {
+            sleep 0.5;
+            private _gPos = _pos getPos [20 + random 25, random 360];
+            private _guard = _guardsGroup3 createUnit ["O_G_Soldier_F", _gPos, [], 0, "NONE"];
+            _guard setPos [ _gPos select 0, _gPos select 1, (getTerrainHeightASL _gPos) ];
+            _guard allowDamage false;
+            [_guard] spawn { sleep 3; (_this select 0) allowDamage true; };
+            _guard setVariable ["LL_forceTemplate", true, true];
+            if (!isNil "LL_fnc_applyCivilianTemplate") then { [_guard] call LL_fnc_applyCivilianTemplate; };
+            _guard setBehaviour "AWARE";
+            _guard setCombatMode "RED";
+        };
+
+        // Équipe 4 — périmètre élargi (20–45 m)
+        for "_i" from 1 to 2 do {
+            sleep 0.5;
+            private _gPos = _pos getPos [20 + random 25, random 360];
+            private _guard = _guardsGroup4 createUnit ["O_G_Soldier_F", _gPos, [], 0, "NONE"];
+            _guard setPos [ _gPos select 0, _gPos select 1, (getTerrainHeightASL _gPos) ];
+            _guard allowDamage false;
+            [_guard] spawn { sleep 3; (_this select 0) allowDamage true; };
             _guard setVariable ["LL_forceTemplate", true, true];
             if (!isNil "LL_fnc_applyCivilianTemplate") then { [_guard] call LL_fnc_applyCivilianTemplate; };
             _guard setBehaviour "AWARE";
@@ -216,14 +246,15 @@ if (!isServer) exitWith {};
         };
 
         // 4. Lancer le comportement de patrouille autour du véhicule
+        // Équipes 1 & 2 : ronde serrée (8–20 m)
         [_guardsGroup1, _veh] spawn {
             params ["_grp", "_v"];
             while { alive _v && { ({ alive _x } count units _grp) > 0 } } do {
                 if (behaviour (leader _grp) != "COMBAT") then {
-                    private _pPos = (getPos _v) getPos [8 + random 15, random 360];
+                    private _pPos = (getPos _v) getPos [8 + random 12, random 360];
                     _grp move _pPos;
                 };
-                sleep (20 + random 15);
+                sleep (15 + random 12);
             };
         };
 
@@ -231,7 +262,30 @@ if (!isServer) exitWith {};
             params ["_grp", "_v"];
             while { alive _v && { ({ alive _x } count units _grp) > 0 } } do {
                 if (behaviour (leader _grp) != "COMBAT") then {
-                    private _pPos = (getPos _v) getPos [8 + random 15, random 360];
+                    private _pPos = (getPos _v) getPos [8 + random 12, random 360];
+                    _grp move _pPos;
+                };
+                sleep (15 + random 12);
+            };
+        };
+
+        // Équipes 3 & 4 : ronde élargie (25–50 m)
+        [_guardsGroup3, _veh] spawn {
+            params ["_grp", "_v"];
+            while { alive _v && { ({ alive _x } count units _grp) > 0 } } do {
+                if (behaviour (leader _grp) != "COMBAT") then {
+                    private _pPos = (getPos _v) getPos [25 + random 25, random 360];
+                    _grp move _pPos;
+                };
+                sleep (20 + random 15);
+            };
+        };
+
+        [_guardsGroup4, _veh] spawn {
+            params ["_grp", "_v"];
+            while { alive _v && { ({ alive _x } count units _grp) > 0 } } do {
+                if (behaviour (leader _grp) != "COMBAT") then {
+                    private _pPos = (getPos _v) getPos [25 + random 25, random 360];
                     _grp move _pPos;
                 };
                 sleep (20 + random 15);

@@ -142,7 +142,7 @@ if (!isServer) exitWith {};
             localize "STR_LL_Task_03b_Title",
             localize "STR_LL_Task_03b_Marker"
         ],
-        _selectedPositions select 0,
+        objNull,
         "AUTOASSIGNED",
         5,
         true,
@@ -236,25 +236,18 @@ if (!isServer) exitWith {};
             _traitor setVariable ["isTraitor",         true,  true];
             _traitor setVariable ["traitorArmed",      false, true];
             if (!isNil "LL_fnc_applyCivilianTemplate") then { [_traitor] call LL_fnc_applyCivilianTemplate; };
-            // Animation civile en boucle — PNJ figé, non rotatif (TASK_RULES §4 adapté)
+            // Ennemi caché — immobile, debout, pas d'animation forcée (les gardes ne discutent pas)
             _traitor disableAI "MOVE";
-            _traitor disableAI "ANIM";
             _traitor setUnitPos "UP";
-            _traitor switchMove "Acts_CivilTalking_1";
-            _traitor addEventHandler ["AnimDone", {
-                params ["_u"];
-                if (alive _u && !(_u getVariable ["traitorArmed", false])) then {
-                    _u switchMove "Acts_CivilTalking_1";
-                };
-            }];
             _allTraitors pushBack _traitor;
         };
 
-        // ── 3. Bombe — caisse + charge + lumières rouges (PRINCIPAL en dernier) ──
-        private _crate  = createVehicle ["Box_East_Ammo_F", _pos, [], 0, "CAN_COLLIDE"];
+        // ── 3. Bombe — valise piégée + charge + lumières rouges (PRINCIPAL en dernier) ──
+        // Land_Suitcase_F : objet statique non-container → aucun inventaire accessible
+        private _crate  = createVehicle ["Land_Suitcase_F", _pos, [], 0, "CAN_COLLIDE"];
         _crate setDir (random 360);
-        private _charge = createVehicle ["DemoCharge_F", _pos vectorAdd [0, 0, 0.65], [], 0, "CAN_COLLIDE"];
-        _charge attachTo [_crate, [0, 0, 0.35]];
+        private _charge = createVehicle ["DemoCharge_F", _pos vectorAdd [0, 0, 0.3], [], 0, "CAN_COLLIDE"];
+        _charge attachTo [_crate, [0, 0, 0.15]];
         _charge setVectorUp [0, 0, 1];
 
         // Lumières rouges visibles jour et nuit
@@ -361,8 +354,15 @@ if (!isServer) exitWith {};
         // ── Suivi désamorçage bombe 0 ──────────────────────────────────────
         if (missionNamespace getVariable ["LL_Task03b_Bomb0_Defused", false] && { !_bomb0Notified }) then {
             _bomb0Notified = true;
-            if (count _bombCharges > 0 && { !isNull (_bombCharges select 0) }) then {
-                deleteVehicle (_bombCharges select 0);
+            // Effet fumée ninja : fumée → 1.5s → lumières éteintes + valise supprimée
+            [(_bombCrates select 0), (_bombCharges select 0)] spawn {
+                params ["_crate", "_charge"];
+                if (!isNull _crate) then {
+                    "SmokeShellWhite" createVehicle (getPos _crate);
+                };
+                sleep 1.5;
+                if (!isNull _charge) then { deleteVehicle _charge; };
+                if (!isNull _crate)  then { deleteVehicle _crate; };
             };
             if (count _markersList > 0 && { _markersList select 0 != "" }) then {
                 deleteMarker (_markersList select 0);
@@ -375,8 +375,15 @@ if (!isServer) exitWith {};
         // ── Suivi désamorçage bombe 1 ──────────────────────────────────────
         if (missionNamespace getVariable ["LL_Task03b_Bomb1_Defused", false] && { !_bomb1Notified }) then {
             _bomb1Notified = true;
-            if (count _bombCharges > 1 && { !isNull (_bombCharges select 1) }) then {
-                deleteVehicle (_bombCharges select 1);
+            // Effet fumée ninja : fumée → 1.5s → lumières éteintes + valise supprimée
+            [(_bombCrates select 1), (_bombCharges select 1)] spawn {
+                params ["_crate", "_charge"];
+                if (!isNull _crate) then {
+                    "SmokeShellWhite" createVehicle (getPos _crate);
+                };
+                sleep 1.5;
+                if (!isNull _charge) then { deleteVehicle _charge; };
+                if (!isNull _crate)  then { deleteVehicle _crate; };
             };
             if (count _markersList > 1 && { _markersList select 1 != "" }) then {
                 deleteMarker (_markersList select 1);

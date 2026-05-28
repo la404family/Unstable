@@ -387,9 +387,7 @@ if (hasInterface) then {
 
         [
             format [
-                "<t size='1.7' color='#ffffff' font='PuristaBold' align='center'>%1</t><br/>" +
                 "<t size='1.0' color='#bbbbbb' font='PuristaLight' align='center'>%2</t>",
-                localize "STR_LL_Intro_MissionStart",
                 localize "STR_LL_Intro_MissionStartSubtitle"
             ],
             -1, -1, 5, 1, 0, 793

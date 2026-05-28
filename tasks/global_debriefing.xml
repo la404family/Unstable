@@ -3,28 +3,28 @@
   <Package name="Missions">
     <Container name="Debriefing">
       <Key ID="STR_LL_End_Success_Title">
-        <English>Mission Accomplished</English>
-        <French>Mission Réussie</French>
+        <English>Mission Complete</English>
+        <French>Mission Terminée</French>
       </Key>
       <Key ID="STR_LL_End_Success_Subtitle">
-        <English>Intelligence Secured - The operation was a success</English>
-        <French>Renseignements Sécurisés - L'opération est un succès</French>
+        <English>Your unit has been extracted from Porto</English>
+        <French>Votre unité a été extraite de Porto</French>
       </Key>
       <Key ID="STR_LL_End_Success_Desc">
-        <English>The RACS has successfully secured the intelligence about insurgent operations in Porto.</English>
-        <French>Le RACS a réussi à sécuriser les renseignements sur les opérations insurgées à Porto.</French>
+        <English>The operation is over. Good work.</English>
+        <French>L'opération est terminée. Bon travail.</French>
       </Key>
       <Key ID="STR_LL_End_Failed_Title">
         <English>Mission Failed</English>
         <French>Mission Échouée</French>
       </Key>
       <Key ID="STR_LL_End_Failed_Subtitle">
-        <English>Intelligence Lost - Our informant has fallen in battle</English>
-        <French>Renseignements Perdus - Notre informateur est tombé au combat</French>
+        <English>The situation got out of control</English>
+        <French>La situation a échappé au contrôle</French>
       </Key>
       <Key ID="STR_LL_End_Failed_Desc">
-        <English>The militia leader was killed before delivering the intelligence. The operation is a failure.</English>
-        <French>Le chef de milice a été tué avant d'avoir pu livrer les renseignements. L'opération est un échec.</French>
+        <English>The operation failed.</English>
+        <French>L'opération a échoué.</French>
       </Key>
     </Container>
   </Package>

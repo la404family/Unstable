@@ -421,28 +421,28 @@ Le Roi de Sahrani a lancé cette opération de pacification autonome pour prouve
     </Container>
     <Container name="Debriefing">
       <Key ID="STR_LL_End_Success_Title">
-        <English>Mission Accomplished</English>
-        <French>Mission Réussie</French>
+        <English>Mission Complete</English>
+        <French>Mission Terminée</French>
       </Key>
       <Key ID="STR_LL_End_Success_Subtitle">
-        <English>Intelligence Secured - The operation was a success</English>
-        <French>Renseignements Sécurisés - L'opération est un succès</French>
+        <English>Your unit has been extracted from Porto</English>
+        <French>Votre unité a été extraite de Porto</French>
       </Key>
       <Key ID="STR_LL_End_Success_Desc">
-        <English>The RACS has successfully secured the intelligence about insurgent operations in Porto.</English>
-        <French>Le RACS a réussi à sécuriser les renseignements sur les opérations insurgées à Porto.</French>
+        <English>The operation is over. Good work.</English>
+        <French>L'opération est terminée. Bon travail.</French>
       </Key>
       <Key ID="STR_LL_End_Failed_Title">
         <English>Mission Failed</English>
         <French>Mission Échouée</French>
       </Key>
       <Key ID="STR_LL_End_Failed_Subtitle">
-        <English>Intelligence Lost - Our informant has fallen in battle</English>
-        <French>Renseignements Perdus - Notre informateur est tombé au combat</French>
+        <English>The situation got out of control</English>
+        <French>La situation a échappé au contrôle</French>
       </Key>
       <Key ID="STR_LL_End_Failed_Desc">
-        <English>The militia leader was killed before delivering the intelligence. The operation is a failure.</English>
-        <French>Le chef de milice a été tué avant d'avoir pu livrer les renseignements. L'opération est un échec.</French>
+        <English>The operation failed.</English>
+        <French>L'opération a échoué.</French>
       </Key>
     </Container>
     <Container name="Actions">
@@ -470,9 +470,13 @@ Le Roi de Sahrani a lancé cette opération de pacification autonome pour prouve
         <English>[SUPPORT] Drone mission complete. MQ-9 returning to base.</English>
         <French>[SUPPORT] Mission drone terminée. MQ-9 de retour à la base.</French>
       </Key>
+      <Key ID="STR_LL_Msg_GameOver">
+        <English>MISSION FAILED — All units have been eliminated.</English>
+        <French>MISSION ÉCHOUÉE — Toutes les unités ont été éliminées.</French>
+      </Key>
       <Key ID="STR_LL_Action_Heal">
         <English>[SQUAD] Order squad to self-heal</English>
-        <French>[ESCOUADE] Ordonner a l'escouade de se soigner</French>
+        <French>[ESCOUADE] Ordonner à l'escouade de se soigner</French>
       </Key>
       <Key ID="STR_LL_Action_RoE_Stealth">
         <English>[SQUAD] RoE: Stealth (Infiltration)</English>
@@ -508,11 +512,7 @@ Le Roi de Sahrani a lancé cette opération de pacification autonome pour prouve
       </Key>
       <Key ID="STR_LL_Msg_Switch_Error">
         <English>[LL ERROR] Locality transfer timed out. Could not switch unit.</English>
-        <French>[LL ERREUR] Delai d'attente depasse pour le transfert de localite. Impossible de basculer sur l'unite.</French>
-      </Key>
-      <Key ID="STR_LL_Msg_GameOver">
-        <English>MISSION FAILED — All units have been eliminated.</English>
-        <French>MISSION ÉCHOUÉE — Toutes les unités ont été éliminées.</French>
+        <French>[LL ERREUR] Délai d'attente dépassé pour le transfert de localité. Impossible de basculer sur l'unité.</French>
       </Key>
       <Key ID="STR_LL_Heli_Action_Supply">
         <English>[Helicopter] Request Ammo Supply</English>
@@ -543,7 +543,7 @@ Le Roi de Sahrani a lancé cette opération de pacification autonome pour prouve
         <French>[SUPPORT] Un hélicoptère de support est déjà demandé ou actif. Veuillez patienter.</French>
       </Key>
       <Key ID="STR_LL_Heli_Msg_Route">
-        <English>[SUPPORT] MH-47E support helicopter en route to the area.</English>
+        <English>[SUPPORT] MH-47E support helicopter inbound to the area.</English>
         <French>[SUPPORT] Hélicoptère de support MH-47E en route vers la zone.</French>
       </Key>
       <Key ID="STR_LL_Heli_Msg_Killed">
@@ -587,7 +587,7 @@ Le Roi de Sahrani a lancé cette opération de pacification autonome pour prouve
         <French>[SUPPORT] Soutien aérien refusé. Espace aérien occupé.</French>
       </Key>
       <Key ID="STR_TAG_Msg_Ammo_Approved">
-        <English>[SUPPORT] Request approved. Chinook en route.</English>
+        <English>[SUPPORT] Request approved. Chinook inbound.</English>
         <French>[SUPPORT] Demande approuvée. Chinook en route.</French>
       </Key>
       <Key ID="STR_TAG_Msg_Ammo_Error">
@@ -607,7 +607,7 @@ Le Roi de Sahrani a lancé cette opération de pacification autonome pour prouve
         <French>[SUPPORT] Soutien refusé. Le véhicule de remplacement a déjà été livré.</French>
       </Key>
       <Key ID="STR_TAG_Msg_Vehicle_Approved">
-        <English>[SUPPORT] Request approved. Chinook en route with the replacement vehicle.</English>
+        <English>[SUPPORT] Request approved. Chinook inbound with the replacement vehicle.</English>
         <French>[SUPPORT] Demande approuvée. Chinook en route avec le véhicule de remplacement.</French>
       </Key>
       <Key ID="STR_TAG_Msg_Vehicle_Error">
@@ -627,7 +627,7 @@ Le Roi de Sahrani a lancé cette opération de pacification autonome pour prouve
         <French>[SUPPORT] Soutien aérien refusé. Espace aérien occupé.</French>
       </Key>
       <Key ID="STR_TAG_Msg_CAS_Approved">
-        <English>[SUPPORT] Request approved. Chinook en route for air support.</English>
+        <English>[SUPPORT] Request approved. Chinook inbound for air support.</English>
         <French>[SUPPORT] Demande approuvée. Chinook en route pour appui aérien.</French>
       </Key>
       <Key ID="STR_TAG_Msg_CAS_Error">
@@ -664,7 +664,7 @@ Le Roi de Sahrani a lancé cette opération de pacification autonome pour prouve
       </Key>
       <Key ID="STR_LL_Msg_Heal_NoKit">
         <English>[LL ERROR] Injured squad members do not have a first aid kit (FirstAidKit/Medikit).</English>
-        <French>[LL ERREUR] Les membres blesses de l'escouade n'ont pas de kit de soin (FirstAidKit/Medikit).</French>
+        <French>[LL ERREUR] Les membres blessés de l'escouade n'ont pas de kit de soin (FirstAidKit/Medikit).</French>
       </Key>
       <Key ID="STR_LL_Msg_Heal_NoInjured">
         <English>[LL ERROR] No injured squad member requires healing.</English>
@@ -700,11 +700,11 @@ Le Roi de Sahrani a lancé cette opération de pacification autonome pour prouve
       </Key>
       <Key ID="STR_LL_Msg_Rally_Start">
         <English>[SQUAD] Regroupment ordered. Squad moving to formation.</English>
-        <French>[ESCOUADE] Regroupement ordonne. L'escouade rejoint la formation.</French>
+        <French>[ESCOUADE] Regroupement ordonné. L'escouade rejoint la formation.</French>
       </Key>
       <Key ID="STR_LL_Msg_Rally_Done">
         <English>[SQUAD] Regroupment complete.</English>
-        <French>[ESCOUADE] Regroupement termine.</French>
+        <French>[ESCOUADE] Regroupement terminé.</French>
       </Key>
       <Key ID="STR_LL_Msg_Rally_NoAI">
         <English>[SQUAD] No active squad members in your group.</English>
@@ -728,7 +728,7 @@ Le Roi de Sahrani a lancé cette opération de pacification autonome pour prouve
       </Key>
       <Key ID="STR_LL_Msg_Resupply_NoAI">
         <English>[SUPPORT] No squad members available to resupply.</English>
-        <French>[SUPPORT] Aucun membre d'escouade disponible pour le reapprovisionnement.</French>
+        <French>[SUPPORT] Aucun membre d'escouade disponible pour le réapprovisionnement.</French>
       </Key>
     </Container>
     <Container name="Intro">
