@@ -4,7 +4,7 @@
  * Description:
  *   Gère l'apparence et le loadout de toutes les unités du groupe (I.A et joueurs).
  *   Compatible serveur dédié : se base sur player_00, pas sur player.
- *   Munitions : 5 chargeurs primaires, 3 pistolet, 2 lance-roquettes, 3 fum igènes blancs.
+ *   Munitions : 5 chargeurs primaires, 3 pistolet, lance-roquettes M72A6 (2 unités aléatoires), 2 fumigènes blancs.
  *   Grenades M67 : joueurs humains uniquement.
  *
  * Locality:
@@ -67,13 +67,16 @@ private _shuffledVests     = _vests call _fn_shuffle;
 // I.A (locale serveur) : toutes les commandes en direct (toutes locales ici).
 // Joueur (distant) : containers globaux sur le serveur + délégation via LL_fnc_applyLocalLoadout.
 private _fnc_applyVisuals = {
-    params ["_unit", "_varName", "_u", "_v", "_b", "_h", "_c"];
+    params ["_unit", "_varName", "_u", "_v", "_b", "_h", "_c", ["_giveLauncher", false, [false]]];
     if (isNull _unit || !alive _unit) exitWith {};
 
     // 1. SAUVEGARDE : armes et chargeurs AVANT nettoyage
     private _pWeapon = primaryWeapon _unit;
     private _sWeapon = secondaryWeapon _unit;
     private _hWeapon = handgunWeapon _unit;
+
+    // Lance-roquettes M72A6 pour les 2 unités désignées aléatoirement
+    if (_giveLauncher) then { _sWeapon = "CUP_launch_M72A6_Special"; };
 
     private _pMag = "";
     private _hMag = "";
@@ -130,10 +133,11 @@ private _fnc_applyVisuals = {
             _unit addWeaponItem [_hWeapon, _hMag, true];
         };
         if (_sWeapon != "") then {
+            if (secondaryWeapon _unit != _sWeapon) then { _unit addWeapon _sWeapon; };
             private _sMags = [_sWeapon] call BIS_fnc_compatibleMagazines;
             if (count _sMags > 0) then { _unit addMagazines [_sMags select 0, 2]; };
         };
-        for "_i" from 1 to 3 do { _unit addMagazine "SmokeShellWhite"; };
+        for "_i" from 1 to 2 do { _unit addMagazine "SmokeShellWhite"; };
         // Pas de M67 pour les I.A
         for "_i" from 1 to 3 do { _unit addItem "FirstAidKit"; };
         { _unit linkItem _x; } forEach _assigned;
@@ -221,6 +225,8 @@ if (isNull _groupLeader) exitWith {
     diag_log "[LL][initPlayerLoadout] 2ème passe T+90s : terminé.";
 };
 
+// Compteur de lance-roquettes attribués — tableau utilisé comme référence mutable dans forEach
+private _launcherCount = [0];
 private _endTime = time + 300;
 while { time < _endTime } do {
     
@@ -259,9 +265,22 @@ while { time < _endTime } do {
         private _c = _shuffledCagoules select 0; _shuffledCagoules deleteAt 0;
         if (count _shuffledCagoules == 0) then { _shuffledCagoules = _cagoules call _fn_shuffle; };
         
+        // Attribution aléatoire du lance-roquettes M72A6 (2 unités max par session)
+        // Algorithme de Bernoulli séquentiel : P(attribuer) = besoin_restant / unités_restantes
+        // Garantit exactement 2 lanceurs quel que soit le nombre de joueurs.
+        private _giveLauncher = false;
+        if ((_launcherCount # 0) < 2) then {
+            private _remaining = (count _toProcess) - _forEachIndex;
+            private _needed    = 2 - (_launcherCount # 0);
+            if (random 1 < (_needed / (_remaining max 1))) then {
+                _giveLauncher = true;
+                _launcherCount set [0, (_launcherCount # 0) + 1];
+            };
+        };
+
         // call (pas spawn) : _fnc_applyVisuals n'a pas de sleep, inutile de spawner.
         // Traitement séquentiel = pas de race condition sur les tableaux shufflés.
-        [_unit, _varName, _u, _v, _b, _h, _c] call _fnc_applyVisuals;
+        [_unit, _varName, _u, _v, _b, _h, _c, _giveLauncher] call _fnc_applyVisuals;
 
     } forEach _toProcess;
 

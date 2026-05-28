@@ -59,14 +59,16 @@ if (_hMag != "" && _hWeapon != "") then {
     _unit addWeaponItem [_hWeapon, _hMag, true];
 };
 
-// 5. LANCE-ROQUETTES : 2 roquettes
+// 5. LANCE-ROQUETTES : arme + 2 roquettes
+// addWeapon nécessaire si l'unité n'avait pas de secondaire en éditeur (ex: M72A6 assigné dynamiquement)
 if (_sWeapon != "") then {
+    if (secondaryWeapon _unit != _sWeapon) then { _unit addWeapon _sWeapon; };
     private _sMags = [_sWeapon] call BIS_fnc_compatibleMagazines;
     if (count _sMags > 0) then { _unit addMagazines [_sMags select 0, 2]; };
 };
 
 // 6. FUMIGÈNES BLANCS (toutes les unités passant par ici sont des joueurs)
-for "_i" from 1 to 3 do { _unit addMagazine "SmokeShellWhite"; };
+for "_i" from 1 to 2 do { _unit addMagazine "SmokeShellWhite"; };
 
 // 6b. TROUSSES DE PREMIERS SECOURS
 for "_i" from 1 to 3 do { _unit addItem "FirstAidKit"; };
