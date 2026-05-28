@@ -510,6 +510,10 @@ Le Roi de Sahrani a lancé cette opération de pacification autonome pour prouve
         <English>[LL ERROR] Locality transfer timed out. Could not switch unit.</English>
         <French>[LL ERREUR] Delai d'attente depasse pour le transfert de localite. Impossible de basculer sur l'unite.</French>
       </Key>
+      <Key ID="STR_LL_Msg_GameOver">
+        <English>MISSION FAILED — All units have been eliminated.</English>
+        <French>MISSION ÉCHOUÉE — Toutes les unités ont été éliminées.</French>
+      </Key>
       <Key ID="STR_LL_Heli_Action_Supply">
         <English>[Helicopter] Request Ammo Supply</English>
         <French>[Hélicoptère] Demander Livraison Munitions</French>

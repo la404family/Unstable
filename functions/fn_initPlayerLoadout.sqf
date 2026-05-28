@@ -278,6 +278,9 @@ while { time < _endTime } do {
             };
         };
 
+        // Diffuser la désignation launcher à tous les clients (lu par initPlayerLocal.sqf)
+        _unit setVariable ["LL_GiveLauncher", _giveLauncher, true];
+
         // call (pas spawn) : _fnc_applyVisuals n'a pas de sleep, inutile de spawner.
         // Traitement séquentiel = pas de race condition sur les tableaux shufflés.
         [_unit, _varName, _u, _v, _b, _h, _c, _giveLauncher] call _fnc_applyVisuals;

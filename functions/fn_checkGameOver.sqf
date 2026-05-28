@@ -33,6 +33,10 @@ if (!isServer) exitWith {};
             diag_log "[LL] checkGameOver: Tous les joueurs sont morts. Fin de mission déclenchée.";
         };
 
+        // Signaler à tous les clients que la mission se termine (utilisé par le timeout de sécurité de fn_switchToAI)
+        MISSION_ended = true;
+        publicVariable "MISSION_ended";
+
         // Fin de mission (défaite)
         ["MissionFailed", false, 5] remoteExec ["BIS_fnc_endMission", 0];
     };

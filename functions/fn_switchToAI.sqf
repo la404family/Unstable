@@ -88,29 +88,67 @@ if (count _livingAI > 0) then {
     // Empêcher le respawn natif Arma 3 (le mettre à un temps infini)
     setPlayerRespawnTime 999999;
 
-    // Déclencher une vérification de fin de partie immédiate ou différée côté serveur
+    // Déclencher une vérification de fin de partie côté serveur
     [] remoteExec ["LL_fnc_checkGameOver", 2];
 
-    // Activer le mode spectateur (Standard Arma 3) sans détruire le HUD ni bloquer l'accès au menu système d'Arma
-    // Le 3e paramètre [] (allowedModes) et les flags par défaut de BIS_fnc_EGSpectator masquent parfois définitivement la GUI et l'UI d'Arma
-    ["Initialize", [player, [], true, true, true, true, true, true, true, true]] call BIS_fnc_EGSpectator;
+    // ── MODE SOLO : fin de mission directe ──────────────────────────────────
+    // BIS_fnc_EGSpectator avec une liste de caméras vide [] cause un gel complet
+    // de l'interface en partie solo (HUD perdu, clavier bloqué, aucune issue).
+    // En solo il n'y a qu'un seul joueur : aucune raison d'afficher un spectateur,
+    // on déclenche directement la fin de mission (DÉFAITE).
+    if (!isMultiplayer) exitWith {
+        _deadUnit setVariable ["LL_Spectating", false, true];
+        titleText [localize "STR_LL_Msg_GameOver", "BLACK FADED", 2];
+        sleep 3;
+        ["MissionFailed", false, 0] call BIS_fnc_endMission;
+
+        if (DEBUG_MODE) then {
+            diag_log "[LL] switchToAI: Mode solo — fin de mission directe (aucune IA disponible).";
+        };
+    };
+
+    // ── MODE MULTIJOUEUR : spectateur avec caméras valides ──────────────────
+    // Caméras : [0=libre, 1=première personne, 2=troisième personne]
+    // Les deux derniers flags (endMissionButton, spectatorList) passent à false/true
+    // pour ne pas bloquer l'affichage de la fin de mission déclenchée par le serveur.
+    ["Initialize", [player, [0,1,2], true, true, false, false, false, false, false, true]] call BIS_fnc_EGSpectator;
 
     if (DEBUG_MODE) then {
         diag_log "[LL] switchToAI: Aucune IA disponible. Spectateur activé. Surveillance du groupe démarrée.";
     };
 
-    // Surveiller l'arrivée de nouvelles IA dans le groupe (ex : renforts hélicoptère DEBARQUEMENT).
-    // Permet au joueur en spectateur de reprendre le contrôle automatiquement sans intervention manuelle.
+    // ── Timeout de sécurité ─────────────────────────────────────────────────
+    // Si checkGameOver ou BIS_fnc_endMission ne déclenchent pas la fin dans les 15 s,
+    // on force la sortie de mission pour éviter un blocage permanent.
+    [] spawn {
+        sleep 15;
+        if (!(missionNamespace getVariable ["MISSION_ended", false])) then {
+            if (DEBUG_MODE) then {
+                diag_log "[LL] switchToAI: Timeout de sécurité atteint — fin de mission forcée.";
+            };
+            ["MissionFailed", false, 0] call BIS_fnc_endMission;
+        };
+    };
+
+    // ── Surveiller l'arrivée de nouvelles IA ────────────────────────────────
+    // Permet au joueur en spectateur de reprendre le contrôle automatiquement
+    // si de nouveaux renforts arrivent (ex : hélicoptère DEBARQUEMENT).
+    // Timeout de 300 s pour éviter une loop orpheline si la mission se termine.
     private _watchGroup = _group;
     private _watchDead  = _deadUnit;
     [_watchGroup, _watchDead] spawn {
         params ["_grp", "_dead"];
 
+        private _watchEnd = time + 300;
         waitUntil {
             sleep 5;
             private _availableAI = (units _grp) select { alive _x && !isPlayer _x };
-            count _availableAI > 0
+            (count _availableAI > 0) || (time > _watchEnd)
+                || (missionNamespace getVariable ["MISSION_ended", false])
         };
+
+        // Sortie par timeout ou fin de mission → ne rien faire
+        if (time > _watchEnd || missionNamespace getVariable ["MISSION_ended", false]) exitWith {};
 
         if (DEBUG_MODE) then {
             diag_log "[LL] switchToAI: Nouvelle IA détectée — sortie du spectateur et reprise.";

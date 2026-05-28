@@ -29,6 +29,59 @@ Porto, 2025. Une île secondaire, un port de pêche reconverti en hub de contreb
 
 [hr][/hr]
 
+[h2]🗺️ ARBRE DE MISSION[/h2]
+
+[code]
+  ┌─────────────────────────────────────┐
+  │  DÉPART DE MISSION                  │
+  └──────────────┬──────────────────────┘
+                 │
+                 ▼
+  ┌─────────────────────────────────────┐
+  │  TASK 00 — Embarquement             │
+  │  Rejoindre le point de rendez-vous  │
+  └──────────────┬──────────────────────┘
+                 │
+                 ▼
+  ┌─────────────────────────────────────┐
+  │  TASK 01 — Rendez-vous              │
+  │  Scénario tiré aléatoirement        │
+  └──────┬───────────┬──────────────────┘
+         │           │           │
+    S1   │      S2   │      S3   │
+ Coopé- │   Trahison│   Mutinerie│
+ ration  │           │            │
+         ▼           ▼      ┌────┴────────┐
+  ┌───────────┐  ┌────────┐ │             │
+  │ TASK 02A  │  │TASK 02B│ │ Chef vivant │ Chef mort
+  │ Neutrali- │  │Le Fil  │ ▼             ▼
+  │ ser chefs │  │Rouge   │ ┌──────────┐  ┌────────┐
+  │ Récupérer │  │Libérer │ │ TASK 02C │  │TASK 02B│
+  │ documents │  │informa-│ │L'Inter-  │  │Le Fil  │
+  └─────┬─────┘  │teur    │ │médiaire  │  │Rouge   │
+        │        └───┬────┘ │Capturer  │  └───┬────┘
+        │            │      │financier │      │
+        │            │      └────┬─────┘      │
+        ▼            ▼           ▼             ▼
+  ┌───────────┐  ┌────────────────────┐  ┌────────────────────┐
+  │ TASK 03A  │  │      TASK 03A      │  │      TASK 03B      │
+  │ Véhicules │  │    Véhicules       │  │ Opération Bouclier │
+  │ armés     │  │    armés           │  │ Désamorcer bombes  │
+  └─────┬─────┘  └────────┬───────────┘  └──────────┬─────────┘
+        │                 │                          │
+        └────────┬────────┘                          │
+                 │                                   │
+                 └──────────────┬────────────────────┘
+                                ▼
+                  ┌─────────────────────────────┐
+                  │  EXTRACTION HÉLICOPTÈRE     │
+                  │  Initiée par les joueurs    │
+                  │  Fin de mission             │
+                  └─────────────────────────────┘
+[/code]
+
+[hr][/hr]
+
 [h2]⚙️ COMMANDEMENT TACTIQUE EN TEMPS RÉEL[/h2]
 
 Le chef de groupe dispose d'un panel complet d'ordres via le [b]menu scroll[/b].

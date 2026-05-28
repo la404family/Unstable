@@ -1,6 +1,7 @@
 // ============================================================================
 // initPlayerLocal.sqf — Initialisation client (exécuté sur chaque client avec interface)
 // ============================================================================
+#include "macros.hpp"
 
 // --- Cinématique d'introduction (partie client) ---
 // Doit être le premier appel pour bloquer les contrôles joueur dès le départ.
@@ -70,6 +71,55 @@
 // L'action de demande de surveillance drone (MQ-9)
 [] spawn LL_fnc_addDroneAction;
 
+// ── Garantie items obligatoires (côté client — contourne les délais de propagation réseau)
+// Le serveur applique vest/backpack en effets globaux AVANT d'envoyer addMagazine (effet local).
+// En partie hébergée ou dédiée, la vest peut ne pas être encore enregistrée côté client
+// au moment où fn_applyLocalLoadout tente d'y insérer les magazines.
+// Ce bloc attend que LL_LoadoutSet soit confirmé, puis injecte directement les items
+// sur le client propriétaire de l'unité — garanti local, aucune dépendance réseau.
+[] spawn {
+    waitUntil { sleep 1; player getVariable ["LL_LoadoutSet", false] };
+    sleep 0.5; // laisser fn_applyLocalLoadout terminer son écriture
+
+    // Fumigènes blancs — 2 par joueur
+    private _smokes = magazines player select { _x == "SmokeShellWhite" };
+    private _missing = 2 - count _smokes;
+    if (_missing > 0) then {
+        for "_i" from 1 to _missing do { player addMagazine "SmokeShellWhite"; };
+    };
+
+    // Grenades M67 — 2 par joueur
+    private _m67 = magazines player select { _x == "HandGrenade" };
+    private _missingM67 = 2 - count _m67;
+    if (_missingM67 > 0) then {
+        for "_i" from 1 to _missingM67 do { player addMagazine "HandGrenade"; };
+    };
+
+    // Lance-roquettes M72A6 — uniquement si désigné par le serveur
+    if (player getVariable ["LL_GiveLauncher", false]) then {
+        if (secondaryWeapon player != "CUP_launch_M72A6_Special") then {
+            player addWeapon "CUP_launch_M72A6_Special";
+        };
+        // Ajouter les roquettes compatibles si manquantes
+        private _sMags = ["CUP_launch_M72A6_Special"] call BIS_fnc_compatibleMagazines;
+        if (count _sMags > 0) then {
+            private _sMag = _sMags select 0;
+            private _existing = magazines player select { _x == _sMag };
+            private _missingMags = 2 - count _existing;
+            if (_missingMags > 0) then {
+                for "_i" from 1 to _missingMags do { player addMagazine _sMag; };
+            };
+        };
+    };
+
+    if (DEBUG_MODE) then {
+        diag_log format ["[LL][initPlayerLocal] Items garantis appliqués — fumigènes: %1, M67: %2, launcher: %3",
+            count (magazines player select { _x == "SmokeShellWhite" }),
+            count (magazines player select { _x == "HandGrenade" }),
+            player getVariable ["LL_GiveLauncher", false]
+        ];
+    };
+};
 // --- Système de basculement vers une IA du groupe en cas de mort ---
 player addEventHandler ["Killed", {
     params ["_unit", "_killer", "_instigator", "_useEffects"];
