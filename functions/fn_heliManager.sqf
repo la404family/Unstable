@@ -763,54 +763,62 @@ private _fnExecExtract = {
     _heli animateDoor   ["door_rear_source", 1];
     (localize "STR_LL_Heli_Msg_Landed_Extract") remoteExec ["systemChat", 0];
 
-    // Attente embarquement joueurs (10 minutes max)
+    // ── Extraction task02b : heli réservé à l'informateur ──────────────────
+    // CRITIQUE : _isTask02bExtract est capturé UNE SEULE FOIS avant la boucle.
+    // fn_task02b.sqf pose LL_Task02b_Freed_Done = true dès que l'informateur
+    // monte à bord. Si on relit cette variable dans la boucle, la branche
+    // task02b se désactive au moment précis où il faut déclencher le départ
+    // → l'hélicoptère bascule en extraction standard et n'attend que des joueurs.
+    private _task02bHostage   = missionNamespace getVariable ["LL_Task02b_Hostage", objNull];
+    private _isTask02bExtract = !isNull _task02bHostage && { alive _task02bHostage };
+
+    // EH GetIn : éjecter immédiatement tout joueur qui tenterait de monter à bord
+    private _ejectEH = -1;
+    if (_isTask02bExtract) then {
+        _ejectEH = _heli addEventHandler ["GetIn", {
+            params ["_vehicle", "_role", "_unit"];
+            if (isPlayer _unit && { alive _unit }) then {
+                moveOut _unit;
+                (localize "STR_LL_Heli_Msg_Extract_Players_Exit_Warning") remoteExec ["systemChat", _unit];
+            };
+        }];
+    };
+
+    // Attente embarquement (10 minutes max — sécurité)
     private _timeout     = time + 600;
     private _shouldLeave = false;
     waitUntil {
         sleep 3;
-        private _allHumans      = allPlayers select { alive _x };
-        private _playersInHeli  = { isPlayer _x && { alive _x } } count (crew _heli);
-        
-        // Custom check for Task02b Hostage if active and not already succeeded
-        private _hostage = missionNamespace getVariable ["LL_Task02b_Hostage", objNull];
-        private _isTask02bActive = !isNull _hostage && { alive _hostage } && { !(missionNamespace getVariable ["LL_Task02b_Freed_Done", false]) };
+        private _allHumans     = allPlayers select { alive _x };
+        private _playersInHeli = { isPlayer _x && { alive _x } } count (crew _heli);
 
-        if (_isTask02bActive) then {
-            // Sécurité : éjecter tout joueur qui monterait à bord (interdit dans cette tâche)
+        if (_isTask02bExtract) then {
+            // Branche figée à true — insensible au changement de LL_Task02b_Freed_Done
+            private _hostage = missionNamespace getVariable ["LL_Task02b_Hostage", objNull];
+
+            // Sécurité secondaire : éjecter par commande directe tout joueur encore à bord
             {
                 if (isPlayer _x && { alive _x }) then {
-                    [_x] remoteExec ["moveOut", _x];
+                    moveOut _x;
                     (localize "STR_LL_Heli_Msg_Extract_Players_Exit_Warning") remoteExec ["systemChat", _x];
                 };
             } forEach (crew _heli);
 
-            // Recalculer le nombre de joueurs à bord après éjection
-            _playersInHeli = { isPlayer _x && { alive _x } } count (crew _heli);
+            // Dès que l'informateur est à bord → départ immédiat
+            if (!isNull _hostage && { vehicle _hostage == _heli }) then { _shouldLeave = true; };
 
-            private _hostageInHeli = (vehicle _hostage == _heli);
-            if (_hostageInHeli) then {
-                // If hostage is inside, we can leave once all players are OUT of the helicopter (as players should not extract in task02b)
-                if (_playersInHeli == 0) then {
-                    _shouldLeave = true;
-                };
-            } else {
-                // Hostage is not yet inside, so we don't leave even if the timeout occurs
-                if (time > _timeout) then { _shouldLeave = true; };
-            };
-            
-            // Log/hint progress of hostage Boarding
-            if (!_hostageInHeli) then {
+            // Sécurité timeout (informateur bloqué / pathfinding)
+            if (time > _timeout) then { _shouldLeave = true; };
+
+            // Hint de progression de l'embarquement de l'informateur
+            if (!isNull _hostage && { vehicle _hostage != _heli }) then {
                 (format [localize "STR_LL_Heli_Msg_Extract_Waiting_Hostage", round (_hostage distance2D _heli)])
                     remoteExec ["hintSilent", 0];
             } else {
-                if (_playersInHeli > 0) then {
-                    (localize "STR_LL_Heli_Msg_Extract_Players_Exit_Warning") remoteExec ["hint", 0];
-                } else {
-                    "" remoteExec ["hintSilent", 0];
-                };
+                "" remoteExec ["hintSilent", 0];
             };
         } else {
-            // Standard players-only extraction
+            // Extraction standard : attendre que tous les joueurs soient à bord
             (format [localize "STR_LL_Heli_Msg_Extract_Counter", _playersInHeli, count _allHumans])
                 remoteExec ["hintSilent", 0];
             if (_playersInHeli >= count _allHumans && { _playersInHeli > 0 }) then {
@@ -820,6 +828,11 @@ private _fnExecExtract = {
         };
 
         !alive _heli || _shouldLeave
+    };
+
+    // Retirer l'EH anti-montée joueur avant le décollage
+    if (_ejectEH >= 0) then {
+        _heli removeEventHandler ["GetIn", _ejectEH];
     };
 
     if (!alive _heli) exitWith {
@@ -842,6 +855,7 @@ private _fnExecExtract = {
     private _boardedPlayers = crew _heli select { isPlayer _x && { alive _x } };
 
     if (count _boardedPlayers > 0) then {
+        // Extraction standard avec joueurs → fin de mission
         "" remoteExec ["hintSilent", 0];
         _heli flyInHeight _flyHeight;
         private _wpVic = _group addWaypoint [_homeBase, 0];
@@ -858,6 +872,10 @@ private _fnExecExtract = {
         };
         true
     } else {
+        // Task02b : informateur à bord, aucun joueur — initier le décollage immédiatement.
+        // _fnRTB (appelé par la boucle principale) gère la phase de vol et la suppression.
+        _heli flyInHeight _flyHeight;
+        _heli doMove _homeBase;
         false
     };
 };

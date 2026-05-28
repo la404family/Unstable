@@ -32,96 +32,85 @@ if (!isServer) exitWith {};
     };
 
     // ══════════════════════════════════════════════════════════════════════
-    // RECHERCHE DES POSITIONS DE SPAWN (positions terrestres aléatoires)
-    // Critères : sur terre (pas dans l'eau), > 500m des joueurs,
-    //            > 300m entre chaque point, terrain accessible en véhicule.
+    // RECHERCHE DES POSITIONS DE SPAWN — HÉLIPORTS INVISIBLES (priorité absolue)
+    // Les Heliport_XXX sont pré-placés dans des zones accessibles en véhicule.
+    // Passe 1 : >500m joueurs, >300m entre spawns  (espacement maximal)
+    // Passe 2 : >300m joueurs, >150m entre spawns  (contraintes assouplies)
+    // Passe 3 : dernier recours — tout héliport non encore utilisé
     // ══════════════════════════════════════════════════════════════════════
-    private _playerPositions = (allPlayers select { alive _x }) apply { getPos _x };
-    private _mapSize         = worldSize;
+    private _playerPositions   = (allPlayers select { alive _x }) apply { getPos _x };
     private _selectedPositions = [];
-    private _minDistPlayers  = 500;  // Distance minimale des joueurs
-    private _minDistSpawns   = 300;  // Espacement minimal entre les spawns
+    private _usedHeliports     = [];
 
-    // Passe 1 : tirage aléatoire avec contraintes complètes
-    private _attempts = 0;
-    while { count _selectedPositions < 3 && _attempts < 800 } do {
-        _attempts = _attempts + 1;
+    // Collecter tous les Heliport_XXX définis dans l'éditeur Eden
+    private _allHeliports = [];
+    {
+        if (_x select [0, 9] == "Heliport_") then {
+            private _hp = missionNamespace getVariable [_x, objNull];
+            if (!isNull _hp) then { _allHeliports pushBack _hp; };
+        };
+    } forEach (allVariables missionNamespace);
+    _allHeliports = _allHeliports call BIS_fnc_arrayShuffle;
 
-        // Position aléatoire dans les limites de la carte (marges de 80m)
-        private _candidate = [
-            80 + random (_mapSize - 160),
-            80 + random (_mapSize - 160),
-            0
-        ];
+    if (DEBUG_MODE) then {
+        diag_log format ["[LL][task03a] %1 héliport(s) disponible(s) pour le spawn des véhicules.", count _allHeliports];
+    };
 
-        // Rejet immédiat si dans l'eau ou altitude négative (sous terrain)
-        if (surfaceIsWater _candidate) then {
-            // continue — passer à l'itération suivante
-        } else {
+    // ── Passe 1 : >500m joueurs, >300m entre spawns ──────────────────────
+    {
+        private _hp        = _x;
+        private _candidate = getPos _hp;
+        if (count _selectedPositions < 3 && { !(_hp in _usedHeliports) }) then {
             private _valid = true;
-
-            // Distance minimale de tous les joueurs vivants
-            {
-                if (_x distance2D _candidate < _minDistPlayers) exitWith { _valid = false; };
-            } forEach _playerPositions;
-
-            // Espacement minimal entre les positions déjà sélectionnées
+            { if (_x distance2D _candidate < 500) exitWith { _valid = false; }; } forEach _playerPositions;
             if (_valid) then {
-                {
-                    if (_x distance2D _candidate < _minDistSpawns) exitWith { _valid = false; };
-                } forEach _selectedPositions;
+                { if (_x distance2D _candidate < 300) exitWith { _valid = false; }; } forEach _selectedPositions;
             };
-
             if (_valid) then {
                 _selectedPositions pushBack _candidate;
+                _usedHeliports     pushBack _hp;
             };
         };
-    };
+    } forEach _allHeliports;
 
-    // Passe 2 (fallback) : si pas assez de positions, réduire la contrainte joueur à 300m
+    // ── Passe 2 : >300m joueurs, >150m entre spawns (contraintes assouplies) ──
     if (count _selectedPositions < 3) then {
         if (DEBUG_MODE) then {
-            diag_log format ["[LL][task03a] Fallback 300m : seulement %1 position(s) trouvées à 500m.", count _selectedPositions];
+            diag_log format ["[LL][task03a] Passe 2 : %1 position(s) après passe 1.", count _selectedPositions];
         };
-        _attempts = 0;
-        while { count _selectedPositions < 3 && _attempts < 500 } do {
-            _attempts = _attempts + 1;
-            private _candidate = [
-                80 + random (_mapSize - 160),
-                80 + random (_mapSize - 160),
-                0
-            ];
-            if !(surfaceIsWater _candidate) then {
+        {
+            private _hp        = _x;
+            private _candidate = getPos _hp;
+            if (count _selectedPositions < 3 && { !(_hp in _usedHeliports) }) then {
                 private _valid = true;
-                {
-                    if (_x distance2D _candidate < 300) exitWith { _valid = false; };
-                } forEach _playerPositions;
+                { if (_x distance2D _candidate < 300) exitWith { _valid = false; }; } forEach _playerPositions;
                 if (_valid) then {
-                    {
-                        if (_x distance2D _candidate < 200) exitWith { _valid = false; };
-                    } forEach _selectedPositions;
+                    { if (_x distance2D _candidate < 150) exitWith { _valid = false; }; } forEach _selectedPositions;
                 };
-                if (_valid) then { _selectedPositions pushBack _candidate; };
+                if (_valid) then {
+                    _selectedPositions pushBack _candidate;
+                    _usedHeliports     pushBack _hp;
+                };
             };
-        };
+        } forEach _allHeliports;
     };
 
-    // Passe 3 (dernier recours) : n'importe quelle position terrestre libre
+    // ── Passe 3 : dernier recours — tout héliport non encore utilisé ─────
     if (count _selectedPositions < 3) then {
-        _attempts = 0;
-        while { count _selectedPositions < 3 && _attempts < 500 } do {
-            _attempts = _attempts + 1;
-            private _candidate = [80 + random (_mapSize - 160), 80 + random (_mapSize - 160), 0];
-            if !(surfaceIsWater _candidate) then {
-                private _tooClose = false;
-                { if (_x distance2D _candidate < 100) exitWith { _tooClose = true; }; } forEach _selectedPositions;
-                if (!_tooClose) then { _selectedPositions pushBack _candidate; };
-            };
+        if (DEBUG_MODE) then {
+            diag_log format ["[LL][task03a] Passe 3 (dernier recours) : %1 position(s) après passe 2.", count _selectedPositions];
         };
+        {
+            private _hp = _x;
+            if (count _selectedPositions < 3 && { !(_hp in _usedHeliports) }) then {
+                _selectedPositions pushBack (getPos _hp);
+                _usedHeliports     pushBack _hp;
+            };
+        } forEach _allHeliports;
     };
 
     if (DEBUG_MODE) then {
-        diag_log format ["[LL][task03a] Positions de spawn sélectionnées (%1 tentatives) : %2", _attempts, _selectedPositions];
+        diag_log format ["[LL][task03a] %1 position(s) retenue(s) sur héliports : %2", count _usedHeliports, _selectedPositions];
     };
 
     // ══════════════════════════════════════════════════════════════════════

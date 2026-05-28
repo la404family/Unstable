@@ -307,8 +307,8 @@ Le Roi de Sahrani a lancé cette opération de pacification autonome pour prouve
         <French>Attente embarquement de l'informateur (%1m)...</French>
       </Key>
       <Key ID="STR_LL_Heli_Msg_Extract_Players_Exit_Warning">
-        <English>WARNING: Helicopter will not depart while players are on board! Get out!</English>
-        <French>ATTENTION : L'hélicoptère ne partira pas tant qu'un joueur est à bord ! Sortez !</French>
+        <English>EXTRACTION RESERVED FOR THE INFORMANT — You have been ejected from the helicopter.</English>
+        <French>EXTRACTION RÉSERVÉE À L'INFORMATEUR — Vous avez été éjecté de l'hélicoptère.</French>
       </Key>
       <Key ID="STR_LL_Speaker_Intermediaire">
         <English>Financial Intermediary</English>

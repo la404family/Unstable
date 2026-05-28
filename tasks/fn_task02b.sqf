@@ -190,23 +190,11 @@ if (!isServer) exitWith {};
         };
     }];
 
-    // Rotation vers le joueur le plus proche toutes les 2s (TASK_RULES §4)
+    // Ancrage de position — empêche la dérive de l'animation, sans rotation vers les joueurs
     [_hostage] spawn {
         params ["_h"];
         while { alive _h && (_h getVariable ["LL_Task02b_Status", "WAIT"]) == "WAIT" } do {
-            private _nearest    = objNull;
-            private _minDist    = 99999;
-            {
-                if (alive _x) then {
-                    private _d = _h distance _x;
-                    if (_d < _minDist) then { _minDist = _d; _nearest = _x; };
-                };
-            } forEach allPlayers;
-            if (!isNull _nearest) then {
-                _h setDir     (_h getDir _nearest);
-                _h setFormDir (_h getDir _nearest); // Empêche l'IA de formation de re-pivoter
-                _h setPosATL  (getPosATL _h);       // Ancre la position — empêche la dérive de l'animation
-            };
+            _h setPosATL (getPosATL _h); // Ancre la position uniquement
             sleep 2;
         };
     };
