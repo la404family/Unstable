@@ -26,10 +26,11 @@ flowchart TD
     T02C["task02c — L'Intermédiaire — Capturer le financier\nfn_task02c.sqf"]
 
     T02A --> T03A["task03a — Neutraliser les véhicules armés\nfn_task03a.sqf"]
-    T02B --> EXFIL
+    T02B --> T03B["task03b — Opération Bouclier — Désamorcer les bombes MJ\nfn_task03b.sqf"]
     T02C --> T03A
 
     T03A --> EXFIL
+    T03B --> EXFIL
 
     EXFIL(["Fin de mission\nExtraction hélicoptère\ninitiée par le joueur\nBIS_fnc_endMission"])
 ```
@@ -43,9 +44,10 @@ flowchart TD
 | `task00` | `fn_task00.sqf` | `fn_taskManager.sqf` au lancement | `SUCCEEDED` uniquement | `task01` |
 | `task01` | `fn_task01.sqf` | Après `task00 SUCCEEDED` | `SUCCEEDED` (S1, S2, S3-chef-vivant) / `FAILED` (S3-chef-mort) | S1→`task02a` / S2→`task02b` / S3-vivant→`task02c` / S3-mort→`task02b` |
 | `task02a` | `fn_task02a.sqf` | `LL_g_task01_scenario == 1` (Coopération) | `SUCCEEDED` (documents récupérés) | `task03a` |
-| `task02b` | `fn_task02b.sqf` | Trahison **ou** Mutinerie chef mort | `SUCCEEDED` (informateur libéré) / `FAILED` (tué) | Extraction |
+| `task02b` | `fn_task02b.sqf` | Trahison **ou** Mutinerie chef mort | `SUCCEEDED` (informateur libéré) / `FAILED` (tué) | `task03b` |
 | `task02c` | `fn_task02c.sqf` | `LL_g_task01_scenario == 3` + chef vivant (Mutinerie réussie) | `SUCCEEDED` (intermédiaire capturé) / `FAILED` (tué) | `task03a` |
 | `task03a` | `fn_task03a.sqf` | Après `task02a` ou `task02c` | `SUCCEEDED` (patrouilles réduites) | Extraction |
+| `task03b` | `fn_task03b.sqf` | Après `task02b` (trahison / mutinerie chef mort) | `SUCCEEDED` (2 bombes désamorcées) / `FAILED` (explosions) | Extraction |
 
 ---
 

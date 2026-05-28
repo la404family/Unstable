@@ -74,7 +74,14 @@ if (DEBUG_MODE) then {
          };
          [] call LL_fnc_task03a;
      }; // Coopération         → Intel reçu
-    case 2: { [] call LL_fnc_task02b; }; // Trahison            → Renseignements perdus
+    case 2: {
+        [] call LL_fnc_task02b;                                    // Trahison → Renseignements perdus
+        waitUntil {
+            sleep 5;
+            (["task_02b_informateur"] call BIS_fnc_taskState) in ["SUCCEEDED", "FAILED", "CANCELED"]
+        };
+        [] call LL_fnc_task03b;                                    // Attentat MJ (suite directe)
+    };
      case 3: {
          if (_task1State == "SUCCEEDED") then {
              [] call LL_fnc_task02c;      // Mutinerie (chef vivant) → Exfiltration chef
@@ -86,5 +93,10 @@ if (DEBUG_MODE) then {
          } else {
             [] call LL_fnc_task02b;      // Mutinerie (chef mort)   → Renseignements perdus (= Trahison)
          };
+         waitUntil {
+             sleep 5;
+             (["task_02b_informateur"] call BIS_fnc_taskState) in ["SUCCEEDED", "FAILED", "CANCELED"]
+         };
+         [] call LL_fnc_task03b;                                // Attentat MJ (suite directe)
      };
  };

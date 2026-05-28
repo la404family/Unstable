@@ -200,6 +200,50 @@ Le Roi de Sahrani a lancé cette opération de pacification autonome pour prouve
         <English>Hold Position</English>
         <French>Tenir la position</French>
       </Key>
+      <Key ID="STR_LL_Task_03b_Title">
+        <English>Operation Shield — Defuse the Bombs</English>
+        <French>Opération Bouclier — Désamorcer les bombes</French>
+      </Key>
+      <Key ID="STR_LL_Task_03b_Desc">
+        <English>FLASH INTELLIGENCE — The MJ (Justice Movement) has planted 2 improvised explosive devices in Porto. Each site is guarded by a heavily armed MJ cell. Civilians in the area may be MJ sympathizers armed and ready to turn against you. Locate both devices and defuse them before the countdown expires. You have 15 minutes.</English>
+        <French>RENSEIGNEMENT FLASH — Le Mouvement pour la Justice (MJ) a dissimulé 2 dispositifs explosifs improvisés dans Porto. Chaque site est protégé par une cellule MJ lourdement armée. Des civils dans la zone peuvent être des sympathisants prêts à se retourner contre vous. Localisez les deux engins et désamorcez-les avant l'expiration du compte à rebours. Il vous reste 15 minutes.</French>
+      </Key>
+      <Key ID="STR_LL_Task_03b_Marker">
+        <English>MJ Bomb Site</English>
+        <French>Site d'attentat MJ</French>
+      </Key>
+      <Key ID="STR_LL_Task_03b_Action_Defuse">
+        <English>Defuse Explosive [HOLD]</English>
+        <French>Désamorcer l'explosif [TENIR]</French>
+      </Key>
+      <Key ID="STR_LL_Task_03b_Bomb_Defused_1">
+        <English>SUPPORT — Device neutralized. 1 / 2 bombs defused. Continue!</English>
+        <French>SUPPORT — Engin neutralisé. 1 / 2 bombes désamorcées. Continuez !</French>
+      </Key>
+      <Key ID="STR_LL_Task_03b_Bomb_Defused_2">
+        <English>SUPPORT — Second device neutralized. 2 / 2 bombs defused!</English>
+        <French>SUPPORT — Second engin neutralisé. 2 / 2 bombes désamorcées !</French>
+      </Key>
+      <Key ID="STR_LL_Task_03b_Traitor_Warning">
+        <English>QG — CONTACT! Civilian traitors have revealed themselves — watch your flanks!</English>
+        <French>QG — CONTACT ! Des traîtres civils se sont révélés — surveillez vos flancs !</French>
+      </Key>
+      <Key ID="STR_LL_Task_03b_Timer_Label">
+        <English>BOMB: %1:%2</English>
+        <French>BOMBE : %1:%2</French>
+      </Key>
+      <Key ID="STR_LL_Task_03b_Surv_Title">
+        <English>Survive — Hold Your Ground</English>
+        <French>Survivre — Tenir la position</French>
+      </Key>
+      <Key ID="STR_LL_Task_03b_Surv_Desc">
+        <English>The bombs have detonated. The MJ cells are now converging on your position. Eliminate the remaining hostiles and hold your ground until you can request helicopter extraction.</English>
+        <French>Les bombes ont explosé. Les cellules MJ convergent sur votre position. Éliminez les combattants survivants et tenez la position jusqu'à l'extraction hélicoptère.</French>
+      </Key>
+      <Key ID="STR_LL_Task_03b_Surv_Marker">
+        <English>Hold Position</English>
+        <French>Tenir la position</French>
+      </Key>
     </Container>
     <Container name="Dialogues">
       <Key ID="STR_LL_Speaker_Nassim">
@@ -307,8 +351,8 @@ Le Roi de Sahrani a lancé cette opération de pacification autonome pour prouve
         <French>Attente embarquement de l'informateur (%1m)...</French>
       </Key>
       <Key ID="STR_LL_Heli_Msg_Extract_Players_Exit_Warning">
-        <English>EXTRACTION RESERVED FOR THE INFORMANT — You have been ejected from the helicopter.</English>
-        <French>EXTRACTION RÉSERVÉE À L'INFORMATEUR — Vous avez été éjecté de l'hélicoptère.</French>
+        <English>WARNING: Helicopter will not depart while players are on board! Get out!</English>
+        <French>ATTENTION : L'hélicoptère ne partira pas tant qu'un joueur est à bord ! Sortez !</French>
       </Key>
       <Key ID="STR_LL_Speaker_Intermediaire">
         <English>Financial Intermediary</English>
@@ -361,6 +405,18 @@ Le Roi de Sahrani a lancé cette opération de pacification autonome pour prouve
       <Key ID="STR_LL_Task_03a_Extraction_Called">
         <English>Extraction requested — consolidate positions!</English>
         <French>Extraction demandée — consolidez vos positions !</French>
+      </Key>
+      <Key ID="STR_LL_Task_03b_Narrative_Start">
+        <English>HQ to all units. Flash intelligence from our informant: the MJ has planted two improvised explosive devices in the city. Each site is secured by an armed cell — between 8 and 12 fighters. Be advised: some civilians in the area are MJ sympathizers. They will arm themselves and open fire if you approach. Find the devices, defuse them. You have between 25 and 45 minutes — exact countdown is on your HUD. Failure is not an option — Porto cannot absorb another atrocity. Out.</English>
+        <French>QG à toutes les unités. Renseignement flash de notre informateur : le MJ a planté deux engins explosifs dans la ville. Chaque site est sécurisé par une cellule armée — entre 8 et 12 combattants. Attention : certains civils dans la zone sont des sympathisants du MJ. Ils s'armeront et ouvriront le feu si vous approchez. Trouvez les engins, désamorcez-les. Vous avez entre 25 et 45 minutes — le chrono exact est sur votre HUD. L'échec n'est pas une option — Porto ne peut pas absorber une nouvelle atrocité. Terminé.</French>
+      </Key>
+      <Key ID="STR_LL_Task_03b_Narrative_All_Defused">
+        <English>HQ to all units. Both devices neutralized. Outstanding work. Porto has been spared. Regroup and stand by for extraction when ready. Out.</English>
+        <French>QG à toutes les unités. Les deux engins ont été neutralisés. Travail remarquable. Porto a été épargnée. Regroupez-vous et attendez l'extraction quand vous êtes prêts. Terminé.</French>
+      </Key>
+      <Key ID="STR_LL_Task_03b_Narrative_Explosion">
+        <English>HQ to all units. One or more devices have detonated. Multiple civilian casualties reported. Surviving MJ fighters are now converging on your position in retaliation. Eliminate all remaining hostiles. Hold your position and request extraction when the situation is under control. Out.</English>
+        <French>QG à toutes les unités. Un ou plusieurs engins ont explosé. De nombreuses victimes civiles signalées. Les combattants MJ survivants convergent sur votre position en représailles. Éliminez toutes les menaces restantes. Tenez la position et demandez l'extraction quand la situation est maîtrisée. Terminé.</French>
       </Key>
     </Container>
     <Container name="Debriefing">
