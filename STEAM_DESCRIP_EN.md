@@ -5,29 +5,17 @@
 ---
 
 [h1]OPERATION ROYAL ALLIANCE — Porto[/h1]
-[i]Dynamic cooperative mission · 1 to 7 players · CUP · NO DLC required[/i]
+[i]Dynamic cooperative mission · 1 to 4 players · CUP · NO DLC required[/i]
 
 [hr][/hr]
 
-Porto, 2025. A backwater island. A fishing port turned smuggling hub, clandestine transit point and jihadist recruitment ground. The [b]Justice Movement (MJ)[/b] and the [b]Liberation Front (FL)[/b] are fighting over it. The Kingdom of Sahrani, under international pressure, deploys its [b]RACS Multinational Expeditionary Corps[/b] — Turkish, Arab, African and Indonesian volunteers — to clean up Porto. Without NATO. Without the Americans. This is a decisive test of the Kingdom's credibility.
+Porto, 2025. A backwater island. A fishing port turned smuggling hub, clandestine transit point and jihadist recruitment ground. The [b]Justice Movement (MJ)[/b] and the [b]Liberation Front (FL)[/b] are fighting over it. The Kingdom of Sahrani, under international pressure, deploys its [b]RACS Multinational Expeditionary Corps[/b] — volunteers from all over the world — to clean up Porto. Without NATO. Without the Americans. This is a decisive test of the Kingdom's credibility.
 
 [b]You are that expeditionary force. The mission depends on your decisions.[/b]
 
 [hr][/hr]
 
-[h2]🔁 DYNAMIC MISSION — 3 RANDOM SCENARIOS[/h2]
-
-At the start of every game, the first reconnaissance meeting randomly draws a scenario. [b]The mission you play tonight will not be the one you play tomorrow.[/b]
-
-[list]
-[*][b]Scenario 1 — Cooperation:[/b] The local contact collaborates. Neutralise the militia leaders, recover the compromising documents, destroy the armed vehicles.
-[*][b]Scenario 2 — Betrayal:[/b] The contact has been burned. Free the imprisoned RACS informant, then defuse both MJ bombs before Porto goes up in flames — [b]timer running[/b].
-[*][b]Scenario 3 — Mutiny:[/b] Confrontation at the meeting point. If the squad leader survives: capture the financier. If he falls: free the informant under pressure.
-[/list]
-
-[b]5 main tasks · 3 branch points · 2 distinct narrative arcs.[/b] Every path leads to a player-initiated helicopter extraction — never automatic.
-
-[hr][/hr]
+[h2]🔁 DYNAMIC MISSION — RANDOM SCENARIOS[/h2]
 
 [h2]🗺️ MISSION TREE[/h2]
 

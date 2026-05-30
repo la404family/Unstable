@@ -39,6 +39,7 @@ class CfgFunctions {
             class initPlayerLoadout     {};
             class applyLocalLoadout     {};
             class applyIdentity         {};
+            class setupUVO              {};
             class assignLeader          {};
             class addHealAction         {};
             class addRoeActions         {};
@@ -99,7 +100,7 @@ class CfgMusic {
     tracks[] = {"Music_Intro"};
     class Music_Intro {
         name    = "Music_Intro";
-        sound[] = {"music\intro.ogg", db+10, 1.0};
+        sound[] = {"music\intro.ogg", db+5, 1.0};
     };
 };
 

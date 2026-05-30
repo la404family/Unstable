@@ -173,7 +173,9 @@ if (!isServer) exitWith {};
             sleep 0.7;
             private _gPos = _pos getPos [5 + random 20, random 360];
             private _g    = _guardsGrp1 createUnit ["O_G_Soldier_F", _gPos, [], 0, "NONE"];
-            _g setPos [_gPos select 0, _gPos select 1, getTerrainHeightASL _gPos];
+            private _asl = getPosASL _g;
+            _asl set [2, (_asl select 2) + 0.2];
+            _g setPosASL _asl;
             _g allowDamage false;
             [_g] spawn { sleep 3; (_this select 0) allowDamage true; };
             _g setVariable ["LL_forceTemplate", true, true];
@@ -186,7 +188,9 @@ if (!isServer) exitWith {};
             sleep 0.7;
             private _gPos = _pos getPos [5 + random 20, random 360];
             private _g    = _guardsGrp2 createUnit ["O_G_Soldier_F", _gPos, [], 0, "NONE"];
-            _g setPos [_gPos select 0, _gPos select 1, getTerrainHeightASL _gPos];
+            private _asl = getPosASL _g;
+            _asl set [2, (_asl select 2) + 0.2];
+            _g setPosASL _asl;
             _g allowDamage false;
             [_g] spawn { sleep 3; (_this select 0) allowDamage true; };
             _g setVariable ["LL_forceTemplate", true, true];
@@ -217,12 +221,24 @@ if (!isServer) exitWith {};
             };
         };
 
-        // ── 2. Bombe — valise piégée + charge + lumières rouges (PRINCIPAL en dernier) ──
-        // Land_Suitcase_F : objet statique non-container → aucun inventaire accessible
-        private _crate  = createVehicle ["Land_Suitcase_F", _pos, [], 0, "CAN_COLLIDE"];
+        // ── 2. Bombe — caisse piégée + charge + lumières rouges (PRINCIPAL en dernier) ──
+        // Remplacement de la valise par une caisse de munitions moyenne
+        private _crate  = createVehicle ["Box_FIA_Ammo_F", _pos, [], 0, "CAN_COLLIDE"];
+        clearWeaponCargoGlobal _crate;
+        clearMagazineCargoGlobal _crate;
+        clearItemCargoGlobal _crate;
+        clearBackpackCargoGlobal _crate;
+        
+        // Empêcher l'ouverture de l'inventaire
+        _crate addEventHandler ["InventoryOpened", { true }];
+        
+        private _crateASL = getPosASL _crate;
+        _crateASL set [2, (_crateASL select 2) + 0.2];
+        _crate setPosASL _crateASL;
         _crate setDir (random 360);
-        private _charge = createVehicle ["DemoCharge_F", _pos vectorAdd [0, 0, 0.3], [], 0, "CAN_COLLIDE"];
-        _charge attachTo [_crate, [0, 0, 0.15]];
+        
+        private _charge = createVehicle ["DemoCharge_F", _pos vectorAdd [0, 0, 0.5], [], 0, "CAN_COLLIDE"];
+        _charge attachTo [_crate, [0, 0, 0.3]]; // Fixé sur le haut de la caisse
         _charge setVectorUp [0, 0, 1];
 
         // Lumières rouges visibles jour et nuit

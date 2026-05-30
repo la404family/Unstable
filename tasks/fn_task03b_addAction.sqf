@@ -36,7 +36,7 @@ private _crates = missionNamespace getVariable ["LL_Task03b_BombCrates", []];
     private _crate    = _x;
     private _bombIdx  = _forEachIndex;
     private _condStr  = format [
-        "alive _caller && _caller distance _target < 3 && !(missionNamespace getVariable ['LL_Task03b_Bomb%1_Defused', false])",
+        "alive _this && _this distance _target < 4 && !(missionNamespace getVariable ['LL_Task03b_Bomb%1_Defused', false])",
         _bombIdx
     ];
 

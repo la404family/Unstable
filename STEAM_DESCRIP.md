@@ -5,29 +5,17 @@
 ---
 
 [h1]OPERATION ROYAL ALLIANCE — Porto[/h1]
-[i]Mission coopérative dynamique · 1 à 7 joueurs · CUP · AUCUN DLC requis[/i]
+[i]Mission coopérative dynamique · 1 à 4 joueurs · CUP · AUCUN DLC requis[/i]
 
 [hr][/hr]
 
-Porto, 2025. Une île secondaire, un port de pêche reconverti en hub de contrebande, de transit clandestin et de recrutement djihadiste. Le [b]Mouvement pour la Justice (MJ)[/b] et le [b]Front de Libération (FL)[/b] se disputent l'île. Le Royaume de Sahrani, sous pression internationale, engage son [b]Corps Expéditionnaire Multinational RACS[/b] — volontaires turcs, arabes, africains, indonésiens — pour nettoyer Porto. Sans l'OTAN. Sans les Américains. C'est un test décisif pour la crédibilité du Royaume.
+Porto, 2025. Une île secondaire, un port de pêche reconverti en hub de contrebande, de transit clandestin et de recrutement djihadiste. Le [b]Mouvement pour la Justice (MJ)[/b] et le [b]Front de Libération (FL)[/b] se disputent l'île. Le Royaume de Sahrani, sous pression internationale, engage son [b]Corps Expéditionnaire Multinational RACS[/b] — volontaires du monde entier — pour nettoyer Porto. Sans l'OTAN. Sans les Américains. C'est un test décisif pour la crédibilité du Royaume.
 
 [b]Vous êtes ce corps expéditionnaire. La mission dépend de vos décisions.[/b]
 
 [hr][/hr]
 
-[h2]🔁 MISSION DYNAMIQUE — 3 SCÉNARIOS ALÉATOIRES[/h2]
-
-À chaque partie, le premier rendez-vous de reconnaissance tire au sort un scénario. [b]La mission que vous jouez ce soir ne sera pas celle de demain.[/b]
-
-[list]
-[*][b]Scénario 1 — Coopération :[/b] Le contact local collabore. Neutralisez les chefs de milice, récupérez les documents compromettants, détruisez les véhicules armés.
-[*][b]Scénario 2 — Trahison :[/b] Le contact est grillé. Libérez l'informateur du RACS retenu prisonnier, puis désamorcez les deux bombes MJ avant que Porto ne s'embrase — [b]15 minutes sur le chrono[/b].
-[*][b]Scénario 3 — Mutinerie :[/b] Confrontation au rendez-vous. Si le chef survit : capturez le financier. S'il tombe : libérez l'informateur sous pression.
-[/list]
-
-[b]5 tâches principales · 3 bifurcations · 2 arcs narratifs distincts.[/b] Chaque arbre mène à une extraction hélicoptère initiée par les joueurs — jamais automatique.
-
-[hr][/hr]
+[h2]🔁 MISSION DYNAMIQUE [/h2]
 
 [h2]🗺️ ARBRE DE MISSION[/h2]
 

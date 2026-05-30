@@ -64,18 +64,14 @@ addMissionEventHandler ["PlayerConnected", {
 
 // ── Pools de noms classés par origine ────────────────────────────────────────
 
-private _names_turkish = [
-    ["Mustafa Demir",    "Mustafa",   "Demir"],
-    ["Ahmet Yılmaz",     "Ahmet",     "Yılmaz"],
-    ["Mehmet Kaya",      "Mehmet",    "Kaya"],
-    ["Emre Şahin",       "Emre",      "Şahin"],
-    ["Can Öztürk",       "Can",       "Öztürk"],
-    ["Hakan Yıldırım",   "Hakan",     "Yıldırım"],
-    ["Oğuzhan Çelik",    "Oğuzhan",   "Çelik"],
-    ["Kaan Arslan",      "Kaan",      "Arslan"],
-    ["Burak Koç",        "Burak",     "Koç"],
-    ["Volkan Aydın",     "Volkan",    "Aydın"],
-    ["Onur Özdemir",     "Onur",      "Özdemir"]
+private _names_african = [
+    ["Moussa Diallo",    "Moussa",    "Diallo"],
+    ["Mamadou Traoré",   "Mamadou",   "Traoré"],
+    ["Ibrahim Keita",    "Ibrahim",   "Keita"],
+    ["Sekou Diop",       "Sekou",     "Diop"],
+    ["Ousmane Sy",       "Ousmane",   "Sy"],
+    ["Bakary Sow",       "Bakary",    "Sow"],
+    ["Ismaël Koné",      "Ismaël",    "Koné"]
 ];
 
 private _names_arab = [
@@ -92,41 +88,53 @@ private _names_arab = [
     ["Rayane Meriah",    "Rayane",    "Meriah"]
 ];
 
-private _names_african = [
-    ["Moussa Diallo",    "Moussa",    "Diallo"],
-    ["Mamadou Traoré",   "Mamadou",   "Traoré"],
-    ["Ibrahim Keita",    "Ibrahim",   "Keita"],
-    ["Sekou Diop",       "Sekou",     "Diop"],
-    ["Ousmane Sy",       "Ousmane",   "Sy"],
-    ["Bakary Sow",       "Bakary",    "Sow"],
-    ["Ismaël Koné",      "Ismaël",    "Koné"],
-    ["Kofi Mensah",      "Kofi",      "Mensah"],
-    ["Amadi Achebe",     "Amadi",     "Achebe"],
-    ["Jengo Okeke",      "Jengo",     "Okeke"],
-    ["Kwame Nkrumah",    "Kwame",     "Nkrumah"]
+private _names_asian = [
+    ["Minh Tuan Nguyen", "Minh Tuan", "Nguyen"],
+    ["Kevin Chang",      "Kevin",     "Chang"],
+    ["Thomas Vo",        "Thomas",    "Vo"],
+    ["Nicolas Hoang",    "Nicolas",   "Hoang"],
+    ["Pierre Dang",      "Pierre",    "Dang"],
+    ["Jun Li",           "Jun",       "Li"],
+    ["Hao Wang",         "Hao",       "Wang"],
+    ["Kenji Sato",       "Kenji",     "Sato"],
+    ["Jun-ho Kang",      "Jun-ho",    "Kang"],
+    ["Si-woo Cho",       "Si-woo",    "Cho"],
+    ["Yer Xiong",        "Yer",       "Xiong"]
 ];
 
-private _names_indonesian = [
-    ["Budi Santoso",     "Budi",      "Santoso"],
-    ["Joko Widodo",      "Joko",      "Widodo"],
-    ["Agus Harjono",     "Agus",      "Harjono"],
-    ["Slamet Rahardjo",  "Slamet",    "Rahardjo"],
-    ["Wawan Setiawan",   "Wawan",     "Setiawan"],
-    ["Hendra Wijaya",    "Hendra",    "Wijaya"],
-    ["Eko Prasetyo",     "Eko",       "Prasetyo"],
-    ["Aditya Nugroho",   "Aditya",    "Nugroho"],
-    ["Rian Hidayat",     "Rian",      "Hidayat"],
-    ["Aris Budiman",     "Aris",      "Budiman"],
-    ["Dedi Kusnadi",     "Dedi",      "Kusnadi"]
+private _names_pacific = [
+    ["Teiva Tehuiotoa",  "Teiva",     "Tehuiotoa"],
+    ["Manaarii Puarai",  "Manaarii",  "Puarai"],
+    ["Teva Rohi",        "Teva",      "Rohi"],
+    ["Manua Tuihani",    "Manua",     "Tuihani"],
+    ["Keanu Loa",        "Keanu",     "Loa"],
+    ["Tamatoa Arii",     "Tamatoa",   "Arii"],
+    ["Ariitea Tehei",    "Ariitea",   "Tehei"]
+];
+
+private _names_standard = [
+    ["Julien Martin",    "Julien",    "Martin"],
+    ["Thomas Bernard",   "Thomas",    "Bernard"],
+    ["Nicolas Petit",    "Nicolas",   "Petit"],
+    ["Alexandre Dubois", "Alexandre", "Dubois"],
+    ["Maxime Moreau",    "Maxime",    "Moreau"],
+    ["Guillaume Laurent","Guillaume", "Laurent"],
+    ["Lucas Girard",     "Lucas",     "Girard"],
+    ["Romain Roux",      "Romain",    "Roux"],
+    ["Clément Fournier", "Clément",   "Fournier"],
+    ["Mathieu Bonnet",   "Mathieu",   "Bonnet"],
+    ["Erwan Le Gall",    "Erwan",     "Le Gall"],
+    ["Enzo Rossi",       "Enzo",      "Rossi"]
 ];
 
 // ── Construction du pool typé complet ────────────────────────────────────────
 
 private _allNamesTyped = [];
-{ _allNamesTyped pushBack [_x, "Turkish"];    } forEach _names_turkish;
-{ _allNamesTyped pushBack [_x, "Arab"];       } forEach _names_arab;
-{ _allNamesTyped pushBack [_x, "African"];    } forEach _names_african;
-{ _allNamesTyped pushBack [_x, "Indonesian"]; } forEach _names_indonesian;
+{ _allNamesTyped pushBack [_x, "Black"];   } forEach _names_african;
+{ _allNamesTyped pushBack [_x, "Arab"];    } forEach _names_arab;
+{ _allNamesTyped pushBack [_x, "Asian"];   } forEach _names_asian;
+{ _allNamesTyped pushBack [_x, "Pacific"]; } forEach _names_pacific;
+{ _allNamesTyped pushBack [_x, "White"];   } forEach _names_standard;
 
 // Cache des noms déjà attribués et du pool complet (session serveur uniquement)
 LL_g_allNamesTyped = _allNamesTyped;
@@ -163,31 +171,29 @@ private _fnc_processUnit = {
 
     // Visage cohérent avec l'origine
     private _faces = switch (_faceType) do {
-        case "Turkish";
+        case "Black":     { ["AfricanHead_01","AfricanHead_02","AfricanHead_03"] };
         case "Arab":      { ["PersianHead_A3_01","PersianHead_A3_02","PersianHead_A3_03",
-                           "GreekHead_A3_01","GreekHead_A3_02","GreekHead_A3_03",
-                           "GreekHead_A3_04","GreekHead_A3_05","GreekHead_A3_06"] };
-        case "African":   { ["AfricanHead_01","AfricanHead_02","AfricanHead_03"] };
-        case "Indonesian": { ["AsianHead_A3_01","AsianHead_A3_02","AsianHead_A3_03",
-                            "TanoanHead_A3_01","TanoanHead_A3_02","TanoanHead_A3_03",
-                            "TanoanHead_A3_04","TanoanHead_A3_05"] };
-        default         { ["WhiteHead_01","WhiteHead_02","WhiteHead_03","WhiteHead_04",
-                           "WhiteHead_05","WhiteHead_06","WhiteHead_07","WhiteHead_08",
-                           "WhiteHead_09","WhiteHead_10","WhiteHead_11","WhiteHead_12",
-                           "WhiteHead_13","WhiteHead_14","WhiteHead_15","WhiteHead_16",
-                           "WhiteHead_17","WhiteHead_18","WhiteHead_19","WhiteHead_20",
-                           "WhiteHead_21"] };
+                             "GreekHead_A3_01","GreekHead_A3_02","GreekHead_A3_03",
+                             "GreekHead_A3_04","GreekHead_A3_05","GreekHead_A3_06"] };
+        case "Asian":     { ["AsianHead_A3_01","AsianHead_A3_02","AsianHead_A3_03"] };
+        case "Pacific":   { ["TanoanHead_A3_01","TanoanHead_A3_02","TanoanHead_A3_03",
+                             "TanoanHead_A3_04","TanoanHead_A3_05"] };
+        default           { ["WhiteHead_01","WhiteHead_02","WhiteHead_03","WhiteHead_04",
+                             "WhiteHead_05","WhiteHead_06","WhiteHead_07","WhiteHead_08",
+                             "WhiteHead_09","WhiteHead_10","WhiteHead_11","WhiteHead_12",
+                             "WhiteHead_13","WhiteHead_14","WhiteHead_15","WhiteHead_16",
+                             "WhiteHead_17","WhiteHead_18","WhiteHead_19","WhiteHead_20",
+                             "WhiteHead_21"] };
     };
     private _face  = selectRandom _faces;
 
-    // Voix de joueur aléatoire entre Américain (1-5), Britannique (1-5) et Anglais d'Altis (1-5) avec variation de pitch (0.85 à 1.00)
-    private _speakers = [
-        "Male01ENG", "Male02ENG", "Male03ENG", "Male04ENG", "Male05ENG",
-        "Male01ENGB", "Male02ENGB", "Male03ENGB", "Male04ENGB", "Male05ENGB",
-        "Male01GRE", "Male02GRE", "Male03GRE", "Male04GRE", "Male05GRE"
-    ];
-    private _speaker = selectRandom _speakers;
-    private _pitch = 0.85 + random 0.15;
+    // Voix française selon l'origine (Full FR)
+    private _speaker = switch (_faceType) do {
+        case "White": { "Male01FRE" };
+        case "Black": { "Male02FRE" };
+        default       { "Male03FRE" };
+    };
+    private _pitch = 0.90 + random 0.20;
 
     // Grade selon le slot (uniquement pour les unités jouables connues)
     {
@@ -206,6 +212,9 @@ private _fnc_processUnit = {
     // Stockage global + drapeau pour éviter les réapplications inutiles
     _unit setVariable ["LL_s_identity",  [_nameData, _faceType, _face, _speaker, _pitch, _beard], true];
     _unit setVariable ["LL_IdentitySet", true, true];
+
+    // --- Intégration optionnelle de UVO Expanded (Full FR) ---
+    [_unit] call LL_fnc_setupUVO;
 };
 
 // ── Boucle principale : scan ciblé sur player_00…player_06 ───────────────────

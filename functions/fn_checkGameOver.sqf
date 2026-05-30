@@ -15,9 +15,9 @@
 if (!isServer) exitWith {};
 
 [] spawn {
-    // Attendre que les scripts switchToAI des clients aient fini leur travail (sleep 3 + selectPlayer)
-    // Cela évite de terminer la mission alors qu'un joueur est en train de prendre le contrôle d'une IA.
-    sleep 5;
+    // Attendre un court instant pour s'assurer que les requêtes réseau de basculement (LL_Switching_To_AI)
+    // ont bien été reçues par le serveur. Le délai de 3s de l'animation est maintenant couvert en amont.
+    sleep 1;
 
     // Exclure les Headless Clients de la liste des joueurs
     private _allPlayers = allPlayers - entities "HeadlessClient_F";
@@ -33,9 +33,14 @@ if (!isServer) exitWith {};
             diag_log "[LL] checkGameOver: Tous les joueurs sont morts. Fin de mission déclenchée.";
         };
 
-        // Signaler à tous les clients que la mission se termine (utilisé par le timeout de sécurité de fn_switchToAI)
+        // Signaler à tous les clients que la mission se termine
         MISSION_ended = true;
         publicVariable "MISSION_ended";
+
+        // DÉLAI CRITIQUE : Laisser 2 secondes aux clients pour désactiver proprement
+        // le mode spectateur (BIS_fnc_EGSpectator) et lancer la caméra immersive.
+        // Si on n'attend pas, l'écran de débriefing entre en conflit avec le spectateur et gèle le jeu !
+        sleep 2;
 
         // Fin de mission (défaite)
         ["MissionFailed", false, 5] remoteExec ["BIS_fnc_endMission", 0];

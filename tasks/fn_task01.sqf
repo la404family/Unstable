@@ -160,13 +160,7 @@ if (_mode == "scenario") exitWith {
             case 2: {
                 if (DEBUG_MODE) then { diag_log "[LL] task01: Scénario 2 — Trahison."; };
 
-                // Animation de dialogue avant la trahison (TASK_ANIM — playMove = transition propre)
-                _chief disableAI "ANIM";
-                _chief playMove "Acts_CivilTalking_1";
-                ["STR_LL_Speaker_Chief", "STR_LL_Task_01_S2_Chief"] remoteExec ["LL_fnc_showSubtitle", 0];
-                sleep 5;
-                // enableAI "ANIM" différé au moment du passage en COMBAT
-                // pour éviter la transition holster → draw (TASK_ANIM)
+                // La milice attaque directement sans sommation
 
                 ["STR_LL_Speaker_Narrator", "STR_LL_Task_01_Narrative_S2_Start"] remoteExec ["LL_fnc_showSubtitle", 0];
 
