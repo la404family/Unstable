@@ -926,7 +926,6 @@ private _fnExecExtract = {
         _wpVic setWaypointCombatMode "RED";
         _wpVic setWaypointSpeed      "FULL";
         _heli doMove _homeBase;
-        { _x hideObjectGlobal true; } forEach (crew _heli select { !(_x in _crew) });
         _heli lock 2;
         sleep 25;
         if (alive _heli) then {

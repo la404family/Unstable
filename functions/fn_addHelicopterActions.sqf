@@ -72,15 +72,7 @@ if (!hasInterface) exitWith {};
             nil, 2.7, false, true, "", "(alive _target && leader (group _target) isEqualTo _target) || _target getVariable ['LL_Spectating', false]"
         ];
 
-        // 5. Demander Extraction (Embarquement)
-        _unit addAction [
-            format ["<t color='#FFFFFF'>%1</t>", localize "STR_LL_Heli_Action_Extraction"],
-            {
-                params ["_target", "_caller", "_actionId"];
-                ["EMBARQUEMENT", getPos player, player, _target, _actionId] remoteExec ["LL_fnc_requestHelicopter", 2];
-            },
-            nil, 2.5, false, true, "", "(alive _target && leader (group _target) isEqualTo _target) || _target getVariable ['LL_Spectating', false]"
-        ];
+
     };
 
     // Boucle de maintien en cas de switch d'IA ou respawn

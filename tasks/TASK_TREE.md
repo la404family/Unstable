@@ -32,7 +32,7 @@ flowchart TD
     T03A --> EXFIL
     T03B --> EXFIL
 
-    EXFIL(["Fin de mission\nExtraction hélicoptère\ninitiée par le joueur\nBIS_fnc_endMission"])
+    EXFIL(["Fin de mission\nExtraction hélicoptère\ininitiée automatiquement task04.sqf"])
 ```
 
 ---

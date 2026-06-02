@@ -92,11 +92,11 @@ if (DEBUG_MODE) then {
              [] call LL_fnc_task03a;
          } else {
             [] call LL_fnc_task02b;      // Mutinerie (chef mort)   → Renseignements perdus (= Trahison)
+            waitUntil {
+                sleep 5;
+                (["task_02b_informateur"] call BIS_fnc_taskState) in ["SUCCEEDED", "FAILED", "CANCELED"]
+            };
+            [] call LL_fnc_task03b;                                // Attentat MJ (suite directe)
          };
-         waitUntil {
-             sleep 5;
-             (["task_02b_informateur"] call BIS_fnc_taskState) in ["SUCCEEDED", "FAILED", "CANCELED"]
-         };
-         [] call LL_fnc_task03b;                                // Attentat MJ (suite directe)
      };
  };
