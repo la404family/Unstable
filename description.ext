@@ -12,7 +12,7 @@ loadScreen      = "porto_load_screen.jpg"; // Image de chargement de la mission
 class Header {
     gameType    = Coop; // Type de mission (Coop, DM, TDM, etc.)
     minPlayers  = 1;
-    maxPlayers  = 7;    // 7 emplacements jouables (player_00 à player_06)
+    maxPlayers  = 8;    // 8 emplacements jouables (player_00 à player_07)
 };
 
 // --- Paramètres réseau & performance ---

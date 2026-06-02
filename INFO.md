@@ -20,7 +20,7 @@
 - Les chapeaux et les barbes sont réservés aux hommes.
 - Heliport_00 à Heliport_XX sont des heliports invisible
 - La variable du drone est : CUP_B_USMC_DYN_MQ9
-- vehicule_team est le véhicule des joueurs en début de mission. (nom de variable du véhicule : CUP_B_nM1025_SOV_M2_USMC_DES)
+- vehicule_team est le véhicule des joueurs en début de mission. (nom de variable du véhicule : CUP_I_LR_Transport_RACS)
 - l'hélicoptère allié est un CH-47F (CUP_I_CH47F_RACS)
 
 ---

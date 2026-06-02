@@ -29,12 +29,13 @@ diag_log "[LL][initServer] Démarrage de l'initialisation serveur...";
     private _leaderUnit = missionNamespace getVariable ["player_00", objNull];
     if (!isNull _leaderUnit) then {
         private _grp = group _leaderUnit;
-        {
-            private _unit = missionNamespace getVariable [format ["player_0%1", _x], objNull];
+        for "_i" from 1 to 99 do {
+            private _suffix = if (_i < 10) then { format ["0%1", _i] } else { str _i };
+            private _unit = missionNamespace getVariable [format ["player_%1", _suffix], objNull];
             if (!isNull _unit && _unit != _leaderUnit) then {
                 [_unit] joinSilent _grp;
             };
-        } forEach [1,2,3,4,5,6];
+        };
     };
 };
 

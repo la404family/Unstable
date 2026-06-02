@@ -347,7 +347,7 @@ private _fnExecDelivery = {
     private _cargoClass = "B_supplyCrate_F";
     if (_type == "VEHICULE") then {
         private _vt = missionNamespace getVariable ["vehicule_team", objNull];
-        _cargoClass = if (!isNull _vt && { alive _vt }) then { typeOf _vt } else { "CUP_B_nM1025_SOV_M2_USMC_DES" };
+        _cargoClass = if (!isNull _vt && { alive _vt }) then { typeOf _vt } else { "CUP_I_LR_Transport_RACS" };
     };
 
     private _cargo = createVehicle [_cargoClass, [0,0,0], [], 0, "NONE"];
