@@ -23,7 +23,8 @@ if (_localizedSpeaker == "") then { _localizedSpeaker = _speaker; };
 private _localizedText = localize _text;
 if (_localizedText == "") then { _localizedText = _text; };
 
-// Utilisation de la fonction native d'Arma 3 (BIS_fnc_showSubtitle)
-// Elle gère automatiquement la file d'attente et l'affichage stylisé en bas de l'écran (type campagne)
-// sans polluer le HUD natif.
-[_localizedSpeaker, _localizedText] spawn BIS_fnc_showSubtitle;
+// Ajout de sauts de ligne invisibles à la fin pour "pousser" le texte vers le haut
+// Cela évite que les sous-titres ne chevauchent le HUD natif d'Arma (stance/stamina en bas au centre)
+private _paddedText = _localizedText + "<br/><br/>";
+
+[_localizedSpeaker, _paddedText] spawn BIS_fnc_showSubtitle;

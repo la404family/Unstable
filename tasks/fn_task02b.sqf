@@ -349,12 +349,36 @@ if (!isServer) exitWith {};
     _hostage setSpeedMode "LIMITED";
     _hostage setCaptive false;
 
-    // Identifier le leader du groupe joueur et rejoindre son groupe
+    // Identifier le leader du groupe joueur
     private _alivePlayers = allPlayers select { alive _x };
     private _playerLeader = if (count _alivePlayers > 0) then {
         leader (group (_alivePlayers select 0))
     } else { objNull };
 
+    // --- VOIX NATIVE IMMERSIVE (parle en perse — on ne comprend pas mais c'est immersif) ---
+    // Pas d'animation de dialogue (c'est un otage libéré, pas un orateur)
+    // On crée un soldat fantôme dans son groupe pour forcer le moteur à générer sa voix native
+    private _dummy = _hostageGrp createUnit ["I_G_Soldier_F", getPos _hostage, [], 0, "NONE"];
+    _dummy hideObjectGlobal true;
+    _dummy allowDamage false;
+    _dummy disableAI "ALL";
+    _hostageGrp selectLeader _hostage; // CORRECTIF : syntaxe group selectLeader unit
+
+    // L'informateur "donne un ordre" au fantôme → le moteur génère sa voix native !
+    _dummy commandMove (getPos _hostage getPos [500, random 360]);
+
+    ["STR_LL_Speaker_Informateur", "STR_LL_Task_02b_Informateur_Freed"] remoteExec ["LL_fnc_showSubtitle", 0];
+    sleep 5;
+
+    // Deuxième phrase vocale native
+    _dummy commandMove (getPos _hostage getPos [800, random 360]);
+
+    ["STR_LL_Speaker_Narrator", "STR_LL_Task_02b_Narrative_Success"] remoteExec ["LL_fnc_showSubtitle", 0];
+    sleep 3;
+
+    deleteVehicle _dummy; // Nettoyage du fantôme
+
+    // --- REJOINDRE LE GROUPE DU JOUEUR ---
     if (!isNull _playerLeader) then {
         [_hostage] joinSilent (group _playerLeader);
         _hostage doFollow _playerLeader;
@@ -380,14 +404,6 @@ if (!isServer) exitWith {};
             sleep 5;
         };
     };
-
-    sleep 3;
-
-    // Dialogues de libération
-    ["STR_LL_Speaker_Informateur", "STR_LL_Task_02b_Informateur_Freed"] remoteExec ["LL_fnc_showSubtitle", 0];
-    sleep 6;
-    ["STR_LL_Speaker_Narrator", "STR_LL_Task_02b_Narrative_Success"] remoteExec ["LL_fnc_showSubtitle", 0];
-    sleep 3;
 
     // ══════════════════════════════════════════════════════════════════════
     // DEMANDE D'EXTRACTION DE L'INFORMATEUR (TAKS_HELI)

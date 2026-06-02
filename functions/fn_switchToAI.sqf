@@ -88,9 +88,20 @@ if (count _livingAI > 0) then {
     // Empêcher le respawn natif Arma 3 (le mettre à un temps infini)
     setPlayerRespawnTime 999999;
 
-    // Déclencher une vérification de fin de partie côté serveur (en multi uniquement)
+    // Déclencher une vérification de fin de partie
     if (isMultiplayer) then {
+        // En multijoueur, le serveur vérifie si tous les joueurs sont morts
         [] remoteExec ["LL_fnc_checkGameOver", 2];
+    } else {
+        // ── MODE SOLO : Fin de mission ──
+        // CORRECTIF CRITIQUE : BIS_fnc_endMission NE FONCTIONNE PAS quand le joueur
+        // est mort (contexte local invalide). On utilise la commande moteur directe
+        // 'endMission' qui fonctionne TOUJOURS, même sur un cadavre.
+        if (DEBUG_MODE) then {
+            diag_log "[LL] switchToAI: Plus aucune unité vivante — endMission directe.";
+        };
+        sleep 3;
+        endMission "MissionFailed";
     };
 
 

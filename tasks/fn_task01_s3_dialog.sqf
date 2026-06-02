@@ -32,7 +32,7 @@ private _dummy = _grp createUnit ["I_G_Soldier_F", getPos _chief, [], 0, "NONE"]
 _dummy hideObjectGlobal true;
 _dummy allowDamage false;
 _dummy disableAI "ALL";
-_chief selectLeader _grp;
+_grp selectLeader _chief; // CORRECTIF : syntaxe group selectLeader unit
 
 // Il donne l'ordre d'aller aux coordonnées, ce qui force le moteur à générer SA VRAIE VOIX !
 _dummy commandMove (_chief getPos [1500, random 360]);

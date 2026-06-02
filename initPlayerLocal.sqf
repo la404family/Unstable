@@ -146,3 +146,48 @@ player addEventHandler ["Respawn", {
         [_unit] spawn LL_fnc_switchToAI;
     }];
 }];
+
+// ══════════════════════════════════════════════════════════════════════════════
+// WATCHDOG SOLO — Boucle de surveillance indépendante (filet de sécurité)
+// Ne dépend PAS de la chaîne de Killed EH. Vérifie en continu si TOUTES
+// les unités jouables sont mortes. Si oui → fin de mission forcée.
+// En multijoueur ce rôle est rempli par fn_checkGameOver côté serveur.
+// ══════════════════════════════════════════════════════════════════════════════
+if (!isMultiplayer) then {
+    [] spawn {
+        // Attendre que la mission soit bien démarrée
+        sleep 15;
+
+        while { true } do {
+            sleep 3;
+
+            // Sortie si la mission est déjà terminée
+            if (missionNamespace getVariable ["MISSION_ended", false]) exitWith {};
+
+            // Vérifier toutes les unités jouables (pas seulement le groupe actuel)
+            private _anyAlive = false;
+            {
+                if (alive _x) exitWith { _anyAlive = true; };
+            } forEach playableUnits;
+
+            // Fallback: vérifier aussi le joueur actuel
+            if (!_anyAlive && alive player) then { _anyAlive = true; };
+
+            // Un basculement IA est peut-être en cours, ne pas interrompre
+            if (!_anyAlive) then {
+                private _switching = false;
+                {
+                    if (_x getVariable ["LL_Switching_To_AI", false]) exitWith { _switching = true; };
+                } forEach allUnits;
+                if (_switching) then { _anyAlive = true; };
+            };
+
+            if (!_anyAlive) then {
+                diag_log "[LL] WATCHDOG SOLO: Aucune unité jouable en vie. Fin de mission forcée.";
+                missionNamespace setVariable ["MISSION_ended", true];
+                sleep 2;
+                endMission "MissionFailed";
+            };
+        };
+    };
+};

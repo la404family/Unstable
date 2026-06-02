@@ -81,12 +81,27 @@ if (_mode == "chief_talk") exitWith {
         _chief setVariable ["LL_Task02c_Status", "ACTION", true];
         _chief enableAI "ANIM";
 
-        // Séquence de dialogue — TASK_RULES §6
+        // --- VOIX NATIVE IMMERSIVE (le chef parle en perse nativement) ---
+        private _chiefGrp = group _chief;
+        private _dummy = _chiefGrp createUnit ["I_G_Soldier_F", getPos _chief, [], 0, "NONE"];
+        _dummy hideObjectGlobal true;
+        _dummy allowDamage false;
+        _dummy disableAI "ALL";
+        _chiefGrp selectLeader _chief;
+
+        // Le chef "donne un ordre" au fantôme → voix native !
+        _dummy commandMove (_chief getPos [500, random 360]);
+
         ["STR_LL_Speaker_Chief", "STR_LL_Task_02c_Chief_Intel"] remoteExec ["LL_fnc_showSubtitle", 0];
         sleep 6;
 
+        // Deuxième phrase vocale native
+        _dummy commandMove (_chief getPos [800, random 360]);
+
         ["STR_LL_Speaker_Narrator", "STR_LL_Task_02c_Narrative_Start"] remoteExec ["LL_fnc_showSubtitle", 0];
         sleep 5;
+
+        deleteVehicle _dummy; // Nettoyage du fantôme
 
         // Signal : le chef a parlé
         missionNamespace setVariable ["LL_Task02c_ChiefTalked", true, true];
@@ -466,15 +481,30 @@ if (_mode == "chief_talk") exitWith {
     deleteMarker "LL_mkr_t02c_inter";
     ["task_02c_intermediaire", "SUCCEEDED", true] call BIS_fnc_taskSetState;
 
+    // --- VOIX NATIVE IMMERSIVE (le financier parle en perse — pas d'animation de dialogue) ---
+    // Création du soldat fantôme pour forcer la voix native du financier
+    private _dummy = _civGrp createUnit ["I_G_Soldier_F", getPos _h, [], 0, "NONE"];
+    _dummy hideObjectGlobal true;
+    _dummy allowDamage false;
+    _dummy disableAI "ALL";
+    _civGrp selectLeader _h;
+
+    // Le financier "donne un ordre" au fantôme → voix native !
+    _dummy commandMove (getPos _h getPos [500, random 360]);
+
     ["STR_LL_Speaker_Intermediaire", "STR_LL_Task_02c_Intermediaire_Captured"] remoteExec ["LL_fnc_showSubtitle", 0];
     sleep 5;
 
-    ["STR_LL_Speaker_Narrator", "STR_LL_Task_02c_Narrative_Success"] remoteExec ["LL_fnc_showSubtitle", 0];
+    // Deuxième phrase vocale native
+    _dummy commandMove (getPos _h getPos [800, random 360]);
+
+    ["STR_LL_Speaker_Intermediaire", "Ne me tuez pas ! L'héliport caché du cartel est juste à côté, prenez cette info mais laissez-moi la vie sauve !"] remoteExec ["LL_fnc_showSubtitle", 0];
     sleep 5;
 
-    if (DEBUG_MODE) then {
-        diag_log "[LL][task02c] Intermédiaire capturé — tâche SUCCEEDED.";
-    };
+    deleteVehicle _dummy; // Nettoyage du fantôme
+
+    ["STR_LL_Speaker_Narrator", "STR_LL_Task_02c_Narrative_Success"] remoteExec ["LL_fnc_showSubtitle", 0];
+    sleep 5;
 
     // ── L'intermédiaire reste sur place en état d'arrestation ────────────
     // L'animation Acts_ExecutionVictim_Loop est déjà active et loopée

@@ -199,12 +199,12 @@ if (!isServer) exitWith {};
             _g setCombatMode "RED";
         };
 
-        // Patrouilles autour du site (TASK_RULES §11)
+        // Patrouilles autour du site (distance augmentée)
         [_guardsGrp1, _pos] spawn {
             params ["_grp", "_center"];
             while { ({ alive _x } count units _grp) > 0 } do {
                 if (behaviour (leader _grp) != "COMBAT") then {
-                    private _pPos = _center getPos [4 + random 21, random 360];
+                    private _pPos = _center getPos [15 + random 45, random 360];
                     _grp move _pPos;
                 };
                 sleep (18 + random 12);
@@ -214,7 +214,7 @@ if (!isServer) exitWith {};
             params ["_grp", "_center"];
             while { ({ alive _x } count units _grp) > 0 } do {
                 if (behaviour (leader _grp) != "COMBAT") then {
-                    private _pPos = _center getPos [4 + random 21, random 360];
+                    private _pPos = _center getPos [15 + random 45, random 360];
                     _grp move _pPos;
                 };
                 sleep (18 + random 12);
@@ -303,9 +303,10 @@ if (!isServer) exitWith {};
         // ── Suivi désamorçage bombe 0 ──────────────────────────────────────
         if (missionNamespace getVariable ["LL_Task03b_Bomb0_Defused", false] && { !_bomb0Notified }) then {
             _bomb0Notified = true;
-            // Effet fumée ninja : fumée → 1.5s → lumières éteintes + valise supprimée
+            // Effet fumée ninja : Attente de 25s → fumée → 1.5s → valise supprimée
             [(_bombCrates select 0), (_bombCharges select 0)] spawn {
                 params ["_crate", "_charge"];
+                sleep 25; // Attente demandée avant disparition
                 if (!isNull _crate) then {
                     "SmokeShellWhite" createVehicle (getPos _crate);
                 };
@@ -324,9 +325,10 @@ if (!isServer) exitWith {};
         // ── Suivi désamorçage bombe 1 ──────────────────────────────────────
         if (missionNamespace getVariable ["LL_Task03b_Bomb1_Defused", false] && { !_bomb1Notified }) then {
             _bomb1Notified = true;
-            // Effet fumée ninja : fumée → 1.5s → lumières éteintes + valise supprimée
+            // Effet fumée ninja : Attente de 25s → fumée → 1.5s → valise supprimée
             [(_bombCrates select 1), (_bombCharges select 1)] spawn {
                 params ["_crate", "_charge"];
+                sleep 25; // Attente demandée avant disparition
                 if (!isNull _crate) then {
                     "SmokeShellWhite" createVehicle (getPos _crate);
                 };
