@@ -318,16 +318,38 @@ if (_mode == "scenario") exitWith {
                 };
 
                 if (alive _chief) then {
-                    // Succès : le chef a survécu
+                    // Succès : le chef a survécu (on attend l'interaction pour valider la tâche)
                     ["STR_LL_Speaker_Narrator", "STR_LL_Task_01_Narrative_S3_Success"] remoteExec ["LL_fnc_showSubtitle", 0];
-                    ["task_01_recon", "SUCCEEDED", true] call BIS_fnc_taskSetState;
 
-                    // CORRECTIF #3.1 : Préparer le chef pour task02c
+                    // CORRECTIF #3.1 : Préparer le chef pour l'interaction et task02c
                     _chief setVariable ["LL_Task01_ChiefCombatDone", true, true];
                     _chief setBehaviour "SAFE";
                     _chief setCombatMode "BLUE";
                     _chief setUnitPos "UP";
                     _chief disableAI "MOVE";
+                    
+                    // Ajouter l'action pour parler au chef (qui déclenchera task02c)
+                    [
+                        _chief,
+                        "Parler au chef de milice",
+                        "\a3\ui_f\data\IGUI\Cfg\holdactions\holdAction_connect_ca.paa",
+                        "\a3\ui_f\data\IGUI\Cfg\holdactions\holdAction_connect_ca.paa",
+                        "alive _target && (_target distance _this < 3)",
+                        "alive _target && (_target distance _this < 3)",
+                        {},
+                        {},
+                        {
+                            params ["_target", "_caller", "_actionId"];
+                            [_target, _actionId] remoteExec ["BIS_fnc_holdActionRemove", 0];
+                            [_target, _caller] remoteExec ["LL_fnc_task01_s3_dialog", 2];
+                        },
+                        {},
+                        [],
+                        2,
+                        0,
+                        false,
+                        false
+                    ] remoteExec ["BIS_fnc_holdActionAdd", 0, _chief];
                 } else {
                     // Échec : le chef a été tué
                     ["STR_LL_Speaker_Narrator", "STR_LL_Task_01_Narrative_S3_Failed"] remoteExec ["LL_fnc_showSubtitle", 0];

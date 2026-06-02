@@ -398,6 +398,38 @@ private _fnExecDelivery = {
         _cargo addMagazineCargoGlobal ["SmokeShellGreen",  10];
     };
 
+    // Nettoyage et ravitaillement du véhicule largué (même logique qu'au démarrage)
+    if (_type == "VEHICULE") then {
+        clearWeaponCargoGlobal   _cargo;
+        clearMagazineCargoGlobal _cargo;
+        clearItemCargoGlobal     _cargo;
+        clearBackpackCargoGlobal _cargo;
+        
+        private _leader = missionNamespace getVariable ["player_00", objNull];
+        if (!isNull _leader) then {
+            private _uniqueMags = [];
+            {
+                if (alive _x) then {
+                    if (primaryWeapon _x != "") then {
+                        private _comp = [primaryWeapon _x] call BIS_fnc_compatibleMagazines;
+                        if (count _comp > 0) then { _uniqueMags pushBackUnique (_comp select 0); };
+                    };
+                    if (secondaryWeapon _x != "") then {
+                        private _comp = [secondaryWeapon _x] call BIS_fnc_compatibleMagazines;
+                        if (count _comp > 0) then { _uniqueMags pushBackUnique (_comp select 0); };
+                    };
+                    if (handgunWeapon _x != "") then {
+                        private _comp = [handgunWeapon _x] call BIS_fnc_compatibleMagazines;
+                        if (count _comp > 0) then { _uniqueMags pushBackUnique (_comp select 0); };
+                    };
+                };
+            } forEach (units group _leader);
+            
+            {
+                _cargo addMagazineCargoGlobal [_x, 3];
+            } forEach _uniqueMags;
+        };
+    };
     // Approche finale vers la LZ
     _heli flyInHeight _hoverHeight;
     _heli flyInHeightASL [_hoverHeight, _hoverHeight, _hoverHeight];

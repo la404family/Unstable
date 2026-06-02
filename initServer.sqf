@@ -39,6 +39,48 @@ diag_log "[LL][initServer] Démarrage de l'initialisation serveur...";
     };
 };
 
+// --- 2.8 Nettoyage et ravitaillement du véhicule d'escouade ---
+[] spawn {
+    waitUntil { time > 1 };
+    private _veh = missionNamespace getVariable ["vehicule_team", objNull];
+    if (!isNull _veh) then {
+        // Vider intégralement le véhicule
+        clearWeaponCargoGlobal _veh;
+        clearMagazineCargoGlobal _veh;
+        clearItemCargoGlobal _veh;
+        clearBackpackCargoGlobal _veh;
+        
+        private _leader = missionNamespace getVariable ["player_00", objNull];
+        if (!isNull _leader) then {
+            private _uniqueMags = [];
+            {
+                if (alive _x) then {
+                    // Arme primaire
+                    if (primaryWeapon _x != "") then {
+                        private _comp = [primaryWeapon _x] call BIS_fnc_compatibleMagazines;
+                        if (count _comp > 0) then { _uniqueMags pushBackUnique (_comp select 0); };
+                    };
+                    // Arme secondaire (Lanceur)
+                    if (secondaryWeapon _x != "") then {
+                        private _comp = [secondaryWeapon _x] call BIS_fnc_compatibleMagazines;
+                        if (count _comp > 0) then { _uniqueMags pushBackUnique (_comp select 0); };
+                    };
+                    // Arme tertiaire (Pistolet)
+                    if (handgunWeapon _x != "") then {
+                        private _comp = [handgunWeapon _x] call BIS_fnc_compatibleMagazines;
+                        if (count _comp > 0) then { _uniqueMags pushBackUnique (_comp select 0); };
+                    };
+                };
+            } forEach (units group _leader);
+            
+            // Ajouter 3 chargeurs de chaque type unique trouvé dans l'escouade
+            {
+                _veh addMagazineCargoGlobal [_x, 3];
+            } forEach _uniqueMags;
+        };
+    };
+};
+
 // Assigne un leader parmi les joueurs humains et surveille qu'une IA ne le devienne jamais
 [] spawn LL_fnc_assignLeader;
 
