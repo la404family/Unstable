@@ -43,4 +43,9 @@ player createDiaryRecord ["diary", [localize "STR_LL_Briefing_Title", localize "
         sleep 0.5;
         showHUD true;
     };
+
+    // --- TEST DE SOUS-TITRE ---
+    // Affiche le sous-titre de test demandé (se lancera après l'initialisation de l'identité)
+    sleep 2;
+    ["Système", "Ici se trouvera les sous tittre dynamique du jeu tres bientot !!"] spawn LL_fnc_showSubtitle;
 };

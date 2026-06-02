@@ -93,44 +93,6 @@ if (count _livingAI > 0) then {
         [] remoteExec ["LL_fnc_checkGameOver", 2];
     };
 
-    // ── MODE SOLO : fin de mission directe ──────────────────────────────────
-    // IMPORTANT : on utilise spawn au lieu de exitWith car exitWith dans un
-    // contexte spawn ne permet pas les sleep, ce qui empêchait la destruction
-    // de la caméra et causait un gel total du jeu (clavier bloqué).
-    if (!isMultiplayer) then {
-        _deadUnit setVariable ["LL_Spectating", false, true];
-
-        [_deadUnit] spawn {
-            params ["_unit"];
-
-            // 1. Caméra vue de haut proche — contempler la scène de mort
-            private _cam = "camera" camCreate (getPos _unit vectorAdd [0, 0, 5]);
-            _cam camSetTarget _unit;
-            _cam cameraEffect ["INTERNAL", "BACK"];
-            _cam camCommit 0;
-            showCinemaBorder false;
-
-            // 2. Laisser le joueur voir la scène pendant 4 secondes
-            sleep 4;
-
-            // 3. DÉTRUIRE la caméra AVANT d'appeler endMission
-            //    C'est critique : BIS_fnc_endMission entre en conflit avec
-            //    une caméra custom active et gèle le jeu si elle est encore là.
-            _cam cameraEffect ["TERMINATE", "BACK"];
-            camDestroy _cam;
-
-            // 4. Petit délai pour laisser le moteur nettoyer la caméra
-            sleep 0.5;
-
-            // 5. Lancer la fin de mission native (écran FAILED + contrôle clavier)
-            //    Le 3ème paramètre (secondes de fondu) est à 3 pour un fondu rapide.
-            ["MissionFailed", false, 3] call BIS_fnc_endMission;
-
-            if (DEBUG_MODE) then {
-                diag_log "[LL] switchToAI: Mode solo — fin de mission native déclenchée avec caméra.";
-            };
-        };
-    };
 
     // ── MODE MULTIJOUEUR : spectateur avec caméras valides ──────────────────
     if (isMultiplayer) then {

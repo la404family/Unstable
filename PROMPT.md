@@ -79,5 +79,13 @@ Always consult and cite these sources when providing answers:
 | `<English>` | English |
 | `<French>` | French |
 | `<Turkish>` | Turkish |
+| `<Korean>` | Korean |
+|`<Spanish>` | Spanish |
+|`<Japanese>` | Japanese |
+|`<Chinese>` | Chinese |
+|`<Russian>` | Russian |
+|`<German>` | German |
+|`<Italian>` | Italian |
+|`<Polish>` | Polish |
 
 ```

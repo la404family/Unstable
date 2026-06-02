@@ -23,4 +23,7 @@ if (_localizedSpeaker == "") then { _localizedSpeaker = _speaker; };
 private _localizedText = localize _text;
 if (_localizedText == "") then { _localizedText = _text; };
 
-systemChat format ["%1: %2", _localizedSpeaker, _localizedText];
+// Utilisation de la fonction native d'Arma 3 (BIS_fnc_showSubtitle)
+// Elle gère automatiquement la file d'attente et l'affichage stylisé en bas de l'écran (type campagne)
+// sans polluer le HUD natif.
+[_localizedSpeaker, _localizedText] spawn BIS_fnc_showSubtitle;

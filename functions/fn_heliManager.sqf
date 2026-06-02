@@ -582,6 +582,8 @@ private _fnExecDeploy = {
 
         removeUniform _unit; removeVest _unit; removeBackpack _unit;
         removeHeadgear _unit; removeGoggles _unit;
+        removeAllWeapons _unit; // Retirer les armes par défaut (anglaises/RACS)
+        
         _unit forceAddUniform (selectRandom _uniforms);
         [_unit, "CSAT_ScimitarRegiment"] call BIS_fnc_setUnitInsignia;
         _unit addVest     (selectRandom _vestPool);
@@ -589,49 +591,71 @@ private _fnExecDeploy = {
         _unit addHeadgear (selectRandom _helmets);
         _unit addGoggles  (selectRandom _cagoules);
         _unit linkItem "NVGogglesB_blk_F";
-        if (binocular _unit != "") then { _unit removeWeapon (binocular _unit); };
+        
+        // --- MÉMOIRE DES ARMES DU TEAM LEADER / APPELANT ---
+        private _refUnit = missionNamespace getVariable ["LL_HELI_caller", objNull];
+        if (isNull _refUnit) then { _refUnit = missionNamespace getVariable ["player_00", objNull]; };
+        
+        if (!isNull _refUnit) then {
+            private _pw = primaryWeapon _refUnit;
+            if (_pw != "") then {
+                [_unit, _pw, 5] call _fnAddMags;
+                _unit addWeapon _pw;
+            };
+            private _hw = handgunWeapon _refUnit;
+            if (_hw != "") then {
+                [_unit, _hw, 3] call _fnAddMags;
+                _unit addWeapon _hw;
+            };
+            // On ne copie pas le lance-roquette pour éviter que toute l'escouade soit anti-char
+        } else {
+            // Fallback générique si aucun joueur n'est trouvé
+            [_unit, "CUP_arifle_FAMAS_F1", 5] call _fnAddMags;
+            _unit addWeapon "CUP_arifle_FAMAS_F1";
+        };
+        
         _unit addWeapon "CUP_LRTV";
-        [_unit, primaryWeapon   _unit, 5] call _fnAddMags;
-        [_unit, handgunWeapon   _unit, 3] call _fnAddMags;
-        [_unit, secondaryWeapon _unit, 2] call _fnAddMags;
+
+        // --- IDENTITÉ FRANÇAISE (Même logique que le début de mission) ---
+        if (!isNil "LL_g_allNamesTyped") then {
+            private _used = missionNamespace getVariable ["LL_g_usedPlayerNames", []];
+            private _available = LL_g_allNamesTyped select { !((_x select 0 select 0) in _used) };
+            if (_available isEqualTo []) then { _available = LL_g_allNamesTyped; };
+            private _entry = selectRandom _available;
+            private _nameData = _entry select 0;
+            private _faceType = _entry select 1;
+            
+            _used pushBack (_nameData select 0);
+            missionNamespace setVariable ["LL_g_usedPlayerNames", _used];
+
+            private _faces = switch (_faceType) do {
+                case "Black":     { ["AfricanHead_01","AfricanHead_02","AfricanHead_03"] };
+                case "Arab":      { ["PersianHead_A3_01","PersianHead_A3_02","PersianHead_A3_03","GreekHead_A3_01","GreekHead_A3_02","GreekHead_A3_03","GreekHead_A3_04","GreekHead_A3_05","GreekHead_A3_06"] };
+                case "Asian":     { ["AsianHead_A3_01","AsianHead_A3_02","AsianHead_A3_03"] };
+                case "Pacific":   { ["TanoanHead_A3_01","TanoanHead_A3_02","TanoanHead_A3_03","TanoanHead_A3_04","TanoanHead_A3_05"] };
+                default           { ["WhiteHead_01","WhiteHead_02","WhiteHead_03","WhiteHead_04","WhiteHead_05","WhiteHead_06","WhiteHead_07","WhiteHead_08","WhiteHead_09","WhiteHead_10","WhiteHead_11","WhiteHead_12","WhiteHead_13","WhiteHead_14","WhiteHead_15","WhiteHead_16","WhiteHead_17","WhiteHead_18","WhiteHead_19","WhiteHead_20","WhiteHead_21"] };
+            };
+            private _face = selectRandom _faces;
+            private _speaker = switch (_faceType) do {
+                case "White": { "Male01FRE" };
+                case "Black": { "Male02FRE" };
+                default       { "Male03FRE" };
+            };
+            private _pitch = 0.90 + random 0.20;
+
+            [_unit, _nameData, _face, _speaker, _pitch, ""] remoteExec ["LL_fnc_applyIdentity", 0, _unit];
+            _unit setVariable ["LL_s_identity", [_nameData, _faceType, _face, _speaker, _pitch, ""], true];
+            _unit setVariable ["LL_IdentitySet", true, true];
+            
+            // Intégration UVO si présent
+            if (!isNil "LL_fnc_setupUVO") then { [_unit] call LL_fnc_setupUVO; };
+        };
+
         for "_i" from 1 to 3 do { _unit addItem "FirstAidKit"; };
         for "_i" from 1 to 3 do { _unit addItem "CUP_HandGrenade_M67"; };
         for "_i" from 1 to 3 do { _unit addItem "SmokeShell"; };
         if (_unitType == "CUP_I_RACS_Soldier_Medic") then { _unit addItemToBackpack "Medikit"; };
 
-        // Identité
-        private _allNamesTyped = missionNamespace getVariable ["LL_g_allNamesTyped", [
-            [["Mehdi Benali",   "Mehdi",  "Benali"],  "Arab"],
-            [["Mustafa Demir",  "Mustafa","Demir"],   "Turkish"],
-            [["Moussa Diallo",  "Moussa", "Diallo"],  "African"],
-            [["Budi Santoso",   "Budi",   "Santoso"], "Indonesian"]
-        ]];
-        private _usedNames = missionNamespace getVariable ["LL_g_usedPlayerNames", []];
-        private _available = _allNamesTyped select { !((_x # 0 # 0) in _usedNames) };
-        if (count _available == 0) then { _usedNames = []; _available = _allNamesTyped; };
-        private _entry     = selectRandom _available;
-        private _nameData  = _entry # 0;
-        private _faceType  = _entry # 1;
-        _usedNames pushBackUnique (_nameData # 0);
-        missionNamespace setVariable ["LL_g_usedPlayerNames", _usedNames, true];
-
-        private _faces = switch (_faceType) do {
-            case "Turkish";
-            case "Arab":       { ["PersianHead_A3_01","PersianHead_A3_02","PersianHead_A3_03",
-                                   "GreekHead_A3_01","GreekHead_A3_02","GreekHead_A3_03",
-                                   "GreekHead_A3_04","GreekHead_A3_05","GreekHead_A3_06"] };
-            case "African":    { ["AfricanHead_01","AfricanHead_02","AfricanHead_03"] };
-            case "Indonesian": { ["AsianHead_A3_01","AsianHead_A3_02","TanoanHead_A3_01","TanoanHead_A3_02"] };
-            default            { ["WhiteHead_01","WhiteHead_02","WhiteHead_03",
-                                   "WhiteHead_04","WhiteHead_05","WhiteHead_06"] };
-        };
-        private _face    = selectRandom _faces;
-        private _speaker = selectRandom ["Male01ENG","Male02ENG","Male03ENG","Male01GRE","Male02GRE","Male03GRE"];
-        private _pitch   = 0.85 + random 0.15;
-
-        [_unit, _nameData, _face, _speaker, _pitch, ""] remoteExec ["LL_fnc_applyIdentity", 0, _unit];
-        _unit setVariable ["LL_s_identity",  [_nameData, _faceType, _face, _speaker, _pitch, ""], true];
-        _unit setVariable ["LL_IdentitySet", true, true];
         _unit setUnitRank (switch (_unitType) do {
             case "CUP_I_RACS_Soldier_SL":    { "SERGEANT" };
             case "CUP_I_RACS_Soldier_Medic": { "CORPORAL"  };
