@@ -9,7 +9,6 @@
 2. 🔴 PC alpha à unité de terrain... Demande refusée. Le couloir aérien est occupé par un drone actif, visuel en cours. Terminé.
 3. 🔴 PC alpha à unité de terrain... Impossible d'allouer un autre drone. Surveillance déjà en place au-dessus des civils. Terminé.
 4. 🔴 PC alpha à unité de terrain... Soutien refusé. Le Reaper collecte déjà du renseignement sur votre secteur. Terminé.
-5. 🔴 PC alpha à unité de terrain... Négatif. Oeil dans le ciel déjà déployé. Maintenez la progression tactique. Terminé.
 
 ### `STR_TAG_Msg_Drone_Approved` 🟢
 1. 🟢 PC alpha à unité de terrain... Demande reçue. Un MQ-9 Reaper décolle pour votre secteur. Visuel imminent. Terminé.
@@ -290,3 +289,12 @@
 3. 🔴 PC alpha à unité de terrain... Les cellules convergent vers vous. Tenez le point d'impact en attendant les secours. Terminé.
 4. 🔴 PC alpha à unité de terrain... Assaut final du MJ en cours. Sécurisez la zone et préparez l'exfiltration. Terminé.
 5. 🔴 PC alpha à unité de terrain... Explosion fatale. Infanterie ennemie en route. Restez en vie jusqu'à l'extraction. Terminé.
+
+## Fichier : `tasks\fn_task01.sqf` (Introduction de Mission & Scénario Dynamique)
+
+### `STR_LL_Mission_Briefing_Intro` 🟢 (1m10 pas plus !)
+1. 🟢 PC alpha à unité de terrain... Briefing de mission. Vous êtes déployés à Porto pour une simple opération de renseignement. Gardez à l'esprit la forte présence civile dans votre secteur. Tout devrait se dérouler sans accroc. En cas de pépin, vous avez l'autorisation d'appeler le drone MQ-9 en soutien. Un hélicoptère viendra vous exfiltrer une fois le renseignement validé. En route. Terminé.
+2. 🟢 PC alpha à unité de terrain... Escouade, écoutez bien. C'est une mission de reconnaissance standard. Ouvrez l'œil, identifiez les cibles et ne tirez qu'en cas d'absolue nécessité, les civils sont nombreux en ville. L'opération devrait être une balade de santé. Si la situation se dégrade, un drone est à votre disposition. L'extraction par hélico est déjà planifiée en fin de parcours. Rompez. Terminé.
+3. 🟢 PC alpha à unité de terrain... L'Opération commence. Votre objectif : récolter du renseignement sur les activités locales. Attention aux dommages collatéraux, les rues sont pleines de civils. Normalement, vous ne devriez rencontrer qu'une résistance minime. Un drone Reaper est prêt à décoller si vous avez besoin d'un visuel. Votre taxi vous récupérera par les airs à la fin de la mission. Bonne patrouille. Terminé.
+4. 🟢 PC alpha à unité de terrain... Ici le commandement. On vous envoie à Porto pour une évaluation de la menace. C'est du renseignement pur et simple. Les civils vaquent à leurs occupations, fondez-vous dans le décor. Tout ira bien tant que vous garderez la tête froide. N'oubliez pas, vous pouvez requérir l'appui du drone au besoin. Une fois l'objectif atteint, le Chinook viendra vous chercher. Terminé.
+5. 🟢 PC alpha à unité de terrain... Déploiement confirmé. Mission de collecte de renseignement dans la zone de Porto. Soyez prudents, il y a beaucoup de civils, pas de tirs hasardeux. Cette patrouille devrait être une simple formalité. Le drone est en stand-by si vous avez besoin d'une vue d'ensemble. Terminez votre tournée et attendez l'hélicoptère d'extraction. Bonne chance. Terminé.

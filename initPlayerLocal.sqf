@@ -178,7 +178,7 @@ if (!isMultiplayer) then {
                 private _switching = false;
                 {
                     if (_x getVariable ["LL_Switching_To_AI", false]) exitWith { _switching = true; };
-                } forEach allUnits;
+                } forEach (allPlayers + allDeadMen);
                 if (_switching) then { _anyAlive = true; };
             };
 

@@ -328,28 +328,46 @@ if (_mode == "scenario") exitWith {
                     _chief setUnitPos "UP";
                     _chief disableAI "MOVE";
                     
-                    // Ajouter l'action pour parler au chef (qui déclenchera task02c)
+                    // Replacer le marqueur sur le chef
+                    _markerID setMarkerPos (getPos _chief);
+                    _markerID setMarkerText (localize "STR_LL_Task_01_Action");
+
+                    // Créer une sous-tâche pour parler au chef
+                    [
+                        independent,
+                        ["task_01_s3_speak", "task_01_recon"],
+                        [
+                            "Le chef a survécu à la mutinerie. Parlez-lui pour obtenir les renseignements.",
+                            localize "STR_LL_Task_01_Action",
+                            ""
+                        ],
+                        _chief,
+                        "AUTOASSIGNED",
+                        5,
+                        true,
+                        "talk"
+                    ] call BIS_fnc_taskCreate;
+
+                    // Ajouter l'action pour parler au chef (qui déclenchera task02c) via addAction simple jaune
                     [
                         _chief,
-                        "Parler au chef de milice",
-                        "\a3\ui_f\data\IGUI\Cfg\holdactions\holdAction_connect_ca.paa",
-                        "\a3\ui_f\data\IGUI\Cfg\holdactions\holdAction_connect_ca.paa",
-                        "alive _target && (_target distance _this < 3)",
-                        "alive _target && (_target distance _this < 3)",
-                        {},
-                        {},
-                        {
-                            params ["_target", "_caller", "_actionId"];
-                            [_target, _actionId] remoteExec ["BIS_fnc_holdActionRemove", 0];
-                            [_target, _caller] remoteExec ["LL_fnc_task01_s3_dialog", 2];
-                        },
-                        {},
-                        [],
-                        2,
-                        0,
-                        false,
-                        false
-                    ] remoteExec ["BIS_fnc_holdActionAdd", 0, _chief];
+                        [
+                            format ["<t color='#FFFF00'>%1</t>", localize "STR_LL_Task_01_Action"],
+                            {
+                                params ["_target", "_caller", "_actionId"];
+                                _target removeAction _actionId;
+                                ["task_01_s3_speak", "SUCCEEDED", true] remoteExec ["BIS_fnc_taskSetState", 2];
+                                [_target, _caller] remoteExec ["LL_fnc_task01_s3_dialog", 2];
+                            },
+                            nil,
+                            10,
+                            true,
+                            true,
+                            "",
+                            "alive _target && (_target distance _this < 4)",
+                            4
+                        ]
+                    ] remoteExec ["addAction", 0, _chief];
                 } else {
                     // Échec : le chef a été tué
                     ["STR_LL_Speaker_Narrator", "STR_LL_Task_01_Narrative_S3_Failed"] remoteExec ["LL_fnc_showSubtitle", 0];

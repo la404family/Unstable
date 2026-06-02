@@ -222,8 +222,8 @@ if (!isServer) exitWith {};
         };
 
         // ── 2. Bombe — caisse piégée + charge + lumières rouges (PRINCIPAL en dernier) ──
-        // Remplacement de la valise par une caisse de munitions moyenne
-        private _crate  = createVehicle ["Box_FIA_Ammo_F", _pos, [], 0, "CAN_COLLIDE"];
+        // Remplacement de l'immense filet de camouflage par une caisse moyenne standard (origine centrée)
+        private _crate  = createVehicle ["Box_IND_Ammo_F", _pos, [], 0, "CAN_COLLIDE"];
         clearWeaponCargoGlobal _crate;
         clearMagazineCargoGlobal _crate;
         clearItemCargoGlobal _crate;
@@ -232,24 +232,25 @@ if (!isServer) exitWith {};
         // Empêcher l'ouverture de l'inventaire
         _crate addEventHandler ["InventoryOpened", { true }];
         
+        // Placement au sol avec très légère élévation pour éviter le clipping dans les tapis
         private _crateASL = getPosASL _crate;
-        _crateASL set [2, (_crateASL select 2) + 0.2];
+        _crateASL set [2, (_crateASL select 2) + 0.05];
         _crate setPosASL _crateASL;
         _crate setDir (random 360);
         
         private _charge = createVehicle ["DemoCharge_F", _pos vectorAdd [0, 0, 0.5], [], 0, "CAN_COLLIDE"];
-        _charge attachTo [_crate, [0, 0, 0.3]]; // Fixé sur le haut de la caisse
+        _charge attachTo [_crate, [0, 0, 0.22]]; // Fixé parfaitement sur le haut de la caisse moyenne
         _charge setVectorUp [0, 0, 1];
 
-        // Lumières rouges visibles jour et nuit
+        // Lumières rouges visibles jour et nuit (rapprochées de la caisse)
         {
             private _redLight = "#lightpoint" createVehicle _pos;
             _redLight setLightBrightness 0.8;
             _redLight setLightColor      [1, 0, 0];
             _redLight setLightAmbient    [1, 0, 0];
             _redLight setLightDayLight   true;
-            _redLight lightAttachObject  [_crate, [_x select 0, _x select 1, 0.5]];
-        } forEach [[1.2, 1.2], [-1.2, -1.2]];
+            _redLight lightAttachObject  [_crate, [_x select 0, _x select 1, 0.25]];
+        } forEach [[0.35, 0], [-0.35, 0]];
 
         _bombCrates  pushBack _crate;
         _bombCharges pushBack _charge;
@@ -371,8 +372,7 @@ if (!isServer) exitWith {};
     // G. SUCCÈS — 2 bombes désamorcées
     // ══════════════════════════════════════════════════════════════════════
     if (_taskSuccess) then {
-        { if (!isNull _x && { alive _x }) then { deleteVehicle _x; }; } forEach _bombCrates;
-        { if (!isNull _x && { alive _x }) then { deleteVehicle _x; }; } forEach _bombCharges;
+        // La suppression des bombes et des charges est gérée par le délai de 25s
         { if (_x != "") then { deleteMarker _x; }; } forEach _markersList;
 
         ["task_03b_bombes", "SUCCEEDED", true] call BIS_fnc_taskSetState;

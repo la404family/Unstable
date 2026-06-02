@@ -271,7 +271,7 @@ private _fnRTB = {
     };
 
     if (alive _heli) then {
-        { deleteVehicle _x; } forEach _crew;
+        { deleteVehicle _x; } forEach (crew _heli);
         deleteVehicle _heli;
     };
     if (!isNull _group) then { deleteGroup _group; };
@@ -736,11 +736,11 @@ private _fnExecDeploy = {
         };
     } forEach _reinforcements;
 
-    // Rattachement au groupe joueur
+    // Rattachement au groupe joueur (doit s'exécuter sur la machine propriétaire du groupe)
     private _playerGroup = if (!isNull _caller) then { group _caller } else { grpNull };
     if (!isNull _playerGroup && { !isNil { _playerGroup } }) then {
-        _reinforcements joinSilent _playerGroup;
-        (localize "STR_LL_Heli_Msg_Squad_Joined") remoteExec ["systemChat", 0];
+        [_reinforcements, _playerGroup] remoteExec ["joinSilent", groupOwner _playerGroup];
+        (localize "STR_LL_Heli_Msg_Squad_Joined") remoteExec ["systemChat", _caller];
     } else {
         [_infGroup, _targetPos, 150] call BIS_fnc_taskPatrol;
         (localize "STR_LL_Heli_Msg_Patrol_Started") remoteExec ["systemChat", 0];
@@ -826,7 +826,7 @@ private _fnExecExtract = {
     // task02b se désactive au moment précis où il faut déclencher le départ
     // → l'hélicoptère bascule en extraction standard et n'attend que des joueurs.
     private _task02bHostage   = missionNamespace getVariable ["LL_Task02b_Hostage", objNull];
-    private _isTask02bExtract = !isNull _task02bHostage && { alive _task02bHostage };
+    private _isTask02bExtract = !isNull _task02bHostage && { alive _task02bHostage } && { !(missionNamespace getVariable ["LL_Task02b_Freed_Done", false]) };
 
     // EH GetIn : éjecter immédiatement tout joueur qui tenterait de monter à bord
     private _ejectEH = -1;
@@ -937,6 +937,18 @@ private _fnExecExtract = {
         // _fnRTB (appelé par la boucle principale) gère la phase de vol et la suppression.
         _heli flyInHeight _flyHeight;
         _heli doMove _homeBase;
+        _heli lock 2; // Empêche l'IA de forcer un débarquement non désiré
+
+        // Suppression de l'informateur 15s après le décollage
+        private _hostage = missionNamespace getVariable ["LL_Task02b_Hostage", objNull];
+        if (!isNull _hostage) then {
+            [_hostage] spawn {
+                params ["_h"];
+                sleep 15;
+                if (!isNull _h) then { deleteVehicle _h; };
+            };
+        };
+
         false
     };
 };

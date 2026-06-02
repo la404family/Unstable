@@ -40,12 +40,15 @@ if (count _livingAI > 0) then {
     private _timeout = time + 5;
     waitUntil { local _targetAI || time > _timeout };
 
-    // Retirer le flag de basculement (succès ou timeout, le résultat est connu ici)
-    _deadUnit setVariable ["LL_Switching_To_AI", false, true];
-
     if (local _targetAI) then {
         // Prendre le contrôle de la nouvelle IA
         selectPlayer _targetAI;
+        
+        // CRITIQUE : Attendre que le moteur valide le changement de joueur
+        waitUntil { player == _targetAI };
+        
+        // Retirer le flag de basculement UNIQUEMENT APRÈS le switch effectif
+        _deadUnit setVariable ["LL_Switching_To_AI", false, true];
         
         // Retirer le Respawn EH du corps original (_deadUnit) pour éviter
         // qu'Arma 3 ne respawn l'ancienne unité et ne duplique le Killed EH.
@@ -72,6 +75,9 @@ if (count _livingAI > 0) then {
             diag_log format ["[LL] switchToAI: Joueur a basculé vers %1", name _targetAI];
         };
     } else {
+        // Retirer le flag en cas d'échec
+        _deadUnit setVariable ["LL_Switching_To_AI", false, true];
+        
         // En cas de bug réseau/timeout de localité, on affiche un message d'erreur
         systemChat localize "STR_LL_Msg_Switch_Error";
         diag_log format ["[LL][ERROR] switchToAI: Échec du transfert de localité pour %1 (timeout)", _targetAI];
