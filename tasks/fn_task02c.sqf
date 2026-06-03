@@ -73,50 +73,7 @@ if (_mode == "capture_anim") exitWith {
     };
 };
 
-if (_mode == "chief_talk") exitWith {
-    _args spawn {
-        params [["_chief", objNull, [objNull]]];
-        if (isNull _chief || !alive _chief) exitWith {};
 
-        _chief setVariable ["LL_Task02c_Status", "ACTION", true];
-        _chief enableAI "ANIM";
-
-        // --- VOIX NATIVE IMMERSIVE (le chef parle en perse nativement) ---
-        private _chiefGrp = group _chief;
-        private _dummy = _chiefGrp createUnit ["I_G_Soldier_F", getPos _chief, [], 0, "NONE"];
-        _dummy hideObjectGlobal true;
-        _dummy allowDamage false;
-        _dummy disableAI "ALL";
-        _chiefGrp selectLeader _chief;
-
-        // Le chef "donne un ordre" au fantôme → voix native !
-        _dummy commandMove (_chief getPos [500, random 360]);
-
-        ["STR_LL_Speaker_Chief", "STR_LL_Task_02c_Chief_Intel"] remoteExec ["LL_fnc_showSubtitle", 0];
-        sleep 6;
-
-        // Deuxième phrase vocale native
-        _dummy commandMove (_chief getPos [800, random 360]);
-
-        ["STR_LL_Speaker_Narrator", "STR_LL_Task_02c_Narrative_Start"] remoteExec ["LL_fnc_showSubtitle", 0];
-        sleep 5;
-
-        deleteVehicle _dummy; // Nettoyage du fantôme
-
-        // Signal : le chef a parlé
-        missionNamespace setVariable ["LL_Task02c_ChiefTalked", true, true];
-
-        // CORRECTIF : Libérer le chef de sa boucle d'animation
-        [_chief, ""] remoteExec ["switchMove", 0];
-        _chief enableAI "MOVE";
-        _chief enableAI "ANIM";
-        _chief setVariable ["LL_Task02c_Status", "DONE", true];
-
-        if (DEBUG_MODE) then {
-            diag_log "[LL][task02c] Dialogue chef terminé — LL_Task02c_ChiefTalked = true.";
-        };
-    };
-};
 
 // ══════════════════════════════════════════════════════════════════════════════
 // INITIALISATION — lancé depuis fn_taskManager
@@ -129,139 +86,12 @@ if (_mode == "chief_talk") exitWith {
         (count (allPlayers select { side _x == independent && alive _x })) > 0
     };
 
-    // ══════════════════════════════════════════════════════════════════════
-    // LOCALISER LE CHEF DE MILICE
-    // Survivant de task01 scénario 3 — I_G_officer_F, côté independent, non-joueur
-    // ══════════════════════════════════════════════════════════════════════
-    // CORRECTIF #4 : Recherche par variable dédiée au lieu de typeOf (plus robuste)
-    private _chief = objNull;
-    {
-        if (!isPlayer _x && (_x getVariable ["LL_Task01_Chief", false]) && alive _x) exitWith {
-            _chief = _x;
-        };
-    } forEach allUnits;
-
-    if (isNull _chief) exitWith {
-        diag_log "[LL][task02c] ERREUR : chef de milice introuvable (I_G_officer_F / independent / alive).";
-    };
 
     // ══════════════════════════════════════════════════════════════════════
     // INITIALISER LES VARIABLES GLOBALES
     // ══════════════════════════════════════════════════════════════════════
-    missionNamespace setVariable ["LL_Task02c_ChiefTalked",    false, true];
     missionNamespace setVariable ["LL_Task02c_Captured",       false, true];
-    missionNamespace setVariable ["LL_Task02c_ActionAdded",    false, true];
-    missionNamespace setVariable ["LL_Task02c_ChiefTriggered", false, true];
     missionNamespace setVariable ["LL_Task02c_CaptureAdded",   false, true];
-
-    // ══════════════════════════════════════════════════════════════════════
-    // METTRE LE CHEF EN ATTENTE D'INTERACTION (TASK_RULES §4)
-    // ══════════════════════════════════════════════════════════════════════
-    // CORRECTIF #7.2 : Transition douce depuis le mode COMBAT de task01 S3
-    _chief setBehaviour "SAFE";
-    sleep 1;
-    _chief action ["SwitchWeapon", _chief, _chief, -1]; // Ranger l'arme
-    sleep 1;
-    _chief disableAI "MOVE";
-    _chief disableAI "ANIM";
-    _chief setUnitPos "UP";
-    _chief switchMove "Acts_CivilTalking_1";
-    _chief setVariable ["LL_Task02c_Status", "WAIT", true];
-
-    _chief addEventHandler ["AnimDone", {
-        params ["_unit"];
-        if (alive _unit && (_unit getVariable ["LL_Task02c_Status", "WAIT"]) == "WAIT") then {
-            _unit switchMove "Acts_CivilTalking_1";
-        };
-    }];
-
-    // Rotation vers le joueur le plus proche (TASK_RULES §4)
-    [_chief] spawn {
-        params ["_u"];
-        while { alive _u && (_u getVariable ["LL_Task02c_Status", "WAIT"]) == "WAIT" } do {
-            private _nearest = objNull;
-            private _minDist = 99999;
-            {
-                if (alive _x) then {
-                    private _d = _u distance2D _x;
-                    if (_d < _minDist) then { _minDist = _d; _nearest = _x; };
-                };
-            } forEach allPlayers;
-            if (!isNull _nearest) then {
-                private _dir = _u getDir _nearest;
-                _u setDir _dir;
-                _u setFormDir _dir; // CORRECTIF #9 : empêche l'IA de re-pivoter
-            };
-            sleep 2;
-        };
-    };
-
-    // Déployer l'addAction "Interroger le chef" sur tous les clients
-    ["chief", _chief] remoteExec ["LL_fnc_task02c_addAction", 0];
-
-    // ══════════════════════════════════════════════════════════════════════
-    // INTERMÉDIAIRE : CRÉATION DU MARQUEUR ET DE LA TÂCHE DE TRANSITION "PARLER"
-    // ══════════════════════════════════════════════════════════════════════
-    createMarker ["LL_mkr_t02c_chief", getPos _chief];
-    "LL_mkr_t02c_chief" setMarkerType "mil_join";
-    "LL_mkr_t02c_chief" setMarkerColor "ColorBlue";
-    "LL_mkr_t02c_chief" setMarkerText localize "STR_LL_Task_01_Action";
-
-    [
-        independent,
-        ["task_02c_talk_chief"],
-        [
-            localize "STR_LL_Task_01_Action",
-            localize "STR_LL_Task_01_Action",
-            ""
-        ],
-        _chief, // Associer directement la tâche à l'unité (suit automatiquement l'objet sans spam de notification)
-        "AUTOASSIGNED",
-        5,
-        true,
-        "meet"
-    ] call BIS_fnc_taskCreate;
-
-    // Mettre à jour uniquement le marqueur carte sur le mouvement du chef (le chef est statique mais peut pivoter)
-    [_chief] spawn {
-        params ["_c"];
-        private _lastPos = [0,0,0];
-        while { alive _c && !(missionNamespace getVariable ["LL_Task02c_ChiefTalked", false]) } do {
-            private _curPos = getPos _c;
-            if (_curPos distance2D _lastPos > 1) then {
-                "LL_mkr_t02c_chief" setMarkerPos _curPos;
-                _lastPos = _curPos;
-            };
-            sleep 4;
-        };
-    };
-
-    if (DEBUG_MODE) then {
-        diag_log "[LL][task02c] Chef stoppé en attente — addAction et tâche intermédiaire 'Parler au chef' créées.";
-    };
-
-    // ══════════════════════════════════════════════════════════════════════
-    // ATTENDRE QUE LE CHEF AIT PARLÉ
-    // ══════════════════════════════════════════════════════════════════════
-    waitUntil {
-        sleep 1;
-        (missionNamespace getVariable ["LL_Task02c_ChiefTalked", false]) || !alive _chief
-    };
-
-    deleteMarker "LL_mkr_t02c_chief";
-    if ("task_02c_talk_chief" call BIS_fnc_taskExists) then {
-        if (alive _chief) then {
-            ["task_02c_talk_chief", "SUCCEEDED", true] call BIS_fnc_taskSetState;
-        } else {
-            ["task_02c_talk_chief", "CANCELED", true] call BIS_fnc_taskSetState;
-        };
-    };
-
-    if (!alive _chief) exitWith {
-        if (DEBUG_MODE) then {
-            diag_log "[LL][task02c] Avertissement : le chef est mort avant de donner les coordonnées.";
-        };
-    };
 
     // ══════════════════════════════════════════════════════════════════════
     // POINT DE SPAWN — Game Logic M_Dans_Bat_XXX
@@ -550,79 +380,6 @@ if (_mode == "chief_talk") exitWith {
         };
     };
 
-    // ══════════════════════════════════════════════════════════════════════
-    // LE CHEF DE MILICE QUITTE LE GROUPE (s'il est encore vivant)
-    // Il part rejoindre l'équipe d'extraction hélicoptère (dissolution §14)
-    // ══════════════════════════════════════════════════════════════════════
-    if (alive _chief) then {
-        sleep 3;
-
-        ["STR_LL_Speaker_Chief", "STR_LL_Task_02c_Chief_Leaves"] remoteExec ["LL_fnc_showSubtitle", 0];
-        sleep 5;
-
-        // CORRECTIF : Libérer de toute animation résiduelle avant sa fuite
-        [_chief, ""] remoteExec ["switchMove", 0];
-        _chief enableAI "MOVE";
-        _chief enableAI "ANIM";
-        _chief setBehaviour "SAFE";
-        _chief setSpeedMode "FULL";
-        _chief setVariable ["LL_Task02c_ChiefLeaving", true, true];
-
-        // Dissolution hors champ (TASK_RULES §14)
-        private _chiefGrp = createGroup [independent, true];
-        [_chief] joinSilent _chiefGrp;
-
-        [[_chief], _chiefGrp] spawn {
-            params ["_units", "_grp"];
-            private _alive = _units select { alive _x };
-            if (count _alive == 0) exitWith {};
-
-            private _running = true;
-            while { _running && ({ alive _x } count _alive) > 0 } do {
-
-                private _refPos      = getPos (leader _grp);
-                private _dissolvePos = [];
-                private _attempts    = 0;
-
-                while { count _dissolvePos == 0 && _attempts < 30 } do {
-                    _attempts = _attempts + 1;
-                    private _candidate = _refPos getPos [200 + random 300, random 360];
-                    private _valid = true;
-                    { if (_x distance2D _candidate <= 150) exitWith { _valid = false; }; }
-                        forEach (allPlayers select { alive _x });
-                    if (_valid) then { _dissolvePos = _candidate; };
-                };
-
-                if (count _dissolvePos == 0) then {
-                    _dissolvePos = _refPos getPos [400, random 360];
-                };
-
-                while { count waypoints _grp > 0 } do { deleteWaypoint [_grp, 0]; };
-                private _wp = _grp addWaypoint [_dissolvePos, 5];
-                _wp setWaypointType "MOVE";
-                _wp setWaypointSpeed "FULL";
-                _wp setWaypointBehaviour "SAFE";
-
-                waitUntil {
-                    sleep 1;
-                    ({ alive _x } count _alive) == 0
-                    || (leader _grp distance2D _dissolvePos <= 5)
-                };
-
-                if (({ alive _x } count _alive) == 0) exitWith { _running = false; };
-
-                private _allFar = true;
-                { if (_x distance2D _dissolvePos <= 150) exitWith { _allFar = false; }; }
-                    forEach (allPlayers select { alive _x });
-
-                if (_allFar) then {
-                    { if (!isNull _x && alive _x) then { deleteVehicle _x; }; } forEach _alive;
-                    if (!isNull _grp) then { deleteGroup _grp; };
-                    _running = false;
-                };
-            };
-        };
-    };
 
     // ══════════════════════════════════════════════════════════════════════
     // DISSOLUTION DES HOMMES DE MAIN SURVIVANTS (TASK_RULES §14)

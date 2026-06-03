@@ -221,28 +221,21 @@ if (!isServer) exitWith {};
             };
         };
 
-        // ── 2. Bombe — caisse piégée + charge + lumières rouges (PRINCIPAL en dernier) ──
-        // Remplacement de l'immense filet de camouflage par une caisse moyenne standard (origine centrée)
-        private _crate  = createVehicle ["Box_IND_Ammo_F", _pos, [], 0, "CAN_COLLIDE"];
-        clearWeaponCargoGlobal _crate;
-        clearMagazineCargoGlobal _crate;
-        clearItemCargoGlobal _crate;
-        clearBackpackCargoGlobal _crate;
+        // ── 2. Bombe — valise piégée + charge + lumières rouges (PRINCIPAL en dernier) ──
+        // Land_Suitcase_F : objet statique non-container → aucun inventaire accessible
+        private _crate  = createVehicle ["Land_Suitcase_F", _pos, [], 0, "CAN_COLLIDE"];
         
-        // Empêcher l'ouverture de l'inventaire
-        _crate addEventHandler ["InventoryOpened", { true }];
-        
-        // Placement au sol avec très légère élévation pour éviter le clipping dans les tapis
+        // Placement au sol
         private _crateASL = getPosASL _crate;
         _crateASL set [2, (_crateASL select 2) + 0.05];
         _crate setPosASL _crateASL;
         _crate setDir (random 360);
         
-        private _charge = createVehicle ["DemoCharge_F", _pos vectorAdd [0, 0, 0.5], [], 0, "CAN_COLLIDE"];
-        _charge attachTo [_crate, [0, 0, 0.22]]; // Fixé parfaitement sur le haut de la caisse moyenne
+        private _charge = createVehicle ["DemoCharge_F", _pos vectorAdd [0, 0, 0.3], [], 0, "CAN_COLLIDE"];
+        _charge attachTo [_crate, [0, 0, 0.15]];
         _charge setVectorUp [0, 0, 1];
 
-        // Lumières rouges visibles jour et nuit (rapprochées de la caisse)
+        // Lumières rouges visibles jour et nuit
         {
             private _redLight = "#lightpoint" createVehicle _pos;
             _redLight setLightBrightness 0.8;
@@ -304,14 +297,16 @@ if (!isServer) exitWith {};
         // ── Suivi désamorçage bombe 0 ──────────────────────────────────────
         if (missionNamespace getVariable ["LL_Task03b_Bomb0_Defused", false] && { !_bomb0Notified }) then {
             _bomb0Notified = true;
-            // Effet fumée ninja : Attente de 25s → fumée → 1.5s → valise supprimée
+            // Effet fumée ninja : 20s d'attente → fumée → valise supprimée
             [(_bombCrates select 0), (_bombCharges select 0)] spawn {
                 params ["_crate", "_charge"];
-                sleep 25; // Attente demandée avant disparition
+                sleep 20; // Attente de 20 secondes demandée
                 if (!isNull _crate) then {
-                    "SmokeShellWhite" createVehicle (getPos _crate);
+                    private _posSmoke = getPosATL _crate;
+                    _posSmoke set [2, (_posSmoke select 2) + 0.2];
+                    "SmokeShell" createVehicle _posSmoke;
                 };
-                sleep 1.5;
+                sleep 1;
                 if (!isNull _charge) then { deleteVehicle _charge; };
                 if (!isNull _crate)  then { deleteVehicle _crate; };
             };
@@ -326,14 +321,16 @@ if (!isServer) exitWith {};
         // ── Suivi désamorçage bombe 1 ──────────────────────────────────────
         if (missionNamespace getVariable ["LL_Task03b_Bomb1_Defused", false] && { !_bomb1Notified }) then {
             _bomb1Notified = true;
-            // Effet fumée ninja : Attente de 25s → fumée → 1.5s → valise supprimée
+            // Effet fumée ninja : 20s d'attente → fumée → valise supprimée
             [(_bombCrates select 1), (_bombCharges select 1)] spawn {
                 params ["_crate", "_charge"];
-                sleep 25; // Attente demandée avant disparition
+                sleep 20; // Attente de 20 secondes demandée
                 if (!isNull _crate) then {
-                    "SmokeShellWhite" createVehicle (getPos _crate);
+                    private _posSmoke = getPosATL _crate;
+                    _posSmoke set [2, (_posSmoke select 2) + 0.2];
+                    "SmokeShell" createVehicle _posSmoke;
                 };
-                sleep 1.5;
+                sleep 1;
                 if (!isNull _charge) then { deleteVehicle _charge; };
                 if (!isNull _crate)  then { deleteVehicle _crate; };
             };

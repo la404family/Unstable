@@ -325,8 +325,10 @@ if (_mode == "scenario") exitWith {
                     _chief setVariable ["LL_Task01_ChiefCombatDone", true, true];
                     _chief setBehaviour "SAFE";
                     _chief setCombatMode "BLUE";
+                    _chief action ["SwitchWeapon", _chief, _chief, -1]; // Ranger l'arme (fin du combat)
                     _chief setUnitPos "UP";
                     _chief disableAI "MOVE";
+                    _chief disableAI "ANIM"; // Empêche le chef de s'asseoir tout seul
                     
                     // Replacer le marqueur sur le chef
                     _markerID setMarkerPos (getPos _chief);
@@ -342,11 +344,22 @@ if (_mode == "scenario") exitWith {
                             ""
                         ],
                         _chief,
-                        "AUTOASSIGNED",
+                        "ASSIGNED", // Forcer l'assignation visuelle
                         5,
                         true,
                         "talk"
                     ] call BIS_fnc_taskCreate;
+
+                    // Surveiller si le joueur tue le chef avant de lui avoir parlé
+                    [_chief] spawn {
+                        params ["_c"];
+                        waitUntil { sleep 1; !alive _c || (["task_01_s3_speak"] call BIS_fnc_taskState == "SUCCEEDED") };
+                        if (!alive _c && (["task_01_s3_speak"] call BIS_fnc_taskState != "SUCCEEDED")) then {
+                            ["task_01_s3_speak", "FAILED", true] call BIS_fnc_taskSetState;
+                            ["task_01_recon", "FAILED", true] call BIS_fnc_taskSetState;
+                            ["STR_LL_Speaker_Narrator", "STR_LL_Task_01_Narrative_S3_Failed"] remoteExec ["LL_fnc_showSubtitle", 0];
+                        };
+                    };
 
                     // Ajouter l'action pour parler au chef (qui déclenchera task02c) via addAction simple jaune
                     [

@@ -29,36 +29,7 @@ if (isNull _unit) exitWith {};
 
 switch (_mode) do {
 
-    // ── Mode "chief" : addAction "Interroger le chef de milice" ──────────────
-    case "chief": {
 
-        // Anti-double instanciation (TASK_RULES §5)
-        if (missionNamespace getVariable ["LL_Task02c_ActionAdded", false]) exitWith {};
-        missionNamespace setVariable ["LL_Task02c_ActionAdded", true];
-
-        _unit addAction [
-            format ["<t color='#FFFF00'>%1</t>", localize "STR_LL_Task_02c_ChiefTalk"], // Jaune — TASK_RULES §5
-            {
-                params ["_target", "_caller", "_id", "_args"];
-
-                // Anti-double déclenchement (TASK_RULES §5)
-                if (missionNamespace getVariable ["LL_Task02c_ChiefTriggered", false]) exitWith {};
-                missionNamespace setVariable ["LL_Task02c_ChiefTriggered", true, true];
-
-                _target removeAction _id;
-
-                // Déclencher la séquence de dialogue sur le serveur
-                ["chief_talk", [_target]] remoteExec ["LL_fnc_task02c", 2];
-            },
-            [],
-            10,   // Priorité
-            true, // showWindow
-            true, // hideOnUse
-            "",   // Raccourci
-            "alive _target && (_this distance _target) < 4 && !(missionNamespace getVariable ['LL_Task02c_ChiefTriggered', false])",
-            4     // Distance d'interaction (TASK_RULES §5)
-        ];
-    };
 
     // ── Mode "capture" : addAction "Maîtriser l'intermédiaire" ───────────────
     case "capture": {
